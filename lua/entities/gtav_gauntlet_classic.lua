@@ -12,12 +12,12 @@ if CLIENT then
     ENT.CameraOffset = Vector( -240, 0, 60 )
 
     Glide.AddSoundSet( "Glide.GautletClassic.ExhaustPop", 75, 95, 105, {
-        "glide/streams/gauntlet_classic/exhaust_pop_1.wav",
-        "glide/streams/gauntlet_classic/exhaust_pop_2.wav",
-        "glide/streams/gauntlet_classic/exhaust_pop_3.wav"
+        "glide/streams/gauntlet_classic/exhaust_pop_1.mp3",
+        "glide/streams/gauntlet_classic/exhaust_pop_2.mp3",
+        "glide/streams/gauntlet_classic/exhaust_pop_3.mp3"
     } )
 
-    ENT.StartedSound = "glide/streams/gauntlet_classic/start.wav"
+    ENT.StartedSound = "glide/streams/gauntlet_classic/start.mp3"
     ENT.ExhaustPopSound = "Glide.GautletClassic.ExhaustPop"
     ENT.HornSound = "glide/horns/car_horn_med_9.wav"
 

@@ -91,8 +91,8 @@ if CLIENT then
     -- Engine sounds
     ENT.StartSound = "Glide.Engine.TruckStart"
     ENT.StartTailSound = "Glide.Engine.CarStartTail"
-    ENT.StartedSound = "glide/engines/start_tail_truck.wav"
-    ENT.StoppedSound = "glide/engines/shut_down_1.wav"
+    ENT.StartedSound = "glide/engines/start_tail_truck.mp3"
+    ENT.StoppedSound = "glide/engines/shut_down_1.mp3"
 
     -- Other sounds
     ENT.TurrentMoveSound = "glide/tanks/turret_move.wav"

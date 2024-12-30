@@ -171,7 +171,7 @@ local function HandleInput( ply, button, active, pressed )
                 Glide.SendNotification( ply, {
                     text = "#glide.notify.lock_denied",
                     icon = "materials/icon16/cancel.png",
-                    sound = "glide/ui/radar_alert.wav",
+                    sound = "glide/ui/radar_alert.mp3",
                     immediate = true
                 } )
             end

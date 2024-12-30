@@ -179,7 +179,7 @@ function ENT:FireCountermeasures()
     local t = CurTime()
 
     if t < self.countermeasureCD then
-        self:EmitSound( "glide/weapons/flare_reloading.wav", 85, 100, 1.0, 6, 0, 0 )
+        self:EmitSound( "glide/weapons/flare_reloading.mp3", 85, 100, 1.0, 6, 0, 0 )
         return
     end
 

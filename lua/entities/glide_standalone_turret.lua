@@ -148,7 +148,7 @@ function ENT:Initialize()
 
     self:SetIsFiring( false )
     self:SetShootLoopSound( ")glide/weapons/mg_shoot_loop.wav" )
-    self:SetShootStopSound( ")glide/weapons/mg_shoot_stop.wav" )
+    self:SetShootStopSound( ")glide/weapons/mg_shoot_stop.mp3" )
 
     if WireLib then
         WireLib.CreateSpecialInputs( self,

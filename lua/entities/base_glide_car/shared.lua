@@ -149,7 +149,7 @@ if CLIENT then
     ENT.StartTailSound = "Glide.Engine.CarStartTail"
     ENT.ExhaustPopSound = "Glide.ExhaustPop.Sport"
     ENT.StartedSound = ""
-    ENT.StoppedSound = "glide/engines/shut_down_1.wav"
+    ENT.StoppedSound = "glide/engines/shut_down_1.mp3"
 
     ENT.ExternalGearSwitchSound = "Glide.GearSwitch.External"
     ENT.InternalGearSwitchSound = "Glide.GearSwitch.Internal"

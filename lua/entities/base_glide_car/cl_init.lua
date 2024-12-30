@@ -93,7 +93,7 @@ function ENT:UpdateTurboSound( sounds )
             sounds.turbo = nil
 
             if self.rpmFraction > 0.5 then
-                self:EmitSound( "glide/engines/turbo_blowoff.wav", 80, math.random( 100, 110 ), 0.3 )
+                self:EmitSound( "glide/engines/turbo_blowoff.mp3", 80, math.random( 100, 110 ), 0.3 )
             end
         end
 

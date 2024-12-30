@@ -29,7 +29,7 @@ function ENT:Initialize()
 
     self:SetSingleShotSound( "" )
     self:SetShootLoopSound( "glide/weapons/turret_mg_loop.wav" )
-    self:SetShootStopSound( "glide/weapons/turret_mg_end.wav" )
+    self:SetShootStopSound( "glide/weapons/turret_mg_end.mp3" )
 end
 
 function ENT:SetBodyModel( model, offset )

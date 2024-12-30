@@ -74,7 +74,7 @@ end
 
 function ENT:Blow()
     self:ChangeRadius( self.defaultRadius * 0.8 )
-    self:EmitSound( "glide/wheels/blowout.wav", 80, math.random( 95, 105 ), 1 )
+    self:EmitSound( "glide/wheels/blowout.mp3", 80, math.random( 95, 105 ), 1 )
 end
 
 function ENT:ChangeRadius( radius )

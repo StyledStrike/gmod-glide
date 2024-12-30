@@ -139,7 +139,7 @@ function TOOL:GetTraceGlideEntities( trace )
         Glide.SendNotification( owner, {
             text = "#tool.glide_wheel_model.vehicle_model",
             icon = "materials/icon16/cancel.png",
-            sound = "glide/ui/radar_alert.wav",
+            sound = "glide/ui/radar_alert.mp3",
             immediate = true
         } )
 
@@ -150,7 +150,7 @@ function TOOL:GetTraceGlideEntities( trace )
         Glide.SendNotification( owner, {
             text = "#tool.glide_water_driving.no_wheels",
             icon = "materials/icon16/cancel.png",
-            sound = "glide/ui/radar_alert.wav",
+            sound = "glide/ui/radar_alert.mp3",
             immediate = true
         } )
 

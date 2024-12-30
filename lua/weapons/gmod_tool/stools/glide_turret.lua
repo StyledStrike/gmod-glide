@@ -20,10 +20,10 @@ TOOL.ClientConVar = {
 
 local SOUND_PRESETS = {
     ["silent"] = { "", "" },
-    ["minigun"] = { ")glide/weapons/mg_shoot_loop.wav", ")glide/weapons/mg_shoot_stop.wav" },
-    ["valkyrie_turret"] = { "glide/weapons/turret_mg_loop.wav", "glide/weapons/turret_mg_end.wav" },
-    ["hunter_turret"] = { "glide/weapons/turret_hunt_loop.wav", "glide/weapons/turret_hunt_end.wav" },
-    ["strikeforce_cannon"] = { ")glide/weapons/b11_turret_loop.wav", ")glide/weapons/b11_turret_loop_end.wav" }
+    ["minigun"] = { ")glide/weapons/mg_shoot_loop.wav", ")glide/weapons/mg_shoot_stop.mp3" },
+    ["valkyrie_turret"] = { "glide/weapons/turret_mg_loop.wav", "glide/weapons/turret_mg_end.mp3" },
+    ["hunter_turret"] = { "glide/weapons/turret_hunt_loop.wav", "glide/weapons/turret_hunt_end.mp3" },
+    ["strikeforce_cannon"] = { ")glide/weapons/b11_turret_loop.wav", ")glide/weapons/b11_turret_loop_end.mp3" }
 }
 
 local function IsGlideTurret( ent )

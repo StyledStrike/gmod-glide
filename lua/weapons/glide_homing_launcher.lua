@@ -156,7 +156,7 @@ function SWEP:PrimaryAttack()
 
     self:TakePrimaryAmmo( 1 )
     self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
-    self:EmitSound( "glide/weapons/homing_launcher/launch.wav", 80, math.random( 95, 105 ), 1, CHAN_WEAPON )
+    self:EmitSound( "glide/weapons/homing_launcher/launch.mp3", 80, math.random( 95, 105 ), 1, CHAN_WEAPON )
 
     local user = self:GetOwner()
 
@@ -235,7 +235,7 @@ if CLIENT then
         volume = 1.0,
         level = 60,
         pitch = { 95, 105 },
-        sound = "glide/weapons/homing_launcher/rocket_insert.wav"
+        sound = "glide/weapons/homing_launcher/rocket_insert.mp3"
     } )
 
     sound.Add( {
@@ -245,8 +245,8 @@ if CLIENT then
         level = 60,
         pitch = { 95, 105 },
         sound = {
-            "glide/weapons/homing_launcher/homing_draw_1.wav",
-            "glide/weapons/homing_launcher/homing_draw_2.wav"
+            "glide/weapons/homing_launcher/homing_draw_1.mp3",
+            "glide/weapons/homing_launcher/homing_draw_2.mp3"
         }
     } )
 
@@ -257,8 +257,8 @@ if CLIENT then
         level = 60,
         pitch = { 95, 105 },
         sound = {
-            "glide/weapons/homing_launcher/homing_move_1.wav",
-            "glide/weapons/homing_launcher/homing_move_2.wav"
+            "glide/weapons/homing_launcher/homing_move_1.mp3",
+            "glide/weapons/homing_launcher/homing_move_2.mp3"
         }
     } )
 
@@ -273,9 +273,9 @@ if CLIENT then
     }
 
     local LOCKON_STATE_SOUNDS = {
-        [1] = "glide/weapons/homing_launcher/homing_lock_1.wav",
-        [2] = "glide/weapons/homing_launcher/homing_lock_2.wav",
-        [3] = "glide/weapons/homing_launcher/homing_lock_3.wav"
+        [1] = "glide/weapons/homing_launcher/homing_lock_1.mp3",
+        [2] = "glide/weapons/homing_launcher/homing_lock_2.mp3",
+        [3] = "glide/weapons/homing_launcher/homing_lock_3.mp3"
     }
 
     function SWEP:OnRemove()

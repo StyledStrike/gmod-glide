@@ -238,7 +238,7 @@ function ENT:ChangeHeadlightState( state, dontPlaySound )
     local driver = self:GetDriver()
     local soundEnt = IsValid( driver ) and driver or self
 
-    soundEnt:EmitSound( state == 0 and "glide/headlights_off.wav" or "glide/headlights_on.wav", 70, 100, 1.0 )
+    soundEnt:EmitSound( state == 0 and "glide/headlights_off.mp3" or "glide/headlights_on.mp3", 70, 100, 1.0 )
 end
 
 --- Update out model's bodygroups depending on which lights are on.

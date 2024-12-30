@@ -32,7 +32,7 @@ function Glide.CreateExplosion( pos, normal, explosionType )
             EmitSound( "WaterExplosionEffect.Sound", pos, 0, 6, volume, 100 )
         else
             if not isTurret then
-                EmitSound( "glide/explosions/impact_fire.wav", pos, 0, 6, volume * 0.8, 95 )
+                EmitSound( "glide/explosions/impact_fire.mp3", pos, 0, 6, volume * 0.8, 95 )
             end
 
             PlaySoundSet( "Glide.Explosion.PreImpact", pos, isTurret and volume * 0.4 or volume )

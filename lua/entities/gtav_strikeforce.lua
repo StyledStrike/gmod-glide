@@ -50,7 +50,7 @@ if CLIENT then
         { offset = Vector( -175, -50, 25 ), angle = Angle( 270, 0, 0 ), scale = 0.7 }
     }
 
-    ENT.StartSoundPath = "glide/aircraft/start_4.wav"
+    ENT.StartSoundPath = "glide/aircraft/start_4.mp3"
     ENT.DistantSoundPath = "glide/aircraft/jet_stream.wav"
     ENT.PropSoundPath = ""
 
@@ -158,7 +158,7 @@ if CLIENT then
             sounds.gunFire:Stop()
             sounds.gunFire = nil
 
-            self:EmitSound( ")glide/weapons/b11_turret_loop_end.wav", 95, 100, 1.0 )
+            self:EmitSound( ")glide/weapons/b11_turret_loop_end.mp3", 95, 100, 1.0 )
         end
     end
 end

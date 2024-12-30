@@ -29,7 +29,7 @@ function TOOL:LeftClick( trace )
             Glide.SendNotification( self:GetOwner(), {
                 text = "#tool.glide_water_driving.no_wheels",
                 icon = "materials/icon16/cancel.png",
-                sound = "glide/ui/radar_alert.wav",
+                sound = "glide/ui/radar_alert.mp3",
                 immediate = true
             } )
 

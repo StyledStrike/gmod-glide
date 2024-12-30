@@ -83,7 +83,7 @@ function Glide.Notify( params )
     notifications[index] = {
         text = params.text,
         icon = params.icon or "materials/glide/icons/question.png",
-        sound = params.sound or "glide/ui/hud_switch.wav",
+        sound = params.sound or "glide/ui/hud_switch.mp3",
         lifetime = params.lifetime or math.Clamp( math.floor( 5 + params.text:len() * 0.05 ), 5, 15 )
     }
 

@@ -16,7 +16,7 @@ function LockOnHandler:OnIncomingLockOn()
     if t < self.incomingLockCD then return end
 
     self.incomingLockCD = t + 1
-    surface.PlaySound( "glide/weapons/incoming_lockon.wav" )
+    surface.PlaySound( "glide/weapons/incoming_lockon.mp3" )
 end
 
 local IsValid = IsValid
@@ -121,7 +121,7 @@ function LockOnHandler:Think()
     if closest then
         if t > self.incomingMissileCD then
             self.incomingMissileCD = t + 1.8
-            surface.PlaySound( "glide/weapons/incoming_missile_1.wav" )
+            surface.PlaySound( "glide/weapons/incoming_missile_1.mp3" )
         end
 
         if beepSound then

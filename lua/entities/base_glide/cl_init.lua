@@ -311,7 +311,7 @@ do
         end
 
         if state > 0 then
-            self.lockOnSound = CreateSound( self, state == 1 and "glide/weapons/lockstart.wav" or "glide/weapons/locktone.wav" )
+            self.lockOnSound = CreateSound( self, state == 1 and "glide/weapons/lockstart.mp3" or "glide/weapons/locktone.mp3" )
             self.lockOnSound:SetSoundLevel( 90 )
             self.lockOnSound:PlayEx( 1.0, 98 )
         end
@@ -327,7 +327,7 @@ function ENT:OnWeaponIndexChange( _, _, index )
     if driver == LocalPlayer() then
         -- Show the weapon switch notification
         self.weaponNotifyTimer = RealTime() + 1.5
-        EmitSound( "glide/ui/hud_switch.wav", Vector(), -2, nil, 1.0, nil, nil, 100 )
+        EmitSound( "glide/ui/hud_switch.mp3", Vector(), -2, nil, 1.0, nil, nil, 100 )
 
         -- Change the crosshair
         local info = self.CrosshairInfo[index]
