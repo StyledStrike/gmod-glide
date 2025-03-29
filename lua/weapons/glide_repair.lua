@@ -1,3 +1,5 @@
+local repairSpeedMulCvar = CreateConVar( "glide_repairswep_speedmul", 1, { FCVAR_ARCHIVE, FCVAR_REPLICATED }, "Changes the repair speed of the glide Vehicle Repair SWEP", 0, 100 )
+
 SWEP.PrintName = "#glide.swep.repair"
 SWEP.Instructions = "#glide.swep.repair.desc"
 SWEP.Author = "StyledStrike"
@@ -92,6 +94,8 @@ function SWEP:PrimaryAttack()
     local ent = self.repairTarget
     if not ent then return end
 
+    local repairMul = repairSpeedMulCvar:GetFloat()
+
     local engineHealth = ent:GetEngineHealth()
     local chassisHealth = ent:GetChassisHealth()
 
@@ -111,8 +115,8 @@ function SWEP:PrimaryAttack()
     end
 
     if chassisHealth < ent.MaxChassisHealth then
-        chassisHealth = chassisHealth + 20
-        engineHealth = math.Clamp( engineHealth + 0.03, 0, 1 )
+        chassisHealth = chassisHealth + ( 20 * repairMul )
+        engineHealth = math.Clamp( engineHealth + ( 0.03 * repairMul ), 0, 1 )
 
         if user.ViewPunch then
             user:ViewPunch( Angle( -0.2, 0, 0 ) )
