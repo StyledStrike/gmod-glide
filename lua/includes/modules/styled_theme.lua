@@ -73,6 +73,7 @@ function StyledTheme.RegisterFont( name, screenSize, data )
 
     data.screenSize = screenSize
     data.font = data.font or StyledTheme.BASE_FONT_NAME
+    data.extended = true
 
     StyledTheme.fonts[name] = data
     StyledTheme.forceUpdateResolution = true
