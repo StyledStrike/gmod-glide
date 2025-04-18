@@ -568,8 +568,11 @@ function ENT:Think()
         if self:WaterLevel() > 2 then
             self:SetIsEngineOnFire( false )
         else
-            local attacker = IsValid( selfTbl.lastDamageAttacker ) and selfTbl.lastDamageAttacker or self
-            local inflictor = IsValid( selfTbl.lastDamageInflictor ) and selfTbl.lastDamageInflictor or self
+            local attacker = selfTbl.lastDamageAttacker 
+            if not attacker or not attacker:IsValid() then attacker = self end
+
+            local inflictor = selfTbl.lastDamageInflictor
+            if not inflictor or not inflictor:IsValid() then inflictor = self end
 
             local dmg = DamageInfo()
             dmg:SetDamage( selfTbl.MaxChassisHealth * selfTbl.ChassisFireDamageMultiplier * dt )
