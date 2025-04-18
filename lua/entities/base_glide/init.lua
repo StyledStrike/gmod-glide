@@ -516,7 +516,7 @@ function ENT:Think()
     -- Update speed variables
     local localVelocity = self:GetPos()
     localVelocity:Add( self:GetVelocity() )
-    localVelocity:Set( self:WorldToLocal( localVelocity ) )
+    localVelocity = self:WorldToLocal( localVelocity )
     selfTbl.localVelocity = localVelocity
     selfTbl.forwardSpeed = localVelocity[1]
     selfTbl.totalSpeed = localVelocity:Length()
