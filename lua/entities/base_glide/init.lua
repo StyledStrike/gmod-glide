@@ -514,12 +514,15 @@ function ENT:Think()
     self:NextThink( time )
 
     -- Update speed variables
-    selfTbl.localVelocity = self:WorldToLocal( self:GetPos() + self:GetVelocity() )
-    selfTbl.forwardSpeed = selfTbl.localVelocity[1]
-    selfTbl.totalSpeed = selfTbl.localVelocity:Length()
+    local localVelocity = self:GetPos()
+    localVelocity:Add( self:GetVelocity() )
+    localVelocity:Set( self:WorldToLocal( localVelocity ) )
+    selfTbl.localVelocity = localVelocity
+    selfTbl.forwardSpeed = localVelocity[1]
+    selfTbl.totalSpeed = localVelocity:Length()
 
     -- If we have at least one seat...
-    if #selfTbl.seats > 0 then
+    if selfTbl.seats[1] then
         -- Use it to check if we have a driver
         local driver = selfTbl.seats[1]:GetDriver()
 
@@ -527,7 +530,7 @@ function ENT:Think()
             self:SetDriver( driver )
             self:ClearLockOnTarget()
 
-            if IsValid( driver ) then
+            if driver:IsValid() then
                 if TriggerOutput then
                     TriggerOutput( self, "Active", 1 )
                     TriggerOutput( self, "Driver", driver )
@@ -554,7 +557,7 @@ function ENT:Think()
     end
 
     -- If necessary, kick passengers when underwater
-    if selfTbl.FallOnCollision and self:WaterLevel() > 2 and #self:GetAllPlayers() > 0 then
+    if selfTbl.FallOnCollision and self:WaterLevel() > 2 and self:GetAllPlayers()[1] > 0 then
         self:RagdollPlayers( 3 )
     end
 
@@ -565,15 +568,15 @@ function ENT:Think()
         if self:WaterLevel() > 2 then
             self:SetIsEngineOnFire( false )
         else
-            local attacker = IsValid( self.lastDamageAttacker ) and self.lastDamageAttacker or self
-            local inflictor = IsValid( self.lastDamageInflictor ) and self.lastDamageInflictor or self
+            local attacker = IsValid( selfTbl.lastDamageAttacker ) and selfTbl.lastDamageAttacker or self
+            local inflictor = IsValid( selfTbl.lastDamageInflictor ) and selfTbl.lastDamageInflictor or self
 
             local dmg = DamageInfo()
-            dmg:SetDamage( self.MaxChassisHealth * self.ChassisFireDamageMultiplier * dt )
+            dmg:SetDamage( selfTbl.MaxChassisHealth * selfTbl.ChassisFireDamageMultiplier * dt )
             dmg:SetAttacker( attacker )
             dmg:SetInflictor( inflictor )
             dmg:SetDamageType( 0 )
-            dmg:SetDamageForce( Vector() )
+            dmg:SetDamageForce( vector_origin )
             dmg:SetDamagePosition( self:GetPos() )
             self:TakeDamageInfo( dmg )
         end
@@ -601,7 +604,7 @@ function ENT:Think()
     -- Make sure we have the corrent damping values
     local phys = self:GetPhysicsObject()
 
-    if IsValid( phys ) then
+    if phys:IsValid() then
         self:ValidatePhysDamping( phys )
     end
 
@@ -634,10 +637,10 @@ function ENT:TriggerInput( name, value )
     if name == "EjectDriver" and value > 0 then
         local seat = self.seats[1]
 
-        if IsValid( seat ) then
+        if seat and seat:IsValid() then
             local driver = seat:GetDriver()
 
-            if IsValid( driver ) then
+            if driver:IsValid() then
                 driver:ExitVehicle()
             end
         end
