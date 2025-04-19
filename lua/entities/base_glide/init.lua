@@ -194,15 +194,6 @@ function ENT:InitializePhysics()
     self:PhysicsInit( SOLID_VPHYSICS )
 end
 
-function ENT:OnRemove()
-    -- Stop physics processing
-    local phys = self:GetPhysicsObject()
-
-    if IsValid( phys ) then
-        self:StopMotionController()
-    end
-end
-
 function ENT:UpdateTransmitState()
     return 2 -- TRANSMIT_PVS
 end
