@@ -162,6 +162,7 @@ function Glide.VehicleFactory( ply, data )
 
     ply:AddCount( "glide_vehicles", ent )
     cleanup.Add( ply, "glide_vehicles", ent )
+    gamemode.Call( "PlayerSpawnedVehicle", ply, ent )
 
     return ent
 end
