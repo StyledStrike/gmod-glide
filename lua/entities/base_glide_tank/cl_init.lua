@@ -145,7 +145,7 @@ end
 
 do
     local Camera = Glide.Camera
-	local PacificMode = GetConVar( "glide_pacific_mode" )
+    local PacificMode = GetConVar( "glide_pacific_mode" )
     local DrawWeaponCrosshair = Glide.DrawWeaponCrosshair
 
     local SetColor = surface.SetDrawColor
@@ -163,10 +163,10 @@ do
     --- Override this base class function.
     function ENT:DrawVehicleHUD( screenW, screenH )
         BaseClass.DrawVehicleHUD( self, screenW, screenH )
-		
-		if not PacificMode:GetBool() then
-			DrawWeaponCrosshair( screenW * 0.5, screenH * 0.5, "glide/aim_tank.png", 0.14, crosshairColor[self:GetIsAimingAtTarget()] )
-		end
+
+        if not PacificMode:GetBool() then
+            DrawWeaponCrosshair( screenW * 0.5, screenH * 0.5, "glide/aim_tank.png", 0.14, crosshairColor[self:GetIsAimingAtTarget()] )
+        end
 
         if not Camera.isInFirstPerson then return end
 
