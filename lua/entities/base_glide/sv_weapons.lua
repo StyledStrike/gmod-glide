@@ -49,9 +49,11 @@ function ENT:GetWeaponCount()
     return self.weaponCount + self.turretCount
 end
 
+local PacificMode = GetConVar( "glide_pacific_mode" )
+
 --- Switch the current active weapon.
 function ENT:SelectWeaponIndex( index )
-    if self.weaponCount == 0 then return end
+    if self.weaponCount == 0 or PacificMode:GetBool() then return end
 
     -- Wrap the index around if outside limits
     if index > self.weaponCount then
@@ -126,7 +128,6 @@ function ENT:FireBullet( params )
     FireBullet( params, self.selfTraceFilter )
 end
 
-local PacificMode = GetConVar( "glide_pacific_mode" )
 local CanLockOnEntity = Glide.CanLockOnEntity
 local FindLockOnTarget = Glide.FindLockOnTarget
 
