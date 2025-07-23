@@ -119,6 +119,7 @@ function ENT:OnDriverChange( _, _, _ )
 end
 
 local Config = Glide.Config
+local PacificMode = GetConVar( "glide_pacific_mode" )
 local DrawWeaponCrosshair = Glide.DrawWeaponCrosshair
 local DrawWeaponSelection = Glide.DrawWeaponSelection
 
@@ -131,7 +132,7 @@ function ENT:DrawVehicleHUD( screenW, screenH )
 
     local crosshair = self.crosshair
 
-    if crosshair.enabled then
+    if crosshair.enabled and not PacificMode:GetBool() then
         local data = crosshair.origin:ToScreen()
         if data.visible then
             DrawWeaponCrosshair( data.x, data.y, crosshair.icon, crosshair.size, crosshair.color )

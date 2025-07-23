@@ -934,6 +934,7 @@ function Config:OpenFrame()
             { name = "sbox_maxglide_standalone_turrets", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_missile_launchers", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_projectile_launchers", decimals = 0, min = 0, max = 100 },
+			{ name = "glide_pacific_mode", decimals = 0, min = 0, max = 1 },
             { name = "glide_gib_lifetime", decimals = 0, min = 0, max = 60 },
             { name = "glide_gib_enable_collisions", decimals = 0, min = 0, max = 1 },
 

@@ -126,6 +126,7 @@ function ENT:FireBullet( params )
     FireBullet( params, self.selfTraceFilter )
 end
 
+local PacificMode = GetConVar( "glide_pacific_mode" )
 local CanLockOnEntity = Glide.CanLockOnEntity
 local FindLockOnTarget = Glide.FindLockOnTarget
 
@@ -141,7 +142,7 @@ function ENT:WeaponThink()
         weapon.ammo = weapon.maxAmmo
     end
 
-    local isFiring = self:GetInputBool( 1, "attack" )
+    local isFiring = not PacificMode:GetBool() and self:GetInputBool( 1, "attack" )
 
     if isFiring and t > weapon.nextFire and ( weapon.ammo > 0 or weapon.maxAmmo == 0 ) then
         weapon.ammo = weapon.ammo - 1

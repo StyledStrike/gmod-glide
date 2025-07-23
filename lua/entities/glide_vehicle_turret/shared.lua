@@ -61,6 +61,7 @@ end
 
 local Clamp = math.Clamp
 local LocalPlayer = LocalPlayer
+local PacificMode = GetConVar( "glide_pacific_mode" )
 
 function ENT:UpdateTurret( parent, body, t )
     local user = self:GetGunUser()
@@ -69,7 +70,7 @@ function ENT:UpdateTurret( parent, body, t )
     if not SERVER and not ( CLIENT and LocalPlayer() == user ) then return end
 
     if IsValid( user ) then
-        self:SetIsFiring( user:KeyDown( 1 ) ) -- IN_ATTACK
+        self:SetIsFiring( not PacificMode:GetBool() and user:KeyDown( 1 ) ) -- IN_ATTACK
 
         local fromPos = body:GetPos() + body:GetUp() * self:GetBulletOffset()[3]
         local aimPos = SERVER and user:GlideGetAimPos() or Glide.GetCameraAimPos()
