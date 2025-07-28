@@ -163,7 +163,7 @@ function ENT:UpdateEngine( dt, selfTbl )
     local speed = selfTbl.forwardSpeed
 
     local inputThrottle = self:GetInputFloat( 1, "accelerate" )
-    local reducedThrottle = not self:GetInputBool( 1, "reduce_throttle" )
+    local reducedThrottle = not self:GetInputBool( 1, "boost" )
     local throttle = 0
 
     if reducedThrottle then

@@ -190,7 +190,7 @@ function ENT:AutoGearSwitch( throttle )
     maxRPM = maxRPM * 0.98
 
     -- Switch up early while using reduced throttle
-    if not self:GetInputBool( 1, "reduce_throttle" ) then
+    if not self:GetInputBool( 1, "boost" ) then
         maxRPM = maxRPM * ( 1 - throttle * 0.2 )
     end
 
@@ -266,7 +266,7 @@ function ENT:EngineThink( dt )
     inputThrottle = self:GetInputFloat( 1, "accelerate" )
     inputBrake = self:GetInputFloat( 1, "brake" )
     inputHandbrake = self:GetInputBool( 1, "handbrake" )
-    reducedThrottle = not self:GetInputBool( 1, "reduce_throttle" )
+    reducedThrottle = not self:GetInputBool( 1, "boost" )
 
     if amphibiousMode then
         self.burnout = 0
@@ -456,7 +456,7 @@ function ENT:BoatEngineThink( dt )
     local waterState = self:GetWaterState()
     local speed = self.forwardSpeed
 
-    if not self:GetInputBool( 1, "reduce_throttle" ) then
+    if not self:GetInputBool( 1, "boost" ) then
         inputThrottle = inputThrottle * 0.65
     end
 
