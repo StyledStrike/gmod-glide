@@ -160,7 +160,6 @@ end
 function ENT:TurnOn()
     BaseClass.TurnOn( self )
 
-    self.reducedThrottle = false
     self:SetGear( 0 )
     self:SetFlywheelRPM( 0 )
 end
@@ -174,7 +173,6 @@ function ENT:TurnOff()
     self.startupTimer = nil
 
     self.clutch = 1
-    self.reducedThrottle = false
     self.availableFrontTorque = 0
     self.availableRearTorque = 0
 end
@@ -209,15 +207,6 @@ function ENT:OnSeatInput( seatIndex, action, pressed )
 
     if action == "siren" then
         self:ChangeSirenState( self:GetSirenState() + 1 )
-
-    elseif action == "reduce_throttle" then
-        self.reducedThrottle = not self.reducedThrottle
-
-        Glide.SendNotification( self:GetAllPlayers(), {
-            text = "#glide.notify.reduced_throttle_" .. ( self.reducedThrottle and "on" or "off" ),
-            icon = "materials/glide/icons/" .. ( self.reducedThrottle and "play_next" or "fast_forward" ) .. ".png",
-            immediate = true
-        } )
 
     elseif action == "accelerate" and self:GetEngineState() == 0 and self:GetEngineRPM() < 1 then
         self:TurnOn()
