@@ -306,7 +306,7 @@ function ENT:EngineThink( dt )
         inputThrottle = inputThrottle * 0.7
 
     elseif reducedThrottle then
-        inputThrottle = inputThrottle * 0.65
+        inputThrottle = inputThrottle * 0.8
     end
 
     rpm = self:GetFlywheelRPM()
@@ -457,7 +457,7 @@ function ENT:BoatEngineThink( dt )
     local speed = self.forwardSpeed
 
     if not self:GetInputBool( 1, "boost" ) then
-        inputThrottle = inputThrottle * 0.65
+        inputThrottle = inputThrottle * 0.75
     end
 
     throttle = 0

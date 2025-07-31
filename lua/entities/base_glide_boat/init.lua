@@ -167,7 +167,7 @@ function ENT:UpdateEngine( dt, selfTbl )
     local throttle = 0
 
     if reducedThrottle then
-        inputThrottle = inputThrottle * 0.65
+        inputThrottle = inputThrottle * 0.8
     end
 
     if Abs( speed ) > 20 or waterState > 0 then
