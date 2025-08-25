@@ -10,7 +10,6 @@ function ENT:EngineInit()
     self.engineBrakeTorque = 2000
 
     -- Fake engine variables
-    self.reducedThrottle = false
     self.flywheelVelocity = 0
     self.clutch = 1
     self.switchCD = 0
@@ -191,7 +190,7 @@ function ENT:AutoGearSwitch( throttle )
     maxRPM = maxRPM * 0.98
 
     -- Switch up early while using reduced throttle
-    if self.reducedThrottle then
+    if not self:GetInputBool( 1, "boost" ) then
         maxRPM = maxRPM * ( 1 - throttle * 0.2 )
     end
 
@@ -256,7 +255,7 @@ local Max = math.max
 local Approach = math.Approach
 
 local gear, rpm, clutch, isRedlining, transmissionRPM, maxRPM
-local throttle, gearTorque, availableTorque
+local throttle, gearTorque, availableTorque, reducedThrottle
 
 function ENT:EngineThink( dt )
     gear = self:GetGear()
@@ -267,6 +266,7 @@ function ENT:EngineThink( dt )
     inputThrottle = self:GetInputFloat( 1, "accelerate" )
     inputBrake = self:GetInputFloat( 1, "brake" )
     inputHandbrake = self:GetInputBool( 1, "handbrake" )
+    reducedThrottle = not self:GetInputBool( 1, "boost" )
 
     if amphibiousMode then
         self.burnout = 0
@@ -305,8 +305,8 @@ function ENT:EngineThink( dt )
     if self:GetIsEngineOnFire() then
         inputThrottle = inputThrottle * 0.7
 
-    elseif self.reducedThrottle then
-        inputThrottle = inputThrottle * 0.65
+    elseif reducedThrottle then
+        inputThrottle = inputThrottle * 0.8
     end
 
     rpm = self:GetFlywheelRPM()
@@ -456,8 +456,8 @@ function ENT:BoatEngineThink( dt )
     local waterState = self:GetWaterState()
     local speed = self.forwardSpeed
 
-    if self.reducedThrottle then
-        inputThrottle = inputThrottle * 0.65
+    if not self:GetInputBool( 1, "boost" ) then
+        inputThrottle = inputThrottle * 0.75
     end
 
     throttle = 0
