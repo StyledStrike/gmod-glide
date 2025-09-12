@@ -6,14 +6,16 @@ function EFFECT:Init( data )
     local velocity = data:GetStart()
     local matId = data:GetSurfaceProp()
     local scale = data:GetScale()
+    local vehicle = data:GetEntity()
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end
 
     if surfaceFX[matId] then
-        self:DoSurface( emitter, origin, velocity, scale, surfaceFX[matId] )
+        local up = vehicle:GetUp()
+        self:DoSurface( emitter, origin, velocity, scale, up, surfaceFX[matId] )
     else
-        self:DoSmoke( emitter, origin, velocity, scale, data:GetEntity() )
+        self:DoSmoke( emitter, origin, velocity, scale, vehicle )
     end
 
     emitter:Finish()
@@ -33,9 +35,12 @@ local Config = Glide.Config
 local debrisGravity = Vector( 0, 0, 0 )
 local debrisVelocity = Vector( 0, 0, 0 )
 
-function EFFECT:DoSurface( emitter, origin, velocity, scale, fx )
+function EFFECT:DoSurface( emitter, origin, velocity, scale, up, fx )
     local p
     local lifetime = fx.lifetime * ( Config.reduceTireParticles and 0.4 or 1 )
+    local col = render.GetSurfaceColor(origin+up, origin-up)
+    if col[1] == 255 then return end
+    col = col:ToColor()
 
     for _ = 1, 5 do
         p = emitter:Add( fx.mat, origin )
@@ -58,7 +63,8 @@ function EFFECT:DoSurface( emitter, origin, velocity, scale, fx )
             p:SetAirResistance( fx.resistance or 50 )
             p:SetGravity( debrisGravity )
             p:SetVelocity( debrisVelocity )
-            p:SetLighting( true )
+            p:SetColor( col.r, col.g, col.b )
+            p:SetLighting( false )
             p:SetCollide( true )
         end
     end
