@@ -42,7 +42,7 @@ if CLIENT then
     }
 
     ENT.Headlights = {
-        { offset = Vector( 26, 0, 23 ) }
+        { offset = Vector( 29, 0, 24 ) }
     }
 
     ENT.StoppedSound = "glide/engines/shut_down_2.wav"

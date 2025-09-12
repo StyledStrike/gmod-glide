@@ -37,7 +37,7 @@ if CLIENT then
     }
 
     ENT.Headlights = {
-        { offset = Vector( 28, 0, 27 ) }
+        { offset = Vector( 29, 0, 27 ) }
     }
 
     ENT.StoppedSound = "Glide.Sanchez.EngineStop"

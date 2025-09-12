@@ -81,6 +81,8 @@ end
 
 local function OnEnter( vehicle, seatIndex )
     vehicle:OnLocalPlayerEnter( seatIndex )
+    vehicle.isLocalPlayerInVehicle = true
+    vehicle.headlightState = 0
 
     activeVehicle = vehicle
     activeSeatIndex = seatIndex
@@ -114,6 +116,8 @@ end
 local function OnLeave( ply )
     if IsValid( activeVehicle ) then
         activeVehicle:OnLocalPlayerExit()
+        activeVehicle.isLocalPlayerInVehicle = false
+        activeVehicle.headlightState = 0
     end
 
     activeVehicle = nil

@@ -21,6 +21,7 @@ function ENT:Initialize()
     self.sounds = {}
     self.waterSideSlide = 0
     self.isLocalPlayerInFirstPerson = false
+    self.isLocalPlayerInVehicle = false
 
     self.weapons = {}
     self.weaponSlotIndex = 0
@@ -271,15 +272,13 @@ function ENT:UpdateMisc()
     self:OnUpdateMisc()
 end
 
-local LocalPlayer = LocalPlayer
-
 function ENT:Think()
     self:SetNextClientThink( CurTime() )
 
     -- Run some things less frequently when the
     -- local player is not inside this vehicle.
     local t = RealTime()
-    local isLazy = LocalPlayer():GlideGetVehicle() ~= self
+    local isLazy = not self.isLocalPlayerInVehicle
 
     if isLazy and t > self.lazyThinkCD then
         isLazy = false
