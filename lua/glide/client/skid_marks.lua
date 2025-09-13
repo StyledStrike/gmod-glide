@@ -49,9 +49,10 @@ function SkidHandler:AddPiece( lastQuadId, pos, forward, normal, width, strength
 
     local right = normal:Cross( forward )
     local lastQuad = quads[lastQuadId]
-    local color = render.GetSurfaceColor(pos, pos - normal * 2):ToColor()
-
-    debugoverlay.Line(pos, pos - normal * 4, 1, color_white, true)
+    local color = render.GetSurfaceColor(pos, ray.HitPos - normal):ToColor()
+    -- print(color)
+    -- debugoverlay.Line(pos + normal * 2, pos - normal * 4, 1, color_white, true)
+    -- debugoverlay.Axis(pos + normal, normal:Angle(), 16, 1, true)
     quads[i] = {
         pos + right * width,                -- [1] 1st vertex
         pos - right * width,                -- [2] 2nd vertex
