@@ -79,7 +79,7 @@ function RangedFeature:Think()
     end
 
     if self.isActive then
-        if (dist > self.deactivateDist and LocalPlayer():GlideGetVehicle() ~= ent) or isDormant or not passedTest then
+        if (dist > self.deactivateDist and not ent.isLocalPlayerInVehicle) or isDormant or not passedTest then
             self:Deactivate()
         end
 
