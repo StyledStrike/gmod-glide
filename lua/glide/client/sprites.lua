@@ -39,7 +39,7 @@ local spriteCount = 0
 
 function Glide.DrawLightSprite( pos, dir, size, color, material )
     spriteCount = spriteCount + 1
-    sprites[spriteCount] = { pos, size, color, dir, material }
+    sprites[spriteCount] = { pos, size, dir, material, color.r, color.g, color.b }
 end
 
 local Max = math.max
@@ -51,6 +51,7 @@ local DepthRange = render.DepthRange
 
 local GetLocalViewLocation = Glide.GetLocalViewLocation
 local DEFAULT_MAT = Material( "glide/effects/light_glow" )
+local spriteColor = Color( 255, 255, 255 )
 
 hook.Add( "PreDrawEffects", "Glide.DrawSprites", function()
     if spriteCount < 1 then return end
@@ -67,12 +68,16 @@ hook.Add( "PreDrawEffects", "Glide.DrawSprites", function()
         DepthRange( 0.0, Clamp( pos:DistToSqr( s[1] ) / 200000, 0.999, 1 ) )
 
         -- Make the sprite smaller as the viewer points away from it
-        dot = s[4] and dir:Dot( s[4] ) or 1
+        dot = s[3] and dir:Dot( s[3] ) or 1
         dot = ( dot - 0.5 ) * 2
         s[2] = s[2] * Max( 0, dot )
 
-        SetMaterial( s[5] or DEFAULT_MAT )
-        DrawSprite( s[1], s[2], s[2], s[3] )
+        spriteColor.r = s[5]
+        spriteColor.g = s[6]
+        spriteColor.b = s[7]
+
+        SetMaterial( s[4] or DEFAULT_MAT )
+        DrawSprite( s[1], s[2], s[2], spriteColor )
 
         sprites[i] = nil
     end

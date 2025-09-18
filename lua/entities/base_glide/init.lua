@@ -245,7 +245,7 @@ function ENT:Use( activator )
     if not IsValid( activator ) then return end
     if not activator:IsPlayer() then return end
 
-    if not IsValid( self:GetDriver() ) then
+    if not IsValid( self:GetDriver() ) and not activator:KeyDown( IN_WALK ) then
         local seat = self:GetFreeSeat()
 
         if seat then

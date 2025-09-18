@@ -254,12 +254,8 @@ end
 local Max = math.max
 local Approach = math.Approach
 
-local gear, rpm, clutch, isRedlining, transmissionRPM, maxRPM
-local throttle, gearTorque, availableTorque
-
 function ENT:EngineThink( dt )
-    gear = self:GetGear()
-
+    local gear = self:GetGear()
     local amphibiousMode = self.IsAmphibious and self:GetWaterState() > 0
 
     -- These variables are used both on `ENT:EngineClutch` and `ENT:EngineThink`
@@ -305,10 +301,11 @@ function ENT:EngineThink( dt )
         inputThrottle = inputThrottle * 0.7
     end
 
-    rpm = self:GetFlywheelRPM()
+    local rpm = self:GetFlywheelRPM()
+    local minRPM = self:GetMinRPM()
 
     -- Handle auto-clutch
-    clutch = amphibiousMode and 1 or self:EngineClutch( dt )
+    local clutch = amphibiousMode and 1 or self:EngineClutch( dt )
 
     -- Do a burnout when holding down the throttle and brake inputs
     if inputThrottle > 0.1 and inputBrake > 0.1 and Abs( self.forwardSpeed ) < 50 then
@@ -360,7 +357,7 @@ function ENT:EngineThink( dt )
             inputThrottle < 0.05 and
             inputBrake < 0.1 and
             self.groundedCount > 1 and
-            rpm < self:GetMinRPM() * 1.2
+            rpm < minRPM * 1.2
         then
             inputBrake = 0.2
         end
@@ -373,10 +370,10 @@ function ENT:EngineThink( dt )
     end
 
     clutch = Approach( self.clutch, clutch, dt * ( ( gear < 2 and inputThrottle > 0.1 ) and 6 or 2 ) )
-
     self.clutch = clutch
-    isRedlining = false
-    transmissionRPM = 0
+
+    local isRedlining = false
+    local transmissionRPM = 0
 
     -- If we're not in neutral, convert the avg.
     -- transmission RPM back to the engine RPM.
@@ -386,9 +383,9 @@ function ENT:EngineThink( dt )
         rpm = ( rpm * clutch ) + ( Max( 0, transmissionRPM ) * ( 1 - clutch ) )
     end
 
-    throttle = self:GetEngineThrottle()
-    gearTorque = self:GetTransmissionTorque( gear, self:GetMinRPMTorque(), self:GetMaxRPMTorque() )
-    availableTorque = gearTorque * throttle
+    local throttle = self:GetEngineThrottle()
+    local gearTorque = self:GetTransmissionTorque( gear, self:GetMinRPMTorque(), self:GetMaxRPMTorque() )
+    local availableTorque = gearTorque * throttle
 
     -- Simulate engine braking
     if transmissionRPM < 0 then
@@ -401,12 +398,9 @@ function ENT:EngineThink( dt )
     end
 
     -- Limit the engine RPM, check if it's redlining
-    maxRPM = self:GetMaxRPM()
+    local maxRPM = self:GetMaxRPM()
 
-    if rpm < self:GetMinRPM() then
-        rpm = self:GetMinRPM()
-
-    elseif rpm > maxRPM then
+    if rpm > maxRPM then
         if rpm > maxRPM * 1.2 then
             availableTorque = 0
         end
@@ -418,7 +412,8 @@ function ENT:EngineThink( dt )
         end
     end
 
-    self:SetFlywheelRPM( Clamp( rpm, 0, maxRPM ) )
+    rpm = Clamp( rpm, minRPM, maxRPM )
+    self:SetFlywheelRPM( rpm )
 
     -- Update the amount of available torque to the transmission
     if self:GetTurboCharged() then

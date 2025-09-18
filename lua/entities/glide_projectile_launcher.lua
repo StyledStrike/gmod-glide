@@ -102,8 +102,8 @@ function ENT:Initialize()
 
     if WireLib then
         WireLib.CreateSpecialInputs( self,
-            { "Fire", "Delay", "Damage", "Radius" },
-            { "NORMAL", "NORMAL", "NORMAL", "NORMAL" }
+            { "Fire", "Delay", "Damage", "Radius", "Speed", "Gravity" },
+            { "NORMAL", "NORMAL", "NORMAL", "NORMAL", "NORMAL", "NORMAL" }
         )
     end
 end
@@ -197,13 +197,19 @@ function ENT:TriggerInput( name, value )
     if name == "Fire" then
         self.isFiring = value > 0
 
-    elseif name == "Delay" then
+    elseif name == "Delay" and value > 0 then
         self:SetReloadDelay( value )
 
-    elseif name == "Damage" then
+    elseif name == "Damage" and value > 0 then
         self:SetExplosionDamage( value )
 
-    elseif name == "Radius" then
+    elseif name == "Radius" and value > 0 then
         self:SetExplosionRadius( value )
+
+    elseif name == "Speed" and value > 0 then
+        self:SetProjectileSpeed( value )
+
+    elseif name == "Gravity" and value > 0 then
+        self:SetProjectileGravity( value )
     end
 end

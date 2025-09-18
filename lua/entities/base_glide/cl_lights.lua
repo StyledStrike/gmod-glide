@@ -45,7 +45,6 @@ local DrawLightSprite = Glide.DrawLightSprite
 
 local COLOR_BRAKE = Color( 255, 0, 0, 255 )
 local COLOR_REV = Color( 255, 255, 255, 200 )
-local COLOR_HEADLIGHT = Color( 255, 255, 255 )
 
 local DEFAULT_BRIGHTNESS = {
     ["signal_left"] = 6,
@@ -62,15 +61,17 @@ local lightState = {
     signal_right = false
 }
 
+local colorHeadlight = Color( 255, 255, 255 )
+
 --- Draw sprites depending on which type of lights are active.
 function ENT:UpdateLights()
     local headlightState = self:GetHeadlightState()
 
     if headlightState > 0 then
         local colorVec = self:GetHeadlightColor()
-        COLOR_HEADLIGHT.r = colorVec[1] * 255
-        COLOR_HEADLIGHT.g = colorVec[2] * 255
-        COLOR_HEADLIGHT.b = colorVec[3] * 255
+        colorHeadlight.r = colorVec[1] * 255
+        colorHeadlight.g = colorVec[2] * 255
+        colorHeadlight.b = colorVec[3] * 255
     end
 
     -- Handle projected lights
@@ -92,7 +93,7 @@ function ENT:UpdateLights()
 
             if enable then
                 v.angles = v.angles or Angle( 10, 0, 0 )
-                self:CreateHeadlight( index, v.offset, v.angles, v.color or COLOR_HEADLIGHT, v.texture, v.fovScale )
+                self:CreateHeadlight( index, v.offset, v.angles, v.color or colorHeadlight, v.texture, v.fovScale )
             end
         end
     end
@@ -170,7 +171,7 @@ function ENT:UpdateLights()
         end
 
         if enable and ltype == "headlight" then
-            DrawLightSprite( pos, dir, l.size or 30, l.color or COLOR_HEADLIGHT, l.spriteMaterial )
+            DrawLightSprite( pos, dir, l.size or 30, l.color or colorHeadlight, l.spriteMaterial )
 
         elseif enable and ( ltype == "taillight" or ltype == "signal_left" or ltype == "signal_right" ) then
             DrawLightSprite( pos, dir, l.size or 30, l.color or COLOR_BRAKE, l.spriteMaterial )

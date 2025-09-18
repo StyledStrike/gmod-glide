@@ -228,13 +228,17 @@ end
 
 local RealTime = RealTime
 local Effect = util.Effect
+local IsGameUIVisible = gui.IsGameUIVisible
+
 local DEFAULT_FLAME_ANGLE = Angle()
+local IS_SINGLEPLAYER = game.SinglePlayer()
 
 function ENT:UpdateMisc()
     local t = RealTime()
+    local dontDoParticles = IS_SINGLEPLAYER and IsGameUIVisible()
 
     -- Keep particles consistent even at high FPS
-    if t > self.particleCD and self:WaterLevel() < 3 then
+    if t > self.particleCD and self:WaterLevel() < 3 and not dontDoParticles then
         self.particleCD = t + 0.03
         self:OnUpdateParticles()
 

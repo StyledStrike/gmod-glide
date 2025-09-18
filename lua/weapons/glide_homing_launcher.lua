@@ -53,7 +53,7 @@ end
 
 function SWEP:Initialize()
     self:SetHoldType( self.HoldType )
-    self:SetDeploySpeed( 0.7 )
+    self:SetDeploySpeed( 0.8 )
 
     if CLIENT and self:IsCarriedByLocalPlayer() then
         self.showHint = true
@@ -62,10 +62,10 @@ end
 
 function SWEP:Deploy()
     self:SetHoldType( self.HoldType )
-    self:SetDeploySpeed( 0.7 )
+    self:SetDeploySpeed( 0.8 )
     self:SetReloading( false )
 
-    self:SendWeaponAnim( ACT_VM_DRAW )
+    self:SendWeaponAnim( self:Clip1() > 0 and ACT_VM_DRAW or ACT_VM_PICKUP )
     self:SetNextPrimaryFire( CurTime() + self.DeployTime )
     self:SetNextSecondaryFire( CurTime() + self.DeployTime )
 
@@ -271,6 +271,15 @@ if CLIENT then
             "glide/weapons/homing_launcher/homing_move_1.wav",
             "glide/weapons/homing_launcher/homing_move_2.wav"
         }
+    } )
+
+    sound.Add( {
+        name = "Glide.HomingLauncher.Rotate",
+        channel = CHAN_STATIC,
+        volume = 0.5,
+        level = 60,
+        pitch = { 97, 103 },
+        sound = "glide/weapons/homing_launcher/homing_rotate.wav"
     } )
 
     local AREA_MAT = Material( "glide/aim_area.png", "smooth" )
