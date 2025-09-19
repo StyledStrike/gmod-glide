@@ -186,7 +186,6 @@ function ENT:Think()
         eff:SetStart( velocity )
         eff:SetSurfaceProp( surfaceId )
         eff:SetScale( particleSize * rollFactor )
-        eff:SetNormal( parent:GetForward() * ( forwardSlip > 1 and 1 or -1 ) )
         eff:SetEntity( parent )
         Effect( "glide_tire_roll", eff )
     end

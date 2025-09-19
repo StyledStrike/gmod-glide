@@ -49,16 +49,13 @@ function SkidHandler:AddPiece( lastQuadId, pos, forward, normal, width, strength
 
     local right = normal:Cross( forward )
     local lastQuad = quads[lastQuadId]
-    local color = render.GetSurfaceColor(pos, ray.HitPos - normal):ToColor()
-    -- print(color)
-    -- debugoverlay.Line(pos + normal * 2, pos - normal * 4, 1, color_white, true)
-    -- debugoverlay.Axis(pos + normal, normal:Angle(), 16, 1, true)
+
     quads[i] = {
         pos + right * width,                -- [1] 1st vertex
         pos - right * width,                -- [2] 2nd vertex
         lastQuad and lastQuad[2] or pos,    -- [3] 3rd vertex
         lastQuad and lastQuad[1] or pos,    -- [4] 4th vertex
-        ColorAlpha(color, 55 + 200 * strength), -- [5] Color + Alpha
+        ColorAlpha( render.GetSurfaceColor( pos, ray.HitPos - normal ):ToColor(), 55 + 200 * strength ), -- [5] Color + Alpha
         RealTime() + Config.skidmarkTimeLimit -- [6] Lifetime
     }
 
@@ -68,8 +65,6 @@ end
 local Min = math.min
 local SetMaterial = render.SetMaterial
 local DrawQuad = render.DrawQuad
-
-local color = Color( 255, 255, 255 )
 
 function SkidHandler:Draw( t )
     SetMaterial( self.material )

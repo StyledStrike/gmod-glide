@@ -38,9 +38,9 @@ local debrisVelocity = Vector( 0, 0, 0 )
 function EFFECT:DoSurface( emitter, origin, scale, normal, up, fx )
     local p
     local lifetime = fx.lifetime * ( Config.reduceTireParticles and 0.4 or 1 )
-    local col = render.GetSurfaceColor(origin+up, origin-up)
-    if col[1] == 255 then return end
-    col = col:ToColor()
+    local col = render.GetSurfaceColor( origin + up, origin - up )
+    if col.x >= 255 then return end
+    col = col * 255
 
     for _ = 1, 5 do
         p = emitter:Add( fx.mat, origin )
@@ -63,7 +63,7 @@ function EFFECT:DoSurface( emitter, origin, scale, normal, up, fx )
             p:SetAirResistance( 50 )
             p:SetGravity( debrisGravity )
             p:SetVelocity( debrisVelocity * scale * RandomFloat( 0.3, 1.0 ) )
-            p:SetColor( col.r, col.g, col.b )
+            p:SetColor( col.x, col.y, col.z )
             p:SetLighting( false )
             p:SetCollide( true )
         end
