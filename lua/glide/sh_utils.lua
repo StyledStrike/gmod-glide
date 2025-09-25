@@ -160,16 +160,15 @@ if CLIENT then
 end
 
 do
-    -- Custom iterator, similar to ipairs, but made to iterate
-    -- over a table of entities, while skipping NULL entities.
-    local NULL = NULL
     local e
 
+    -- Custom iterator, similar to ipairs, but made to iterate
+    -- over a table of entities, while skipping invalid entities.
     local function EntIterator( array, i )
         i = i + 1
         e = array[i]
 
-        while e == NULL do
+        while e and not ( e.IsValid and e:IsValid() ) do
             i = i + 1
             e = array[i]
         end

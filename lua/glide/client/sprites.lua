@@ -39,7 +39,7 @@ local spriteCount = 0
 
 function Glide.DrawLightSprite( pos, dir, size, color, material )
     spriteCount = spriteCount + 1
-    sprites[spriteCount] = { pos, size, dir, material, color.r, color.g, color.b }
+    sprites[spriteCount] = { pos, size, dir, material, color.r, color.g, color.b, color.a }
 end
 
 local Max = math.max
@@ -75,6 +75,7 @@ hook.Add( "PreDrawEffects", "Glide.DrawSprites", function()
         spriteColor.r = s[5]
         spriteColor.g = s[6]
         spriteColor.b = s[7]
+        spriteColor.a = s[8]
 
         SetMaterial( s[4] or DEFAULT_MAT )
         DrawSprite( s[1], s[2], s[2], spriteColor )

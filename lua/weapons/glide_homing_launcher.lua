@@ -139,10 +139,6 @@ function SWEP:CanAttack()
     end
 
     if self:Clip1() < 1 then
-        if self:GetUserAmmoCount() > 0 then
-            self:Reload()
-        end
-
         return false
     end
 
