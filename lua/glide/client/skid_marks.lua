@@ -60,6 +60,8 @@ function SkidHandler:AddPiece( lastQuadId, pos, forward, normal, width, strength
         RealTime() + Config.skidmarkTimeLimit -- [6] Lifetime
     }
 
+    if #quads <= 1 then return i end
+
     if lastQuad then
         lastQuad[5]:Lerp( color, 0.5 )
     end
