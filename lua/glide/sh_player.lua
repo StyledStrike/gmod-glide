@@ -23,6 +23,12 @@ if SERVER then
         return self.GlideCameraAimPos or Vector()
     end
 
+    --- This function is deprecated, it has been
+    --- replaced by Player:GlideGetAimAngles.
+    function PlayerMeta:GlideGetCameraAngles()
+        return self.GlideCameraAngles or Angle()
+    end
+
     --- Utility function to get the entity creator
     --- or CPPI owner from a entity.
     function Glide.GetEntityCreator( source )
