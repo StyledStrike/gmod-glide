@@ -141,8 +141,8 @@ function MouseInput:ApplySteeringInput( x )
     mouse[1] = ExpDecay( mouse[1], 0, Config.mouseSteerDecayRate, FrameTime() )
     mouse[2] = 0
 
-    -- Make low values "ramp up" slightly faster
-    local steer = math.pow( Abs( mouse[1] ), 0.8 )
+    -- Make low values "ramp up" slightly slower
+    local steer = math.pow( Abs( mouse[1] ), 1.2 )
     if mouse[1] < 0 then steer = -steer end
 
     self.cvarPitch:SetFloat( steer )

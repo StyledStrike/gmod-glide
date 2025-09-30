@@ -156,9 +156,6 @@ function ENT:OnUpdateMisc()
 end
 
 do
-    local Camera = Glide.Camera
-    local DrawWeaponCrosshair = Glide.DrawWeaponCrosshair
-
     local SetColor = surface.SetDrawColor
     local SetMaterial = surface.SetMaterial
     local DrawTexturedRectRotated = surface.DrawTexturedRectRotated
@@ -170,13 +167,18 @@ do
 
     local matBody = Material( "materials/glide/tank_body.png", "smooth" )
     local matTurret = Material( "materials/glide/tank_turret.png", "smooth" )
+
+    local Camera = Glide.Camera
     local CanUseWeaponry = Glide.CanUseWeaponry
+    local DrawWeaponCrosshair = Glide.DrawWeaponCrosshair
 
     --- Override this base class function.
     function ENT:DrawVehicleHUD( screenW, screenH )
         BaseClass.DrawVehicleHUD( self, screenW, screenH )
 
-        if CanUseWeaponry( LocalPlayer() ) then
+        local user = LocalPlayer()
+
+        if CanUseWeaponry( user ) then
             DrawWeaponCrosshair( screenW * 0.5, screenH * 0.5, "glide/aim_tank.png", 0.14, crosshairColor[self:GetIsAimingAtTarget()] )
         end
 

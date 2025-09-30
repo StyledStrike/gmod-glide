@@ -1,8 +1,8 @@
 local PlayerMeta = FindMetaTable( "Player" )
 local EntityMeta = FindMetaTable( "Entity" )
+local GetNWEntity = EntityMeta.GetNWEntity
 
 do
-    local GetNWEntity = EntityMeta.GetNWEntity
     local GetNWInt = EntityMeta.GetNWInt
 
     function PlayerMeta:GlideGetVehicle()
@@ -15,22 +15,12 @@ do
 end
 
 if SERVER then
-    --- Get the player's Glide camera angles.
-    function PlayerMeta:GlideGetCameraAngles()
-        return self:LocalEyeAngles()
+    function PlayerMeta:GlideGetAimAngles()
+        return self.GlideCameraAngles or Angle()
     end
 
-    local TraceLine = util.TraceLine
-    local eyePos = EntityMeta.EyePos
-
     function PlayerMeta:GlideGetAimPos()
-        local origin = eyePos( self )
-
-        return TraceLine( {
-            start = origin,
-            endpos = origin + self:GlideGetCameraAngles():Forward() * 50000,
-            filter = { self, self:GlideGetVehicle() }
-        } ).HitPos
+        return self.GlideCameraAimPos or Vector()
     end
 
     --- Utility function to get the entity creator
@@ -69,4 +59,17 @@ if SERVER then
         local ply = Glide.GetEntityCreator( source )
         Glide.SetEntityCreator( target, ply )
     end
+
+    local IsValid = IsValid
+    local EntEyePos = EntityMeta.EyePos
+
+    hook.Add( "SetupMove", "Glide.CacheCameraLocation", function( ply, _, cmd )
+        local vehicle = GetNWEntity( ply, "GlideVehicle", NULL )
+        if not IsValid( vehicle ) then return end
+
+        local angles = cmd:GetViewAngles()
+
+        ply.GlideCameraAngles = angles
+        ply.GlideCameraAimPos = EntEyePos( ply ) + angles:Forward() * cmd:GetUpMove()
+    end, HOOK_HIGH )
 end

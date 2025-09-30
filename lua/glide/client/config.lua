@@ -1,6 +1,4 @@
-local Config = Glide.Config or {}
-
-Glide.Config = Config
+local Config = Glide.Config
 
 --- Reset settings to their default values.
 function Config:Reset()

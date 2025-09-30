@@ -2,9 +2,6 @@ local IsValid = IsValid
 local LocalPlayer = LocalPlayer
 local NormalizeAngle = math.NormalizeAngle
 
-local EntityMeta = FindMetaTable( "Entity" )
-local getTable = EntityMeta.GetTable
-
 hook.Add( "UpdateAnimation", "Glide.OverridePlayerAnim", function( ply )
     local vehicle = ply:GlideGetVehicle()
     if not IsValid( vehicle ) then return end
@@ -59,14 +56,16 @@ local holdTypeSequences = {
     ["passive"] = "sit_passive"
 }
 
+local GetTable = FindMetaTable( "Entity" ).GetTable
+
 hook.Add( "CalcMainActivity", "Glide.OverridePlayerActivity", function( ply )
     local vehicle = ply:GlideGetVehicle()
 
-    local vehTbl = getTable( vehicle )
+    local vehTbl = GetTable( vehicle )
     if not vehTbl then return end
     if not vehTbl.GetPlayerSitSequence then return end
 
-    local plyTbl = getTable( ply )
+    local plyTbl = GetTable( ply )
     if plyTbl.m_bWasNoclipping then
         plyTbl.m_bWasNoclipping = nil
         ply:AnimResetGestureSlot( 6 ) -- GESTURE_SLOT_CUSTOM

@@ -329,6 +329,10 @@ if SERVER then
 end
 
 if CLIENT then
+    -- Make these tables are available before we load everything
+    Glide.Config = Glide.Config or {}
+    Glide.Camera = Glide.Camera or {}
+
     -- Shared files
     Glide.IncludeDir( "glide/", true, false )
 

@@ -268,7 +268,7 @@ local function HandleMouseInput( ply, active, dt )
         if not IsValid( phys ) then return end
 
         local angVel = phys:GetAngleVelocity()
-        local targetDir = ply:GlideGetCameraAngles():Forward()
+        local targetDir = ply:GlideGetAimAngles():Forward()
 
         local pitchDrag = Clamp( angVel[2] * -0.1, -3, 3 ) * dt * 40
         local rudderDrag = Clamp( angVel[3] * 0.1, -3, 3 ) * dt * 40
