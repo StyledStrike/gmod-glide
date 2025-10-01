@@ -1,3 +1,4 @@
+local Clamp = math.Clamp
 local RandomFloat = math.Rand
 local FindWaterSurfaceAbove = Glide.FindWaterSurfaceAbove
 
@@ -6,8 +7,8 @@ local angles = Angle( 270, 0, 0 )
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local velocity = data:GetStart() * 0.5
-    local scale = data:GetScale()
-    local magnitude = data:GetMagnitude()
+    local scale = Clamp( data:GetScale(), 0.1, 10 )
+    local magnitude = Clamp( data:GetMagnitude(), 0.1, 10 )
 
     local emitter = ParticleEmitter( origin, true )
     if not IsValid( emitter ) then return end

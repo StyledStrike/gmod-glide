@@ -1,10 +1,11 @@
+local Clamp = math.Clamp
 local CurTime = CurTime
 local DEFAULT_TRACER_COLOR = Color( 255, 160, 35 )
 
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local endpos = data:GetStart()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 3 )
     local ent = data:GetEntity()
 
     local dir = endpos - origin
@@ -30,9 +31,9 @@ function EFFECT:Init( data )
 
     if data:GetColor() > 0 then
         self.traceColor = Color(
-            data:GetRadius(),
-            data:GetHitBox(),
-            data:GetMaterialIndex()
+            Clamp( data:GetRadius(), 0, 255 ),
+            Clamp( data:GetHitBox(), 0, 255 ),
+            Clamp( data:GetMaterialIndex(), 0, 255 )
         )
     end
 

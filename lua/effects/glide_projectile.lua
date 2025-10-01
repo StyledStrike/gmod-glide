@@ -2,6 +2,7 @@ local FrameTime = FrameTime
 local RandomVec = VectorRand
 local RandomInt = math.random
 local RandomFloat = math.Rand
+local Clamp = math.Clamp
 local Max = math.max
 
 local SMOKE_MATERIAL = "particle/smokesprites_000"
@@ -10,8 +11,12 @@ local r, g, b = 0, 0, 0
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local normal = data:GetNormal()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 5 )
     local color = data:GetStart()
+
+    color[1] = Clamp( color[1], 0, 255 )
+    color[2] = Clamp( color[2], 0, 255 )
+    color[3] = Clamp( color[3], 0, 255 )
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end

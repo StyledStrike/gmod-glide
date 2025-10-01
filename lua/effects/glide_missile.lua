@@ -1,10 +1,11 @@
+local Clamp = math.Clamp
 local RandomFloat = math.Rand
 
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local normal = data:GetNormal()
-    local scale = data:GetScale()
-    local spinSpeed = data:GetColor() / 10
+    local scale = Clamp( data:GetScale(), 0.1, 3 )
+    local spinSpeed = Clamp( data:GetColor(), 0, 255 ) / 10
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end

@@ -1,3 +1,4 @@
+local Clamp = math.Clamp
 local RandomInt = math.random
 local RandomFloat = math.Rand
 
@@ -8,9 +9,9 @@ function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local normal = -data:GetAngles():Forward()
     local velocity = data:GetStart()
-    local scale = data:GetScale()
-    local alpha = data:GetColor()
-    local power = data:GetMagnitude() / 1000
+    local scale = Clamp( data:GetScale(), 0.1, 5 )
+    local alpha = Clamp( data:GetColor(), 0, 255 )
+    local power = Clamp( data:GetMagnitude() / 1000, 0, 1 )
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end

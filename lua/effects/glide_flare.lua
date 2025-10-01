@@ -1,6 +1,8 @@
+local Clamp = math.Clamp
+
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 2 )
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end

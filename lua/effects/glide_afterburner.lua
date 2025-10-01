@@ -16,7 +16,7 @@ function EFFECT:Init( data )
 
     self.offset = self.parent:WorldToLocal( origin )
     self.angles = self.parent:WorldToLocalAngles( angles )
-    self.scale = data:GetScale() * RandomFloat( 0.9, 1.1 )
+    self.scale = Clamp( data:GetScale(), 0.1, 10 ) * RandomFloat( 0.9, 1.1 )
 
     DEFAULT_COLOR.a = 255 * Clamp( data:GetMagnitude(), 0, 1 )
 

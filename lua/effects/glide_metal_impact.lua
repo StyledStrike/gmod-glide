@@ -1,8 +1,9 @@
+local Clamp = math.Clamp
 local RandomFloat = math.Rand
 
 function EFFECT:Init( data )
     local pos = data:GetOrigin()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 10 )
     local normal = data:GetNormal()
 
     local emitter = ParticleEmitter( pos, false )

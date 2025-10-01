@@ -11,7 +11,7 @@ function EFFECT:Init( data )
     if not IsValid( self.parent ) then return end
 
     local origin = data:GetOrigin()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 5 )
     local angles = data:GetAngles()
 
     self.offset = self.parent:WorldToLocal( origin )
@@ -21,7 +21,7 @@ function EFFECT:Init( data )
     self:SetModel( "models/glide/effects/afterburner_flame.mdl" )
     self:SetModelScale( scale * Clamp( data:GetMagnitude(), 0, 1 ) * RandomFloat( 0.9, 1.1 ) )
 
-    origin = origin - angles:Forward() * data:GetRadius()
+    origin = origin - angles:Forward() * Clamp( data:GetRadius(), -100, 100 )
 
     local emitter = ParticleEmitter( origin, false )
     local p = emitter:Add( FLASH_MATERIAL, origin )

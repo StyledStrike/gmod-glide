@@ -1,3 +1,4 @@
+local Clamp = math.Clamp
 local RandomInt = math.random
 local RandomFloat = math.Rand
 
@@ -9,7 +10,7 @@ local FLAME_GRAVITY = Vector( 0, 0, 80 )
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local velocity = data:GetStart() * 0.8
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 5 )
     local normal = data:GetAngles():Up()
 
     local emitter = ParticleEmitter( origin, false )

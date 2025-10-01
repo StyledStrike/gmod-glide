@@ -8,10 +8,10 @@ local EXHAUST_SMOKE_GRAVITY = Vector( -50, 0, 0 )
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local normal = data:GetNormal()
-    local health = data:GetColor() / 255
-    local power = data:GetMagnitude() / 1000
+    local health = Clamp( data:GetColor() / 255, 0, 1 )
+    local power = Clamp( data:GetMagnitude() / 1000, 0, 1 )
     local velocity = data:GetStart()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 4 )
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end
@@ -36,7 +36,7 @@ function EFFECT:Init( data )
             p:SetGravity( EXHAUST_SMOKE_GRAVITY )
             p:SetVelocity( velocity + normal * RandomInt( 0, 200 ) * scale )
             p:SetColor( color, color, color )
-            p:SetCollide( true )
+            p:SetCollide( false )
         end
     end
 

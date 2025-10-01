@@ -1,10 +1,11 @@
+local Clamp = math.Clamp
 local IsValid = IsValid
 local surfaceFX = {}
 
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local matId = data:GetSurfaceProp()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 15 )
     local normal = data:GetNormal()
     local vehicle = data:GetEntity()
 

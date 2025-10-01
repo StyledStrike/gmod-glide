@@ -1,9 +1,10 @@
+local Clamp = math.Clamp
 local CurTime = CurTime
 
 function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local normal = data:GetNormal()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 1.5 )
 
     self.size = 1200 * scale
     self.origin = origin

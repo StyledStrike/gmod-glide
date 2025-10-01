@@ -1,3 +1,4 @@
+local Clamp = math.Clamp
 local IsValid = IsValid
 local surfaceFX = {}
 
@@ -5,7 +6,7 @@ function EFFECT:Init( data )
     local origin = data:GetOrigin()
     local velocity = data:GetStart()
     local matId = data:GetSurfaceProp()
-    local scale = data:GetScale()
+    local scale = Clamp( data:GetScale(), 0.1, 10 )
     local vehicle = data:GetEntity()
 
     local emitter = ParticleEmitter( origin, false )
