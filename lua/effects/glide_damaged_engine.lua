@@ -9,7 +9,7 @@ function EFFECT:Init( data )
     local angles = data:GetAngles()
     local velocity = data:GetStart()
     local health = Clamp( data:GetColor() / 255, 0, 1 )
-    local width = Clamp( data:GetMagnitude() / 2000, -100, 100 )
+    local width = Clamp( data:GetMagnitude() / 2000, 1, 100 )
     local scale = Clamp( data:GetScale(), 0.1, 4 )
     local maxZVel = data:GetRadius()
 

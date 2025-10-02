@@ -206,7 +206,11 @@ local MOUSE_STEER_MODE = Glide.MOUSE_STEER_MODE
 
 function Camera:Think()
     local vehicle = self.vehicle
-    if not IsValid( vehicle ) then return end
+
+    if not IsValid( vehicle ) then
+        self:Shutdown()
+        return
+    end
 
     self.isActive = self:ShouldBeActive()
     if not self.isActive then return end
@@ -454,6 +458,8 @@ function Camera:InputMouseApply( _, x, y )
     if self.isUsingDirectMouse then return end
 
     local vehicle = self.vehicle
+    if not IsValid( vehicle ) then return end
+
     local sensitivity = Config.lookSensitivity
     local lookX = ( Config.cameraInvertX and -x or x ) * 0.05 * sensitivity
     local lookY = ( Config.cameraInvertY and -y or y ) * 0.05 * sensitivity
