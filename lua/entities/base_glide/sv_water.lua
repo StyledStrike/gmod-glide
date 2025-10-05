@@ -120,6 +120,7 @@ end
 
 local CurTime = CurTime
 local Cos = math.cos
+local Sqrt = math.sqrt
 local TraceLine = util.TraceLine
 
 local ray = {}
@@ -147,7 +148,7 @@ function ENT:SimulateBoat( phys, dt, outLin, outAng, throttle, steer )
     -- Buoyancy forces
     local upDrag = -params.waterLinearDrag[3]
     local upDepth = params.buoyancyDepth
-    local pointVel, offset, buoyancyForce
+    local pointVel, upVel, offset, buoyancyForce
 
     for _, point in ipairs( self.buoyancyPoints ) do
         if point.isUnderWater then
@@ -160,8 +161,14 @@ function ENT:SimulateBoat( phys, dt, outLin, outAng, throttle, steer )
 
             TraceLine( traceData )
 
+            upVel = worldUp:Dot( pointVel )
             buoyancyForce = params.buoyancy * ( 1 - ray.Fraction )
-            buoyancyForce = buoyancyForce + worldUp:Dot( pointVel ) * upDrag
+            buoyancyForce = buoyancyForce + upVel * upDrag
+
+            -- Limit how fast this point can sink
+            if upVel < -100 then
+                buoyancyForce = buoyancyForce + Sqrt( -upVel )
+            end
 
             AddForceOffset( outLin, outAng, phys, dt, offset, worldUp * buoyancyForce )
         end

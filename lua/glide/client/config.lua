@@ -58,7 +58,8 @@ function Config:Reset()
     self.showPassengerList = true
     self.showCustomHealth = true
     self.showEmptyVehicleHealth = false
-    self.showSkybox = true
+    self.showSkyboxOnLand = false
+    self.showSkyboxOnAircraft = true
     self.useKMH = false
 
     -- Misc. settings
@@ -164,7 +165,8 @@ function Config:Save( immediate )
         showPassengerList = self.showPassengerList,
         showCustomHealth = self.showCustomHealth,
         showEmptyVehicleHealth = self.showEmptyVehicleHealth,
-        showSkybox = self.showSkybox,
+        showSkyboxOnLand = self.showSkyboxOnLand,
+        showSkyboxOnAircraft = self.showSkyboxOnAircraft,
         useKMH = self.useKMH,
 
         manualGearShifting = self.manualGearShifting,
@@ -279,7 +281,8 @@ function Config:Load()
     LoadBool( "showPassengerList", true )
     LoadBool( "showCustomHealth", true )
     LoadBool( "showEmptyVehicleHealth", false )
-    LoadBool( "showSkybox", true )
+    LoadBool( "showSkyboxOnLand", false )
+    LoadBool( "showSkyboxOnAircraft", true )
     LoadBool( "useKMH", false )
 
     SetNumber( self, "throttleModifierMode", data.throttleModifierMode, 0, 2, self.throttleModifierMode )
@@ -936,8 +939,14 @@ function Config:OpenFrame()
         self:Save()
     end )
 
-    CreateToggle( panelMisc, L"misc.show_skybox", self.showSkybox, function( value )
-        self.showSkybox = value
+    CreateToggle( panelMisc, L"misc.show_skybox.land", self.showSkyboxOnLand, function( value )
+        self.showSkyboxOnLand = value
+        self:Save()
+        Glide.EnableSkyboxIndicator()
+    end )
+
+    CreateToggle( panelMisc, L"misc.show_skybox.aircraft", self.showSkyboxOnAircraft, function( value )
+        self.showSkyboxOnAircraft = value
         self:Save()
         Glide.EnableSkyboxIndicator()
     end )

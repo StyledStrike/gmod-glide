@@ -100,7 +100,15 @@ function Glide.EnableSkyboxIndicator()
         plane.alpha = 0
     end
 
-    if not Glide.Config.showSkybox then return end
+    local vehicle = Glide.currentVehicle
+    if not IsValid( vehicle ) then return end
+
+    if Glide.IsAircraft( vehicle ) then
+        if not Glide.Config.showSkyboxOnAircraft then return end
+    else
+        if not Glide.Config.showSkyboxOnLand then return end
+    end
+
     if not Glide.currentSeatIndex then return end
     if Glide.currentSeatIndex > 1 then return end
 

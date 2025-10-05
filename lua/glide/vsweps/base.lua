@@ -70,8 +70,9 @@ if SERVER then
         self.projectileOffsetIndex = 0
 
         -- Compatibility with vehicles that use `ENT.WeaponSlots`, and
-        -- access the weapon's `ammoType` (lowercase "a") on `ENT:OnWeaponFire`.
+        -- access the weapon's `ammoType`/`maxAmmo` (lowercase "a"/"m") on `ENT:OnWeaponFire`.
         self.ammoType = self.AmmoType
+        self.maxAmmo = self.MaxAmmo
 
         -- Compatibility with vehicles that use `ENT.WeaponSlots`, and
         -- access the weapon's `lockOn` on `ENT:OnWeaponFire`.
