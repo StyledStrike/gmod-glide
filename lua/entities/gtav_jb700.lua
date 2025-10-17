@@ -82,6 +82,8 @@ if SERVER then
     end
 
     function ENT:CreateFeatures()
+        self.switchBaseDelay = 0.4
+
         self:CreateWeapon( "base", {
             Spread = 0.5,
             Damage = 40,

@@ -13,6 +13,7 @@ function ENT:EngineInit()
     self.flywheelVelocity = 0
     self.clutch = 1
     self.switchCD = 0
+    self.switchBaseDelay = 0.3
 
     -- Wheel control variables
     self.groundedCount = 0
@@ -144,8 +145,9 @@ function ENT:SwitchGear( index, cooldown )
     if self:GetGear() == index then return end
 
     index = Clamp( index, self.minGear, self.maxGear )
+    cooldown = cooldown or self.switchBaseDelay
 
-    self.switchCD = cooldown or ( index == 1 and 0 or ( self:GetFastTransmission() and 0.15 or 0.3 ) )
+    self.switchCD = cooldown * ( index == 1 and 0 or ( self:GetFastTransmission() and 0.5 or 1 ) )
     self.clutch = 1
     self:SetGear( index )
 end
@@ -181,13 +183,13 @@ function ENT:AutoGearSwitch( throttle )
     if currentGear < 0 and self.forwardSpeed < -100 then return end
 
     -- Don't switch when the wheels are slipping forwards
-    if Abs( self.avgForwardSlip ) > 10 then return end
+    if Abs( self.avgForwardSlip ) > 3 then return end
 
     local gear = Clamp( currentGear, 1, self.maxGear )
     local minRPM, maxRPM = self:GetMinRPM(), self:GetMaxRPM()
 
     -- Avoid hitting the redline
-    maxRPM = maxRPM * 0.98
+    maxRPM = maxRPM * 0.95
 
     -- When accelerating, switch up early when the throttle is low
     if self.forwardAcceleration > 0 then

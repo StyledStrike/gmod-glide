@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/gta5/vehicles/wolfsbane/vehicle_gen_bikedetail_diff"
+	"$bumpmap" "models/gta5/vehicles/wolfsbane/vehicle_gen_bikedetail_normal"
+	"$allowdiffusemodulation" "false"
+}

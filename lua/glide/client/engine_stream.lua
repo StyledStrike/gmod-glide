@@ -32,6 +32,7 @@ function Glide.CreateEngineStream( parent )
         wobbleTime = 0,
         isPlaying = false,
         isRedlining = false,
+        redlineTime = 0,
         firstPerson = false,
         volumeMultiplier = 0,
 
@@ -211,11 +212,9 @@ function EngineStream:Pause()
     end
 end
 
+local Cos = math.cos
 local Clamp = math.Clamp
 local Remap = math.Remap
-local Cos = math.cos
-
-local Time = RealTime
 local GetVolume = Glide.Config.GetVolume
 
 local vol, pitch, pan
@@ -265,8 +264,18 @@ function EngineStream:Think( dt, eyePos, eyeRight )
     local redlineVol = 1
 
     if self.isRedlining then
-        local redlineStrength = self.redlineStrength
-        redlineVol = ( 1 - redlineStrength ) + Cos( Time() * self.redlineFrequency ) * redlineStrength
+        local strength = self.redlineStrength * 1.5
+        local freq = self.redlineFrequency
+        local time = self.redlineTime + dt
+        self.redlineTime = time
+
+        local stage = Cos( time * freq )
+        redlineVol = 1 - strength * Clamp( 1 - stage * 2, 0, 1 )
+
+        stage = Cos( ( time + freq * 0.2 ) * freq )
+        pitch = pitch * ( 1 - ( 0.5 - stage * 0.5 ) * strength * 0.05 )
+    else
+        self.redlineTime = 0
     end
 
     local channel, value

@@ -71,10 +71,6 @@ if CLIENT then
     -- Play this sound (to passengers only) when the wings are stalling
     ENT.StallHornSound = "glide/ui/stall_beep.wav"
     ENT.StallHornVolume = 1.0
-
-    -- Children classes should override this function
-    -- to update animations (the control surfaces for example).
-    function ENT:OnUpdateAnimations() end
 end
 
 if SERVER then

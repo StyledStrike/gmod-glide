@@ -45,6 +45,15 @@ if CLIENT then
         Color( 0, 255, 0 )
     }
 
+    -- Delay between each rotor "beat" sound.
+    --
+    -- If not nil, it will try to play sounds defined on
+    -- `ENT.BassSoundSet`, `ENT.MidSoundSet` and `ENT.HighSoundSet`,
+    -- so make sure to set those to prevent errors.
+    --
+    -- See `base_glide_heli/shared.lua` for a example.
+    ENT.RotorBeatInterval = nil
+
     --- Override this base class function.
     function ENT:GetCameraType( _seatIndex )
         return 2 -- Glide.CAMERA_TYPE.AIRCRAFT

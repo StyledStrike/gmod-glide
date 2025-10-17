@@ -40,6 +40,7 @@ Glide.LOCKON_WHITELIST = {
     ["base_glide_plane"] = true,
     ["base_glide_boat"] = true,
     ["base_glide_motorcycle"] = true,
+    ["base_glide_plane_vtol"] = true,
     ["prop_vehicle_prisoner_pod"] = true
 }
 

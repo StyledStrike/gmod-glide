@@ -1,7 +1,5 @@
 include( "shared.lua" )
 
-DEFINE_BASECLASS( "base_glide_aircraft" )
-
 function ENT:OnOutOfControlChange( _, _, value )
     if value then
         local path = ( "glide/helicopters/spinout_%d.wav" ):format( math.random( 1, 6 ) )
@@ -38,10 +36,6 @@ function ENT:OnActivateSounds()
     self:CreateLoopingSound( "distant", self.DistantSoundPath, 90 )
     self:CreateLoopingSound( "engine", self.EngineSoundPath, self.EngineSoundLevel )
     self:CreateLoopingSound( "jet", self.JetSoundPath, self.JetSoundLevel )
-
-    -- Setup variables for the beat sounds
-    self.nextBeat = 0
-    self.beatDiff = 0
 end
 
 --- Implement this base class function.
@@ -52,12 +46,8 @@ function ENT:OnDeactivateSounds()
     end
 end
 
-local Abs = math.abs
 local Clamp = math.Clamp
-local RealTime = RealTime
-
 local GetVolume = Glide.Config.GetVolume
-local PlaySoundSet = Glide.PlaySoundSet
 
 --- Implement this base class function.
 function ENT:OnUpdateSounds()
@@ -100,27 +90,4 @@ function ENT:OnUpdateSounds()
         sounds.engineWarning:Stop()
         sounds.engineWarning = nil
     end
-
-    local t = RealTime()
-    if t < self.nextBeat then return end
-
-    local delay = self.RotorBeatInterval + Clamp( 0.6 - power, 0, 1 ) * 0.1
-
-    -- Calculate the time difference between the time we expected to play
-    -- the beat and the time when it actually played, to compensate next frame.
-    self.beatDiff = Clamp( t - self.nextBeat, -0.05, 0.05 )
-    self.nextBeat = t + delay - self.beatDiff
-
-    -- Change beat pitch/volume depending on power and angles
-    local ang = self:GetAngles()
-    local angMult = Clamp( ( Abs( ang[1] * 0.8 ) + Abs( ang[3] ) ) / 50, 0, 1 )
-
-    local beatVolume = ( Clamp( power, 0, 1 ) - 0.1 ) * vol
-    local beatPitch = 70 + ( 30 * power ) - ( angMult * 20 )
-    local midVolume = ( self.MidSoundVol * 0.8 ) + self.MidSoundVol * angMult
-    local highVolume = self.HighSoundVol - self.HighSoundVol * angMult * 0.4
-
-    PlaySoundSet( self.BassSoundSet, self, beatVolume * self.BassSoundVol, beatPitch )
-    PlaySoundSet( self.MidSoundSet, self, midVolume * beatVolume, beatPitch )
-    PlaySoundSet( self.HighSoundSet, self, highVolume * beatVolume, beatPitch )
 end

@@ -82,6 +82,10 @@ if SERVER then
         { type = "headlight", bodyGroupId = 6, subModelId = 1 }
     }
 
+    ENT.BoatParams = {
+        turnForce = 850
+    }
+
     function ENT:CreateFeatures()
         self:CreateSeat( Vector( -36, 13, 13 ), Angle( 0, 270, 0 ), Vector( -36, 13, 55 ), true )
         self:CreateSeat( Vector( -27, -13, 15 ), Angle( 0, 270, 0 ), Vector( -36, -13, 55 ), true )

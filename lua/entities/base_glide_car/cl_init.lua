@@ -6,6 +6,7 @@ ENT.AutomaticFrameAdvance = true
 function ENT:OnPostInitialize()
     self.slowBrakePressure = 0
     self.fastBrakePressure = 0
+    self.turboInertia = 0
 
     self.rpmFraction = 0
     self.streamJSONOverride = nil
@@ -51,6 +52,7 @@ function ENT:OnActivateMisc()
     self.slowBrakePressure = 0
     self.fastBrakePressure = 0
     self.rpmFraction = 0
+    self.turboInertia = 0
 end
 
 --- Implement this base class function.
@@ -63,34 +65,37 @@ end
 
 local Clamp = math.Clamp
 local FrameTime = FrameTime
+local ExpDecay = Glide.ExpDecay
 
-function ENT:UpdateTurboSound( sounds )
-    local volume = self:GetEngineThrottle() * 0.5
+function ENT:UpdateTurboSound( sounds, dt )
+    local lastInertia = self.turboInertia
+    local inertia = ExpDecay( lastInertia, self:GetEngineThrottle(), 1, dt )
 
-    if volume < 0.2 then
+    if inertia < lastInertia and inertia > 0.6 and self.rpmFraction > 0.5 and self.TurboBlowoffSound ~= "" then
+        self:EmitSound( self.TurboBlowoffSound, 80, math.random( 100, 110 ), self.TurboBlowoffVolume * inertia )
+        inertia = 0
+    end
+
+    if inertia > 0.2 then
+        local volume = inertia * 0.5 * GetVolume( "carVolume" )
+        local pitch = self.TurboPitch * 0.5
+        pitch = pitch + self.rpmFraction * pitch
+
         if sounds.turbo then
-            sounds.turbo:Stop()
-            sounds.turbo = nil
+            sounds.turbo:ChangeVolume( volume )
+            sounds.turbo:ChangePitch( pitch )
 
-            if self.rpmFraction > 0.5 then
-                self:EmitSound( self.TurboBlowoffSound, 80, math.random( 100, 110 ), self.TurboBlowoffVolume )
-            end
+        elseif self.TurboLoopSound ~= "" then
+            local snd = self:CreateLoopingSound( "turbo", self.TurboLoopSound, 80, self )
+            snd:PlayEx( volume, pitch )
         end
 
-        return
+    elseif sounds.turbo then
+        sounds.turbo:Stop()
+        sounds.turbo = nil
     end
 
-    local pitch = self.TurboPitch * 0.5
-    pitch = pitch + self.rpmFraction * pitch
-    volume = volume * self.TurboVolume * self.rpmFraction * GetVolume( "carVolume" )
-
-    if sounds.turbo then
-        sounds.turbo:ChangeVolume( volume )
-        sounds.turbo:ChangePitch( pitch )
-    else
-        local snd = self:CreateLoopingSound( "turbo", self.TurboLoopSound, 80, self )
-        snd:PlayEx( volume, pitch )
-    end
+    self.turboInertia = inertia
 end
 
 local Min = math.min
@@ -189,7 +194,7 @@ function ENT:OnUpdateSounds()
     end
 
     if self:GetTurboCharged() then
-        self:UpdateTurboSound( sounds )
+        self:UpdateTurboSound( sounds, dt )
 
     elseif sounds.turbo then
         sounds.turbo:Stop()
@@ -268,7 +273,6 @@ function ENT:OnUpdateSounds()
 end
 
 local CurTime = CurTime
-local ExpDecay = Glide.ExpDecay
 local DrawLight = Glide.DrawLight
 local DrawLightSprite = Glide.DrawLightSprite
 
@@ -276,8 +280,6 @@ local DEFAULT_SIREN_COLOR = Color( 255, 255, 255, 255 )
 
 --- Implement this base class function.
 function ENT:OnUpdateMisc()
-    self:OnUpdateAnimations()
-
     local dt = FrameTime()
     local rpmFraction = ( self:GetEngineRPM() - self:GetMinRPM() ) / ( self:GetMaxRPM() - self:GetMinRPM() )
 

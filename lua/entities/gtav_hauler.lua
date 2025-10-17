@@ -108,6 +108,7 @@ if SERVER then
 
     function ENT:CreateFeatures()
         self.engineBrakeTorque = 4000
+        self.switchBaseDelay = 0.7
 
         self:SetSuspensionLength( 14 )
         self:SetSpringStrength( 1500 )

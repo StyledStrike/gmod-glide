@@ -17,8 +17,14 @@ end
 --- Implement this base class function.
 function ENT:OnActivateSounds()
     self:CreateLoopingSound( "engine", self.EngineSoundPath, self.EngineSoundLevel )
-    self:CreateLoopingSound( "exhaust", self.ExhaustSoundPath, self.ExhaustSoundLevel )
-    self:CreateLoopingSound( "distant", self.DistantSoundPath, self.DistantSoundLevel )
+
+    if self.DistantSoundPath ~= "" then
+        self:CreateLoopingSound( "distant", self.DistantSoundPath, self.DistantSoundLevel )
+    end
+
+    if self.ExhaustSoundPath ~= "" then
+        self:CreateLoopingSound( "exhaust", self.ExhaustSoundPath, self.ExhaustSoundLevel )
+    end
 
     if self.ThrustSound ~= "" then
         self:CreateLoopingSound( "thrust", self.ThrustSound, self.ThrustSoundLevel )
@@ -72,8 +78,6 @@ local RealTime = RealTime
 function ENT:OnUpdateMisc()
     BaseClass.OnUpdateMisc( self )
 
-    self:OnUpdateAnimations()
-
     local t = RealTime()
 
     if t > self.nextControlTime then
@@ -120,13 +124,17 @@ function ENT:OnUpdateSounds()
     sounds.engine:ChangePitch( Remap( power, 1, 2, self.EngineSoundMinPitch, self.EngineSoundMaxPitch ) * power01 * pitch )
     sounds.engine:ChangeVolume( power01 * self.EngineSoundVolume * vol )
 
-    sounds.exhaust:ChangePitch( Remap( power, 1, 2, self.ExhaustSoundMinPitch, self.ExhaustSoundMaxPitch ) * power01 * pitch )
-    sounds.exhaust:ChangeVolume( power01 * self.ExhaustSoundVolume * vol )
+    if sounds.exhaust then
+        sounds.exhaust:ChangePitch( Remap( power, 1, 2, self.ExhaustSoundMinPitch, self.ExhaustSoundMaxPitch ) * power01 * pitch )
+        sounds.exhaust:ChangeVolume( power01 * self.ExhaustSoundVolume * vol )
+    end
 
     vol = vol * Clamp( self.rfSounds.lastDistance / 1000000, 0, 1 )
 
-    sounds.distant:ChangePitch( Remap( power, 1, 2, 80, 100 ) )
-    sounds.distant:ChangeVolume( vol * power01 )
+    if sounds.distant then
+        sounds.distant:ChangePitch( Remap( power, 1, 2, 80, 100 ) )
+        sounds.distant:ChangeVolume( vol * power01 )
+    end
 
     -- Handle damaged engine sound
     local health = self:GetEngineHealth()

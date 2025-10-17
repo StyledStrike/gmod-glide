@@ -100,6 +100,7 @@ if SERVER then
     }
 
     function ENT:CreateFeatures()
+        self.switchBaseDelay = 0.4
         self:SetDifferentialRatio( 0.78 )
 
         self:SetMaxRPM( 12000 )

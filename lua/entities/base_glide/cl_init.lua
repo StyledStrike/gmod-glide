@@ -274,6 +274,7 @@ function ENT:UpdateMisc()
 
     -- Let children classes do their own stuff
     self:OnUpdateMisc()
+    self:OnUpdateAnimations()
 end
 
 function ENT:Think()

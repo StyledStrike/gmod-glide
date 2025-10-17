@@ -226,6 +226,7 @@ if CLIENT then
     function ENT:OnActivateSounds() end
     function ENT:OnDeactivateSounds() end
     function ENT:OnUpdateSounds() end
+    function ENT:OnUpdateAnimations() end
 
     function ENT:OnLocalPlayerEnter( _seatIndex ) end
     function ENT:OnLocalPlayerExit() end

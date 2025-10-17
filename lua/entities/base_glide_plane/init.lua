@@ -200,7 +200,15 @@ function ENT:OnPostThink( dt, selfTbl )
         TriggerOutput( self, "Power", power )
     end
 
-    -- Update wheels
+    self:UpdatePlaneWheels( selfTbl )
+
+    -- Check if the wings are stalling
+    local controllability = Abs( selfTbl.forwardSpeed ) / self.PlaneParams.controlSpeed
+    self:SetIsStalling( controllability < 0.75 and selfTbl.altitude > 100 )
+end
+
+function ENT:UpdatePlaneWheels( selfTbl )
+    local throttle = self:GetThrottle()
     local torque = 0
 
     if throttle < 0 and selfTbl.forwardSpeed < 100 then
@@ -224,7 +232,7 @@ function ENT:OnPostThink( dt, selfTbl )
     for _, w in EntityPairs( self.wheels ) do
         state = w.state
 
-        state.brake = self.brake
+        state.brake = selfTbl.brake
         state.torque = torque
 
         if state.isOnGround then
@@ -247,11 +255,6 @@ function ENT:OnPostThink( dt, selfTbl )
     inputSteer = Clamp( inputSteer + counterSteer, -1, 1 )
 
     selfTbl.steerAngle[2] = inputSteer * -selfTbl.MaxSteerAngle
-
-    -- Check if the wings are stalling
-    local controllability = Abs( selfTbl.forwardSpeed ) / self.PlaneParams.controlSpeed
-
-    self:SetIsStalling( controllability < 0.75 and self.altitude > 100 )
 end
 
 --- Implement this base class function.

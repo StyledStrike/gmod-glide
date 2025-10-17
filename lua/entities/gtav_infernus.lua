@@ -83,6 +83,7 @@ if SERVER then
     end
 
     function ENT:CreateFeatures()
+        self.switchBaseDelay = 0.25
         self:SetHeadlightColor( Vector( 1, 1, 1 ) )
         self:SetSteerConeChangeRate( 10 )
         self:SetCounterSteer( 0.2 )

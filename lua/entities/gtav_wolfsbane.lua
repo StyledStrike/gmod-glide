@@ -103,6 +103,7 @@ if CLIENT then
 
         self.frontBoneId = self:LookupBone( "wheel_f" )
         self.rearBoneId = self:LookupBone( "wheel_r" )
+        self.beltTextureScroll = Vector()
     end
 
     local spinAng = Angle()
@@ -121,6 +122,24 @@ if CLIENT then
 
         spinAng[3] = -self:GetWheelSpin( 2 )
         self:ManipulateBoneAngles( self.rearBoneId, spinAng, false )
+
+        local scroll = self.beltTextureScroll
+        if scroll and self:IsEngineOn() then
+            scroll[1] = ( scroll[1] + FrameTime() * ( 4 + self.rpmFraction * 15 ) ) % 1
+        end
+    end
+
+    local matScroll = Material( "models/gta5/vehicles/wolfsbane/vehicle_gen_bikedetail_diff_scroll" )
+    local scrollMatrix = Matrix()
+
+    function ENT:Draw()
+        local scroll = self.beltTextureScroll
+        if not scroll then return end
+
+        scrollMatrix:SetTranslation( scroll )
+        matScroll:SetMatrix( "$basetexturetransform", scrollMatrix )
+
+        self:DrawModel()
     end
 end
 

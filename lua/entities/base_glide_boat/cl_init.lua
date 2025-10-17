@@ -35,11 +35,6 @@ function ENT:OnDeactivateSounds()
     end
 end
 
---- Implement this base class function.
-function ENT:OnUpdateMisc()
-    self:OnUpdateAnimations()
-end
-
 local Abs = math.abs
 local Clamp = math.Clamp
 local FrameTime = FrameTime

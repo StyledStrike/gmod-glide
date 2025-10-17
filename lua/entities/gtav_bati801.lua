@@ -142,10 +142,11 @@ if SERVER then
     end
 
     function ENT:CreateFeatures()
+        self.switchBaseDelay = 0.25
         self:SetHeadlightColor( Vector( 1, 1, 1 ) )
 
         self:SetSteerConeMaxAngle( 0.25 )
-        self:SetForwardTractionMax( 2400 )
+        self:SetForwardTractionMax( 2600 )
         self:SetSideTractionMax( 2700 )
 
         self:SetSuspensionLength( 8 )

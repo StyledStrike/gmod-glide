@@ -280,7 +280,8 @@ local function ResetAll()
         ["base_glide_heli"] = true,
         ["base_glide_plane"] = true,
         ["base_glide_motorcycle"] = true,
-        ["base_glide_trailer"] = true
+        ["base_glide_trailer"] = true,
+        ["base_glide_plane_vtol"] = true
     }
 
     for _, e in ents.Iterator() do
