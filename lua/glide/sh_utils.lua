@@ -346,7 +346,7 @@ function Glide.ValidateStreamData( data )
 
         count = count + 1
 
-        if count >= max then
+        if count > max then
             return false, "Preset data has too many layers!"
         end
     end

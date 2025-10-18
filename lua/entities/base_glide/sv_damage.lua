@@ -101,12 +101,13 @@ local IsValid = IsValid
 
 local cvarBullet = GetConVar( "glide_bullet_damage_multiplier" )
 local cvarBlast = GetConVar( "glide_blast_damage_multiplier" )
+local cvarGlobal = GetConVar( "glide_global_damage_multiplier" )
 
 function ENT:OnTakeDamage( dmginfo )
     if self.hasExploded then return end
 
     local health = self:GetChassisHealth()
-    local amount = dmginfo:GetDamage()
+    local amount = dmginfo:GetDamage() * cvarGlobal:GetFloat()
 
     if dmginfo:IsDamageType( 64 ) then -- DMG_BLAST
         amount = amount * self.BlastDamageMultiplier * cvarBlast:GetFloat()
@@ -209,11 +210,15 @@ function ENT:PhysicsCollide( data )
         -- `ent:IsWorld` is returning `false` on "Entity [0][worldspawn]",
         -- so I'm comparing against `game.GetWorld` instead.
         local multiplier = ent == GetWorld() and cvarWorldCollision:GetFloat() or cvarCollision:GetFloat()
+        local damage = ( speed / 10 ) * self.CollisionDamageMultiplier * multiplier
+
+        -- Counteract the global damage multiplier
+        damage = damage / cvarGlobal:GetFloat()
 
         local dmg = DamageInfo()
         dmg:SetAttacker( ent )
         dmg:SetInflictor( self )
-        dmg:SetDamage( ( speed / 10 ) * self.CollisionDamageMultiplier * multiplier )
+        dmg:SetDamage( damage )
         dmg:SetDamageType( 1 ) -- DMG_CRUSH
         dmg:SetDamagePosition( data.HitPos )
         self:TakeDamageInfo( dmg )

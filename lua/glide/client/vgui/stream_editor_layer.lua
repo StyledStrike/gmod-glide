@@ -206,6 +206,7 @@ function PANEL:SetControllers( controllers )
         comboIn:Dock( LEFT )
         comboIn:AddChoice( "throttle" )
         comboIn:AddChoice( "rpmFraction" )
+        comboIn:AddChoice( "redline" )
         comboIn:SetValue( params[1] )
 
         ApplyTheme( comboIn )
