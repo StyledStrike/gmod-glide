@@ -99,6 +99,7 @@ function ENT:SetupWheel( t )
 
     -- Wheel offset relative to the parent
     params.basePos = t.basePos or self:GetLocalPos()
+    self:SetBaseZPos( params.basePos[3] )
 
     -- How much the parent's steering angle affects this wheel
     params.steerMultiplier = t.steerMultiplier or 0
@@ -212,7 +213,6 @@ do
             self:SetSideSlip( 0 )
         else
             self:SetLastSpin( state.spin )
-            self:SetLastOffset( self:GetLocalPos()[3] - params.basePos[3] )
         end
 
         if isAsleep or not state.isOnGround then

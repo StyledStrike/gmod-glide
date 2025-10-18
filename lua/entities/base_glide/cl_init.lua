@@ -92,8 +92,8 @@ end
 function ENT:GetWheelOffset( index )
     local wheel = self.wheels and self.wheels[index]
 
-    if IsValid( wheel ) and wheel.GetLastOffset then
-        return wheel:GetLastOffset()
+    if IsValid( wheel ) and wheel.GetBaseZPos then
+        return wheel:GetLocalPos()[3] - wheel:GetBaseZPos()
     end
 
     return 0
