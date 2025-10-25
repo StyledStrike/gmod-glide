@@ -66,8 +66,8 @@ function SkidHandler:AddPiece( lastQuadId, pos, forward, normal, width, strength
         lastQuad[5]:Lerp( color, 0.5 )
     end
 
-    local ind = (i+1) % #quads
-    local alpha = quads[ind][5]
+    local ind = (i) % #quads
+    local alpha = quads[ind+1][5]
     alpha.a = alpha.a * 0.9
 
     return i
