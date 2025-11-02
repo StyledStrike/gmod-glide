@@ -33,20 +33,8 @@ commands[Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET] = function( ply )
 
     if hook.Run( "CanTool", ply, tr, "glide_engine_stream", {}, 1 ) == false then return end
 
-    local size = net.ReadUInt( 16 )
-
-    if size > Glide.MAX_JSON_SIZE then
-        Glide.Print( "Tried to read data that was too big! (%d/%d)", size, Glide.MAX_JSON_SIZE )
-        return
-    end
-
-    local data = net.ReadData( size )
-
-    data = util.Decompress( data )
-    if not data then return end
-
-    data = Glide.FromJSON( data )
-    if not data then return end
+    local data = Glide.ReadTable()
+    if table.IsEmpty( data ) then return end
 
     Glide.StoreEngineStreamPresetModifier( ply, veh, data )
 end
@@ -63,20 +51,8 @@ commands[Glide.CMD_UPLOAD_MISC_SOUNDS_PRESET] = function( ply )
 
     if hook.Run( "CanTool", ply, tr, "glide_misc_sounds", {}, 1 ) == false then return end
 
-    local size = net.ReadUInt( 16 )
-
-    if size > Glide.MAX_JSON_SIZE then
-        Glide.Print( "Tried to read data that was too big! (%d/%d)", size, Glide.MAX_JSON_SIZE )
-        return
-    end
-
-    local data = net.ReadData( size )
-
-    data = util.Decompress( data )
-    if not data then return end
-
-    data = Glide.FromJSON( data )
-    if not data then return end
+    local data = Glide.ReadTable()
+    if table.IsEmpty( data ) then return end
 
     Glide.StoreMiscSoundsPresetModifier( ply, veh, data )
 end
@@ -101,8 +77,8 @@ local cooldowns = {
     [Glide.CMD_SWITCH_SEATS] = { interval = 0.5, players = {} },
     [Glide.CMD_SET_HEADLIGHTS] = { interval = 0.5, players = {} },
     [Glide.CMD_LAST_AIM_ENTITY] = { interval = 0.01, players = {} },
-    [Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET] = { interval = 0.4, players = {} },
-    [Glide.CMD_UPLOAD_MISC_SOUNDS_PRESET] = { interval = 0.4, players = {} }
+    [Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET] = { interval = 0.9, players = {} },
+    [Glide.CMD_UPLOAD_MISC_SOUNDS_PRESET] = { interval = 0.9, players = {} }
 }
 
 -- Receive and validate network commands

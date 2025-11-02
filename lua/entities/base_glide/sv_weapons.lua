@@ -70,6 +70,7 @@ function ENT:CreateWeapon( class, data )
     self.weaponCount = index
     self.weapons[index] = weapon
 
+    weapon.ClassName = class
     weapon.SlotIndex = index
     weapon.Vehicle = self
     weapon:Initialize()

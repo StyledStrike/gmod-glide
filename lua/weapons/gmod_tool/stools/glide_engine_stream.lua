@@ -28,7 +28,7 @@ function TOOL:CanSendData( veh )
         return false
     end
 
-    self.fireCooldown = t + 0.5
+    self.fireCooldown = t + 1
 
     return true
 end
@@ -58,14 +58,15 @@ function TOOL:LeftClick( trace )
             return false
         end
 
-        data = util.Compress( data )
-
         local size = #data
 
         if size > Glide.MAX_JSON_SIZE then
             Glide.Print( "Tried to write data that was too big! (%d/%d)", size, Glide.MAX_JSON_SIZE )
-            return
+            return false
         end
+
+        data = util.Compress( data )
+        size = #data
 
         Glide.StartCommand( Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET, false )
         net.WriteEntity( veh )

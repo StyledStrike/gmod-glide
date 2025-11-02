@@ -247,11 +247,20 @@ if not game.SinglePlayer() then return end
 local function ResetVehicle( vehicle )
     vehicle:ResetInputs( 1 )
     vehicle:SetDriver( NULL )
+    vehicle.autoTurnOffLights = false
     vehicle:TurnOff()
+    vehicle:SetEngineState( 0 )
 
     -- Reset weapon timings
     if vehicle.weaponCount > 0 then
         for _, weapon in ipairs( vehicle.weapons ) do
+            -- Reassign the VSWEP metatable
+            local class = Glide.WeaponRegistry[weapon.ClassName]
+
+            if class then
+                setmetatable( weapon, { __index = class } )
+            end
+
             weapon.nextFire = 0
             weapon.nextReload = 0
         end
@@ -259,7 +268,7 @@ local function ResetVehicle( vehicle )
 end
 
 local function ResetAll()
-    -- Restore NW variables for all Glide seats
+    -- Reset solid state for all Glide seats
     for _, seat in ipairs( ents.FindByClass( "prop_vehicle_prisoner_pod" ) ) do
         local seatIndex = seat.GlideSeatIndex
 
@@ -304,9 +313,10 @@ local function ResetAll()
     if not IsValid( parent ) then return end
     if not parent.IsGlideVehicle then return end
 
-    timer.Simple( 0, function()
-        ply:ExitVehicle()
+    parent.autoTurnOffLights = false
+    ply:ExitVehicle()
 
+    timer.Simple( 0, function()
         if IsValid( seat ) then
             ply:EnterVehicle( seat )
         end
@@ -316,6 +326,6 @@ end
 -- Restore state if the player was on a Glide vehicle during a Source Engine save or map transition.
 hook.Add( "ClientSignOnStateChanged", "Glide.RestoreVehicle", function( _, _, newState )
     if newState == SIGNONSTATE_FULL then
-        timer.Simple( 1, ResetAll )
+        timer.Simple( 0.2, ResetAll )
     end
 end )

@@ -49,7 +49,7 @@ function TOOL:CanSendData()
         return false
     end
 
-    self.fireCooldown = t + 0.5
+    self.fireCooldown = t + 1
 
     return true
 end
@@ -66,13 +66,16 @@ function TOOL:LeftClick( trace )
     if CLIENT then
         if not game.SinglePlayer() and not IsFirstTimePredicted() then return end
 
-        local data = util.Compress( Glide.ToJSON( presetData ) )
+        local data = Glide.ToJSON( presetData )
         local size = #data
 
         if size > Glide.MAX_JSON_SIZE then
             Glide.Print( "Tried to write data that was too big! (%d/%d)", size, Glide.MAX_JSON_SIZE )
-            return
+            return false
         end
+
+        data = util.Compress( data )
+        size = #data
 
         Glide.StartCommand( Glide.CMD_UPLOAD_MISC_SOUNDS_PRESET, false )
         net.WriteEntity( veh )

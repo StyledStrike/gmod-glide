@@ -3,8 +3,8 @@ if SERVER then
     util.AddNetworkString( "glide.sync_weapon_data" )
 end
 
--- Size limit for JSON data
-Glide.MAX_JSON_SIZE = 4096 -- 4 kibibytes
+-- Size limit for user JSON data
+Glide.MAX_JSON_SIZE = 3072 -- 3 kibibytes
 
 -- Used on net.WriteUInt for the command ID
 Glide.CMD_SIZE = 4
@@ -30,27 +30,57 @@ function Glide.StartCommand( id, unreliable )
 end
 
 function Glide.WriteTable( t )
-    local data = util.Compress( Glide.ToJSON( t ) )
-    local bytes = #data
+    local json = Glide.ToJSON( t )
 
-    net.WriteUInt( bytes, 16 )
-
-    if bytes > Glide.MAX_JSON_SIZE then
-        Glide.Print( "Tried to write JSON that was too big! (%d/%d)", bytes, Glide.MAX_JSON_SIZE )
+    if #json > Glide.MAX_JSON_SIZE then
+        Glide.Print( "The JSON data length that was too big! (%d/%d)", #json, Glide.MAX_JSON_SIZE )
+        net.WriteUInt( 0, 16 )
         return
     end
 
+    local data = util.Compress( json )
+    local len = #data
+
+    if len > Glide.MAX_JSON_SIZE then
+        net.WriteUInt( 0, 16 )
+        Glide.Print( "Tried to write data that was too big! (%d/%d)", len, Glide.MAX_JSON_SIZE )
+        return
+    end
+
+    net.WriteUInt( len, 16 )
     net.WriteData( data )
 end
 
 function Glide.ReadTable()
-    local bytes = net.ReadUInt( 16 )
+    local len = net.ReadUInt( 16 )
 
-    if bytes > Glide.MAX_JSON_SIZE then
-        Glide.Print( "Tried to read JSON that was too big! (%d/%d)", bytes, Glide.MAX_JSON_SIZE )
+    if len < 1 then
         return {}
     end
 
-    local data = net.ReadData( bytes )
-    return Glide.FromJSON( util.Decompress( data ) )
+    if len > Glide.MAX_JSON_SIZE then
+        Glide.Print( "The reported JSON data length that was too big! (%d/%d)", len, Glide.MAX_JSON_SIZE )
+        return {}
+    end
+
+    local data = net.ReadData( len )
+
+    if not data then
+        Glide.Print( "Failed to read JSON data!" )
+        return {}
+    end
+
+    data = util.Decompress( data )
+
+    if not data then
+        Glide.Print( "Failed to decompress JSON data!" )
+        return {}
+    end
+
+    if #data > Glide.MAX_JSON_SIZE then
+        Glide.Print( "Tried to read data that was too big! (%d/%d)", #data, Glide.MAX_JSON_SIZE )
+        return {}
+    end
+
+    return Glide.FromJSON( data )
 end
