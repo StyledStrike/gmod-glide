@@ -233,7 +233,7 @@ function ENT:OnUpdateSounds()
     inputs.rpmFraction = self.rpmFraction or 0
     inputs.throttle = Pow( engineThrottle, 0.6 )
 
-    local isRedlining = self:GetIsRedlining() and inputs.throttle > 0.9
+    local isRedlining = self:GetIsRedlining() and inputs.throttle > 0.9 and inputs.rpmFraction > 0.9
 
     if isRedlining ~= stream.isRedlining then
         stream.isRedlining = isRedlining

@@ -223,7 +223,7 @@ function ENT:WeaponThink()
                 -- If the target is another type of vehicle, notify the driver
                 local ply = target:GetDriver()
 
-                if IsValid( ply ) then
+                if IsValid( ply ) and ply:IsPlayer() then
                     Glide.SendLockOnDanger( ply )
                 end
             end
