@@ -202,13 +202,6 @@ Glide.StoreEngineStreamPresetModifier, Glide.ClearEngineStreamPresetModifier = G
         -- Make sure this entity is a Glide vehicle that supports this modifier
         if not Glide.DoesEntitySupportEngineStreamPreset( ent ) then return end
 
-        -- Migrate from the old data format, where the preset was
-        -- stored as a string on the `json` key. On the new format,
-        -- the preset data is stored on the `data` table directly.
-        if type( data.json ) == "string" then
-            data = Glide.FromJSON( data.json )
-        end
-
         local success, message = Glide.ValidateStreamData( data )
 
         if success then
@@ -228,13 +221,6 @@ Glide.StoreMiscSoundsPresetModifier, Glide.ClearMiscSoundsPresetModifier = Glide
     function( ply, ent, data )
         -- Make sure this entity is a Glide vehicle that supports this modifier
         if not Glide.DoesEntitySupportMiscSoundsPreset( ent ) then return end
-
-        -- Migrate from the old data format, where the preset was
-        -- stored as a string on the `json` key. On the new format,
-        -- the preset data is stored on the `data` table directly.
-        if type( data.json ) == "string" then
-            data = Glide.FromJSON( data.json )
-        end
 
         local success, message = Glide.ValidateMiscSoundData( data )
 

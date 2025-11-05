@@ -84,6 +84,8 @@ function ENT:PhysicsSimulate( phys, dt )
     angForce[2] = angVel[2] * drag[2] * mass
     angForce[3] = angVel[3] * drag[3] * self:GetYawDragMultiplier() * mass
 
+    local groundedCount = 0
+
     -- Do wheel physics
     if self.wheelCount > 0 and self.wheelsEnabled then
         local traceFilter = self.wheelTraceFilter
@@ -96,6 +98,10 @@ function ENT:PhysicsSimulate( phys, dt )
 
         for _, w in EntityPairs( self.wheels ) do
             w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, vehVel, vehAngVel )
+
+            if w.state.isOnGround then
+                groundedCount = groundedCount + 1
+            end
         end
 
         phys:SetPos( vehPos )
@@ -107,17 +113,19 @@ function ENT:PhysicsSimulate( phys, dt )
     self:OnSimulatePhysics( phys, dt, linForce, angForce )
 
     -- At slow speeds, try to prevent slipping sideways on mildly steep slopes
-    local totalSpeed = self.totalSpeed + Abs( angVel[3] )
-    local factor = 1 - Clamp( totalSpeed / 30, 0, 1 )
+    if groundedCount > 0 then
+        local totalSpeed = self.totalSpeed + Abs( angVel[3] )
+        local factor = 1 - Clamp( totalSpeed / 30, 0, 1 )
 
-    if factor > 0.1 then
-        local vel = phys:GetVelocity()
-        local rt = self:GetRight()
-        local force = ( rt:Dot( vel ) / dt ) * mass * factor * rt
+        if factor > 0.1 then
+            local vel = phys:GetVelocity()
+            local rt = self:GetRight()
+            local force = ( rt:Dot( vel ) / dt ) * mass * factor * rt
 
-        linForce[1] = linForce[1] - force[1]
-        linForce[2] = linForce[2] - force[2]
-        linForce[3] = linForce[3] - force[3]
+            linForce[1] = linForce[1] - force[1]
+            linForce[2] = linForce[2] - force[2]
+            linForce[3] = linForce[3] - force[3]
+        end
     end
 
     -- Prevent crashes
