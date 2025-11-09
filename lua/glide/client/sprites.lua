@@ -58,19 +58,23 @@ hook.Add( "PreDrawEffects", "Glide.DrawSprites", function()
 
     local pos, ang = GetLocalViewLocation()
     local dir = -ang:Forward()
-    local s, dot
+    local s, dist, dot
 
     for i = 1, spriteCount do
         s = sprites[i]
+        dist = pos:Distance( s[1] )
 
         -- Make so the sprite draws over things that are right on top of it,
-        -- but does not draw on top of walls when viewed from far away.
-        DepthRange( 0.0, Clamp( pos:DistToSqr( s[1] ) / 200000, 0.999, 1 ) )
+        -- but does not draw over walls when viewed from far away.
+        -- Due to the exponential nature of a depth buffer,
+        -- this requires some really small numbers, and it's not ideal.
+        DepthRange( 0.0, 0.99 + Clamp( dist * 0.00001, 0, 0.0099999 ) )
 
-        -- Make the sprite smaller as the viewer points away from it
+        -- Make the sprite smaller as the viewer points away from it,
+        -- and larger as the viewer moves away from it.
         dot = s[3] and dir:Dot( s[3] ) or 1
         dot = ( dot - 0.5 ) * 2
-        s[2] = s[2] * Max( 0, dot )
+        s[2] = s[2] * Max( 0, dot ) * ( 1 + dist * 0.002 )
 
         spriteColor.r = s[5]
         spriteColor.g = s[6]

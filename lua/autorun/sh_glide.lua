@@ -334,6 +334,7 @@ if CLIENT then
     -- Make these tables are available before we load everything
     Glide.Config = Glide.Config or {}
     Glide.Camera = Glide.Camera or {}
+    Glide.WebAudio = Glide.WebAudio or {}
 
     -- Shared files
     Glide.IncludeDir( "glide/", true, false )

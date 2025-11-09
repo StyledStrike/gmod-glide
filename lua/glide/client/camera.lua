@@ -37,6 +37,7 @@ function Camera:Initialize( user, vehicle, seatIndex )
     self.mode = 0
     self.isActive = false
     self.isUsingDirectMouse = false
+    self.muffleSound = false
     self.allowRolling = false
     self.centerStrength = 0
     self.lastMouseMoveTime = 0
@@ -75,6 +76,7 @@ function Camera:Shutdown()
     self.vehicle = nil
     self.seatIndex = nil
     self.lastAimEntity = NULL
+    self.muffleSound = false
 
     for id, name in pairs( self.hooks ) do
         hook.Remove( name, id )
@@ -121,6 +123,8 @@ function Camera:SetFirstPerson( enable )
             end
         end
     end
+
+    self.muffleSound = muffleSound
 
     if IsValid( self.user ) then
         self.user:SetDSP( muffleSound and 30 or 1 )

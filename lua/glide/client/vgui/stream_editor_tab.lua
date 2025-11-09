@@ -223,7 +223,7 @@ function PANEL:LoadPath( path )
 end
 
 function PANEL:LoadJSON( data )
-    self.stream = Glide.CreateEngineStream( LocalPlayer() )
+    self.stream = Glide.CreateEngineStream( LocalPlayer(), true )
     self.stream.errorCallback = OnStreamError
     self.stream.firstPerson = true
 

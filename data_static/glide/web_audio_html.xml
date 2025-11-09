@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Web Audio API Engine Stream</title>
+</head>
+
+<body></body>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .debugPanel {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 400px;
+
+        font-weight: 500;
+        color: white;
+        background-color: #00000011;
+    }
+
+    th {
+        padding: 10px;
+        text-align: center;
+        background: #000;
+    }
+
+    td {
+        width: 100%;
+        padding: 6px;
+    }
+
+    tr {
+        background-color: #111111aa;
+    }
+</style>
+
+<script>
+const clamp = (value, min, max) => {
+    return Math.min(Math.max(value, min), max);
+};
+
+const remap = (value, inMin, inMax, outMin, outMax) => {
+    return outMin + (((value - inMin) / (inMax - inMin)) * (outMax - outMin));
+};
+
+const approach = (cur, target, inc) => {
+    if (cur < target) return Math.min(cur + Math.abs(inc), target);
+    if (cur > target) return Math.max(cur - Math.abs(inc), target);
+
+    return target
+};
+
+const createArrayBufferRequest = (url, resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.responseType = "arraybuffer";
+
+    xhr.onload = () => {
+        if (xhr.response) {
+            resolve(xhr.response);
+        }
+        else {
+            console.error("No data could be fetched from: " + url);
+            reject();
+        }
+    };
+
+    xhr.onerror = () => {
+        console.error("Error when fetching data from: " + url, xhr.status, xhr.statusText, xhr.readyState);
+        reject();
+    };
+
+    xhr.onabort = () => {
+        console.warn("Aborted fetching data from: " + url);
+        reject();
+    };
+
+    xhr.timeout = 5000;
+    xhr.open("GET", url, true);
+    xhr.send();
+
+    return xhr;
+};
+
+/*
+    Debugging utilities
+*/
+const debug = {
+    enabled: false
+};
+
+debug.setEnabled = (enabled) => {
+    debug.enabled = enabled;
+
+    if (enabled && !("panel" in debug)) {
+        debug.rows = {};
+        debug.panel = document.createElement("table");
+        debug.panel.className = "debugPanel";
+        debug.panel.innerHTML = `<tr><th colspan="100%">Web Audio API Debug</th></tr>`;
+        document.body.appendChild(debug.panel);
+    }
+    else if (!enabled && "panel" in debug) {
+        document.body.removeChild(debug.panel);
+        delete debug.panel;
+        delete debug.rows;
+    }
+}
+
+debug.getRow = (id) => {
+    if (!debug.enabled) return;
+
+    let row = debug.rows[id];
+
+    if (row === undefined) {
+        row = {};
+
+        row.line = document.createElement("tr");
+        debug.panel.appendChild(row.line);
+
+        row.name = document.createElement("td");
+        row.name.innerHTML = id;
+        row.line.appendChild(row.name);
+
+        row.value = document.createElement("td");
+        row.line.appendChild(row.value);
+
+        debug.rows[id] = row;
+    }
+
+    return row;
+};
+
+debug.setValue = (id, value) => {
+    if (!debug.enabled) return;
+
+    debug.getRow(id).value.innerHTML = value.toString();
+};
+
+/*
+    Engine stream logic, plus audio node management
+*/
+
+let DEFAULT_STREAM_PARAMETERS = {};
+
+class EngineStream {
+    constructor(id, streamManager) {
+        this.id = id;
+        this.streamManager = streamManager;
+
+        this.layers = {};
+        this.position = [0.0, 0.0, 0.0];
+
+        this.isPlaying = false;
+        this.isRedlining = false;
+        this.isFirstAccel = false;
+        this.wobbleTime = 0;
+        this.redlineTime = 0;
+        this.volumeMultiplier = 0;
+
+        this.inputs = {
+            throttle: 0,
+            rpmFraction: 0,
+            redline: 0
+        };
+
+        this.params = {};
+
+        for (let k in DEFAULT_STREAM_PARAMETERS) {
+            this.params[k] = DEFAULT_STREAM_PARAMETERS[k];
+        }
+
+        // Setup audio graph for this stream
+        const context = streamManager.audioContext;
+
+        this.bassBoostNode = context.createBiquadFilter();
+        this.bassBoostNode.type = "lowshelf";
+        this.bassBoostNode.frequency.value = 0.0;
+        this.bassBoostNode.gain.value = 0.0;
+        this.bassBoostNode.Q.value = 0.1;
+
+        this.trebleBoostNode = context.createBiquadFilter();
+        this.trebleBoostNode.type = "highshelf";
+        this.trebleBoostNode.frequency.value = 0.0;
+        this.trebleBoostNode.gain.value = 0.0;
+        this.trebleBoostNode.Q.value = 0.1;
+
+        this.pannerNode = new PannerNode(context, {
+            panningModel: "equalpower", //"HRTF",
+            distanceModel: "linear",
+            positionX: this.position[0],
+            positionY: this.position[1],
+            positionZ: this.position[2],
+            maxDistance: this.params.fadeDist,
+            refDistance: 1,
+            rolloffFactor: 10
+        });
+
+        this.pannerNode.channelCount = 1;
+        this.pannerNode.channelCountMode = "explicit";
+        this.pannerNode.channelInterpretation = "discrete";
+
+        this.bassBoostNode.connect(this.trebleBoostNode);
+        this.trebleBoostNode.connect(this.pannerNode);
+        this.pannerNode.connect(streamManager.preGainNode);
+    }
+
+    destroy() {
+        this.removeAllLayers();
+
+        // Disconnect stream audio nodes
+        this.bassBoostNode.disconnect();
+        this.trebleBoostNode.disconnect();
+        this.pannerNode.disconnect();
+
+        this.bassBoostNode = undefined;
+        this.trebleBoostNode = undefined;
+        this.pannerNode = undefined;
+
+        // Remove references to data
+        this.layers = undefined;
+        this.position = undefined;
+        this.inputs = undefined;
+        this.params = undefined;
+    }
+
+    setPosition(x, y, z) {
+        const position = this.position;
+        position[0] = x;
+        position[1] = y;
+        position[2] = z;
+
+        const pannerNode = this.pannerNode;
+        pannerNode.positionX.value = x;
+        pannerNode.positionY.value = y;
+        pannerNode.positionZ.value = z;
+    }
+
+    removeAllLayers() {
+        for (let id in this.layers) {
+            this.removeLayer(id);
+        }
+    }
+
+    removeLayer(id) {
+        if (!(id in this.layers)) return;
+
+        const layer = this.layers[id];
+
+        // Abort an existing download request, if it is active
+        if (layer.loadRequest && layer.loadRequest.readyState < 4) {
+            layer.loadRequest.abort();
+        }
+
+        // Remove layer gain node
+        layer.gainNode.disconnect();
+        layer.gainNode = undefined;
+
+        // Remove references to data
+        layer.audioBuffer = undefined;
+        layer.loadRequest = undefined;
+
+        this.stopLayer(id);
+        delete this.layers[id];
+    }
+
+    addLayer(id, path, controllers, redline) {
+        if (id in this.layers) return;
+
+        const gainNode = this.streamManager.audioContext.createGain();
+        gainNode.gain.value = 1.0;
+        gainNode.channelCount = 2;
+        gainNode.channelCountMode = "explicit";
+        gainNode.channelInterpretation = "speakers";
+        gainNode.connect(this.bassBoostNode);
+
+        this.layers[id] = {
+            redline: redline,
+            controllers: controllers,
+
+            audioBuffer: undefined,
+            loadRequest: undefined,
+
+            sourceNode: undefined,
+            gainNode: gainNode
+        };
+
+        const url = "asset://garrysmod/sound/" + path;
+        const context = this.streamManager.audioContext;
+
+        this.layers[id].loadRequest = createArrayBufferRequest(url, (arrayBuffer) => {
+            context.decodeAudioData(arrayBuffer)
+                .then((audioBuffer) => {
+                    // Make sure the layer object still exists
+                    if (!(id in this.layers)) return;
+
+                    const layer = this.layers[id];
+                    layer.audioBuffer = audioBuffer;
+
+                    if (this.isPlaying) {
+                        this.playLayer(id);
+                    }
+                })
+                .catch((err) => {
+                    console.error(err.message);
+                });
+        }, () => {
+            console.error("Could not load stream layer audio!");
+        });
+    }
+
+    playLayer(id) {
+        if (!(id in this.layers)) return;
+
+        const layer = this.layers[id];
+        if (!layer.audioBuffer) return;
+        if (layer.sourceNode) return;
+
+        layer.gainNode.gain.value = 0.0;
+
+        layer.sourceNode = this.streamManager.audioContext.createBufferSource();
+        layer.sourceNode.buffer = layer.audioBuffer;
+        layer.sourceNode.loop = true;
+        layer.sourceNode.connect(layer.gainNode);
+        layer.sourceNode.start();
+    }
+
+    stopLayer(id) {
+        if (!(id in this.layers)) return;
+
+        const layer = this.layers[id];
+        if (!layer.sourceNode) return;
+
+        layer.sourceNode.stop();
+        layer.sourceNode.disconnect();
+        layer.sourceNode = undefined;
+    }
+
+    play() {
+        this.isPlaying = true;
+        this.volumeMultiplier = 0;
+
+        for (let id in this.layers) {
+            this.playLayer(id);
+        }
+    }
+
+    stop() {
+        this.isPlaying = false;
+        this.volumeMultiplier = 0;
+
+        for (let id in this.layers) {
+            this.stopLayer(id);
+        }
+    }
+
+    think(dt) {
+        if (!this.isPlaying) return;
+
+        if (this.volumeMultiplier < 1) {
+            this.volumeMultiplier = approach(this.volumeMultiplier, 1, dt * 2);
+        }
+
+        const inputs = this.inputs;
+        const params = this.params;
+
+        this.pannerNode.maxDistance = params.fadeDist;
+
+        let baseVol = params.volume * this.volumeMultiplier;
+        let pitch = 1;
+
+        // Gear switch "wobble"
+        if (this.wobbleTime > 0) {
+            this.wobbleTime = this.wobbleTime - dt * (0.1 + inputs.throttle);
+            pitch = pitch + Math.cos(this.wobbleTime * params.wobbleFrequency) * this.wobbleTime * params.wobbleStrength * 0.3;
+        }
+
+        if (inputs.throttle > 0.5 && !this.isFirstAccel) {
+            this.isFirstAccel = true;
+
+            const attackTime = 0.25;
+            const releaseTime = attackTime + 0.9;
+            const attackFreq = 1000.0;
+            const releaseFreq = 100.0;
+
+            const t = this.streamManager.audioContext.currentTime;
+
+            const trebleGain = this.trebleBoostNode.gain;
+            trebleGain.cancelAndHoldAtTime(t);
+            trebleGain.linearRampToValueAtTime(-4.0, t + attackTime);
+            trebleGain.linearRampToValueAtTime(0.0, t + releaseTime);
+
+            const bassGain = this.bassBoostNode.gain;
+            bassGain.cancelAndHoldAtTime(t);
+            bassGain.linearRampToValueAtTime(5.0, t + attackTime);
+            bassGain.linearRampToValueAtTime(0.0, t + releaseTime);
+
+            const trebleFreq = this.trebleBoostNode.frequency;
+            trebleFreq.cancelAndHoldAtTime(t);
+            trebleFreq.linearRampToValueAtTime(attackFreq, t + attackTime);
+            trebleFreq.linearRampToValueAtTime(releaseFreq, t + releaseTime);
+
+            const bassFreq = this.bassBoostNode.frequency;
+            bassFreq.cancelAndHoldAtTime(t);
+            bassFreq.linearRampToValueAtTime(attackFreq, t + attackTime);
+            bassFreq.linearRampToValueAtTime(releaseFreq, t + releaseTime);
+        }
+        else if (this.isFirstAccel && inputs.throttle < 0.4) {
+            this.isFirstAccel = false;
+        }
+
+        pitch *= params.pitch;
+
+        // Rapidly change volume to simulate hitting the rev limiter
+        let redlineVol = 1;
+
+        if (this.isRedlining) {
+            const strength = params.redlineStrength * 1.5;
+            const freq = params.redlineFrequency;
+            const time = this.redlineTime + dt;
+            this.redlineTime = time;
+
+            let stage = Math.cos(time * freq);
+            redlineVol = 1 - strength * clamp(1 - stage * 2, 0, 1);
+
+            stage = Math.cos((time + freq * 0.2) * freq);
+            pitch = pitch * (1 - (0.5 - stage * 0.5) * strength * 0.05);
+        }
+        else {
+            this.redlineTime = 0;
+        }
+
+        inputs.redline = approach(inputs.redline, this.isRedlining ? 1 : 0, dt * 5);
+
+        let value, layerVol, layerPitch;
+        const outputs = {volume: 0, pitch: 0};
+        const curTime = this.streamManager.audioContext.currentTime;
+
+        for (let id in this.layers) {
+            const layer = this.layers[id];
+            if (!layer.audioBuffer) continue;
+            
+            outputs.volume = 1;
+            outputs.pitch = 1;
+
+            for (let i = 0; i < layer.controllers.length; i++) {
+                const c = layer.controllers[i];
+
+                value = clamp(inputs[c[0]], c[1], c[2]);
+                value = remap(value, c[1], c[2], c[4], c[5]);
+
+                // If any previous controller(s) changed the
+                // same output type, mix their output with this one.
+                outputs[c[3]] = outputs[c[3]] * value;
+            }
+
+            layerVol = outputs.volume * baseVol * (layer.redline ? redlineVol : 1);
+            layerPitch = outputs.pitch * pitch;
+
+            const gainParam = layer.gainNode.gain;
+            gainParam.cancelAndHoldAtTime(curTime);
+            gainParam.linearRampToValueAtTime(layerVol, curTime + dt);
+
+            if (layer.sourceNode) {
+                const pitchParam = layer.sourceNode.playbackRate;
+                pitchParam.cancelAndHoldAtTime(curTime);
+                pitchParam.linearRampToValueAtTime(layerPitch, curTime + dt);
+            }
+            else {
+                this.volumeMultiplier = 0;
+            }
+        }
+    }
+}
+
+/*
+    Logic to manage engine streams
+*/
+
+class EngineStreamManager {
+    constructor() {
+        this.streams = {};
+        this.defaultStreamParameters = {};
+
+        this.busParameters = {};
+        this.audioContext = new AudioContext();
+
+        if (this.audioContext.state === "suspended") {
+            this.audioContext.resume();
+        }
+
+        // "Input" gain node, where all Engine Streams will output audio to.
+        this.preGainNode = this.audioContext.createGain();
+        this.preGainNode.channelCount = 2;
+        this.preGainNode.channelCountMode = "explicit";
+        this.preGainNode.channelInterpretation = "speakers";
+
+        // "Dry" gain node, for unmodified audio coming from the "input" node
+        this.dryNode = this.audioContext.createGain();
+        this.dryNode.channelCount = 2;
+        this.dryNode.channelCountMode = "explicit";
+        this.dryNode.channelInterpretation = "speakers";
+
+        // "Wet" gain node for the effects.
+        this.wetNode = this.audioContext.createGain();
+        this.wetNode.channelCount = 2;
+        this.wetNode.channelCountMode = "explicit";
+        this.wetNode.channelInterpretation = "speakers";
+
+        // Create a gain and delay nodes that points to
+        // eachother, to apply the echo effect.
+        this.echoDelayNode = this.audioContext.createDelay();
+        this.echoGainNode = this.audioContext.createGain();
+
+        this.echoDelayNode.connect(this.echoGainNode);
+        this.echoGainNode.connect(this.echoDelayNode);
+
+        // Create a convolver node to apply the reverb effect.
+        this.convolverNode = this.audioContext.createConvolver();
+        this.convolverNode.channelCount = 1;
+        this.convolverNode.channelCountMode = "explicit";
+        this.convolverNode.channelInterpretation = "speakers";
+
+        // Cache impulse response audio for the convolver
+        this.impulseBufferCache = {};
+
+        // Add a "passthrough" (no reverb effect) impulse response audio to the cache
+        this.impulseBufferCache["passthrough"] = this.audioContext.createBuffer(1, 1, this.audioContext.sampleRate);
+        const impulseData = this.impulseBufferCache["passthrough"].getChannelData(0);
+        impulseData[0] = 1.0;
+
+        // Add a compressor to prevent audio clipping
+        const compressorNode = this.audioContext.createDynamicsCompressor();
+        compressorNode.threshold.value = -35;
+        compressorNode.knee.value = 40;
+        compressorNode.ratio.value = 4;
+        compressorNode.attack.value = 0.1;
+        compressorNode.release.value = 0.2;
+
+        // Add a lowpass filter for first-person effects
+        this.postFilterNode = this.audioContext.createBiquadFilter();
+        this.postFilterNode.type = "peaking";
+        this.postFilterNode.frequency.value = 12000.0;
+        this.postFilterNode.Q.value = 1.0;
+
+        // Connect the "input" node to "dry" and "reverb" nodes.
+        this.preGainNode.connect(compressorNode);
+        compressorNode.connect(this.dryNode);
+        compressorNode.connect(this.convolverNode);
+
+        // Connect the "dry" node to the post-filter
+        this.dryNode.connect(this.postFilterNode);
+
+        // Connect the "reverb" node to the "echo" node
+        this.convolverNode.connect(this.echoDelayNode);
+
+        // Connect the "echo" node to the "wet" node
+        this.echoDelayNode.connect(this.wetNode);
+
+        // Connect the "wet" node to the post-filter
+        this.wetNode.connect(this.postFilterNode);
+
+        // Connect the post-filter to the context output
+        this.postFilterNode.connect(this.audioContext.destination);
+
+        // Setup which node parameters from our "audio bus" can be tweaked
+        this.registerBusParameter("preGainVolume", this.preGainNode.gain);
+        this.registerBusParameter("postFilterBandGain", this.postFilterNode.gain);
+
+        this.registerBusParameter("dryVolume", this.dryNode.gain);
+        this.registerBusParameter("wetVolume", this.wetNode.gain);
+        this.registerBusParameter("delayTime", this.echoDelayNode.delayTime);
+        this.registerBusParameter("delayFeedback", this.echoGainNode.gain);
+
+        // Set default node parameters
+        this.setBusParameter("preGainVolume", 1.0);
+        this.setBusParameter("postFilterBandGain", 0.0);
+
+        this.setBusParameter("dryVolume", 1.0);
+        this.setBusParameter("wetVolume", 0.5);
+        this.setBusParameter("delayTime", 0.3);
+        this.setBusParameter("delayFeedback", 0.3);
+        this.setConvolverInpulseResponseAudio(undefined);
+    }
+
+    registerBusParameter(name, nodeParam) {
+        this.busParameters[name] = nodeParam;
+    }
+
+    setBusParameter(name, value) {
+        const nodeParam = this.busParameters[name];
+
+        if (nodeParam) {
+            nodeParam.value = value;
+
+            debug.setValue(name, value);
+        }
+    }
+
+    setConvolverInpulseResponseAudio(fileName) {
+        // Abort an existing request if this function is being called quickly
+        if (this.inpulseResponseRequest && this.inpulseResponseRequest.readyState < 4) {
+            this.inpulseResponseRequest.abort();
+        }
+
+        this.inpulseResponseRequest = undefined;
+
+        if (fileName === undefined) {
+            this.convolverNode.normalize = false;
+            this.convolverNode.buffer = this.impulseBufferCache["passthrough"];
+            debug.setValue("inpulseResponseAudio", "none");
+            return;
+        }
+
+        const url = "asset://garrysmod/sound/glide/impulse_response/" + fileName;
+
+        if (url in this.impulseBufferCache) {
+            this.convolverNode.normalize = true;
+            this.convolverNode.buffer = this.impulseBufferCache[url];
+            debug.setValue("inpulseResponseAudio", fileName + " (from memory cache)");
+
+            return;
+        }
+
+        this.inpulseResponseRequest = createArrayBufferRequest(url, (arrayBuffer) => {
+            this.audioContext.decodeAudioData(arrayBuffer)
+                .then((audioBuffer) => {
+                    this.impulseBufferCache[url] = audioBuffer;
+                    this.convolverNode.normalize = true;
+                    this.convolverNode.buffer = audioBuffer;
+                    debug.setValue("inpulseResponseAudio", fileName);
+                })
+                .catch((err) => {
+                    console.error(err.message);
+                    this.setConvolverInpulseResponseAudio(undefined);
+                });
+        }, () => {
+            console.error("Could not load inpulse response audio!");
+            this.setConvolverInpulseResponseAudio(undefined);
+        });
+    }
+
+    updateListener(x, y, z, forwardX, forwardY, forwardZ, upX, upY, upZ) {
+        const listener = this.audioContext.listener;
+
+        listener.positionX.value = x;
+        listener.positionY.value = y;
+        listener.positionZ.value = z;
+
+        listener.forwardX.value = forwardX;
+        listener.forwardY.value = forwardY;
+        listener.forwardZ.value = forwardZ;
+
+        listener.upX.value = upX;
+        listener.upY.value = upY;
+        listener.upZ.value = upZ;
+    }
+
+    createStream(id) {
+        if (!(id in this.streams)) {
+            this.streams[id] = new EngineStream(id, this);
+            console.log("Created EngineStream #" + id);
+            webaudio.OnStreamCreated(id);
+        }
+
+        return this.streams[id];
+    }
+
+    destroyStream(id) {
+        console.log("destroyStream", id);
+
+        if (id in this.streams) {
+            this.streams[id].destroy();
+            delete this.streams[id];
+            console.log("Destroyed EngineStream #" + id);
+        }
+    }
+
+    setStreamJSON(id, json) {
+        if (!(id in this.streams)) return;
+
+        const stream = this.streams[id];
+        const data = JSON.parse(json);
+
+        if (data.kv) {
+            for (let k in data.kv) {
+                stream.params[k] = data.kv[k];
+            }
+        }
+
+        if (data.layers) {
+            for (let id in data.layers) {
+                const layer = data.layers[id];
+                stream.addLayer(id, layer.path, layer.controllers, layer.redline == true);
+            }
+        }
+    }
+
+    setStreamData(id, x, y, z, throttle, rpmFraction, redline, isRedlining) {
+        if (!(id in this.streams)) return;
+
+        const stream = this.streams[id];
+        stream.setPosition(x, y, z);
+        stream.isRedlining = isRedlining;
+
+        const inputs = stream.inputs;
+        inputs.throttle = throttle;
+        inputs.rpmFraction = rpmFraction;
+        inputs.redline = redline;
+    }
+
+    setStreamWobbleTime(id, wobbleTime) {
+        if (!(id in this.streams)) return;
+
+        const stream = this.streams[id];
+        stream.wobbleTime = wobbleTime;
+    }
+
+    setStreamPlaying(id, isPlaying) {
+        if (!(id in this.streams)) return;
+
+        const stream = this.streams[id];
+
+        if (isPlaying)
+            stream.play();
+        else
+            stream.stop();
+    }
+
+    think(dt) {
+        for (let id in this.streams) {
+            this.streams[id].think(dt);
+        }
+    }
+}
+
+/*
+    Glue logic
+*/
+const manager = new EngineStreamManager();
+
+{
+    // Create a animation cycle, limited to 60 FPS
+    const requiredElapsed = 1000 / 60;
+    let lastTime;
+
+    const step = (time) => {
+        requestAnimationFrame(step);
+
+        if (lastTime === undefined) {
+            lastTime = time;
+        }
+
+        const elapsed = time - lastTime;
+
+        if (elapsed > requiredElapsed) {
+            lastTime = time;
+            manager.think(elapsed * 0.001);
+        }
+    };
+
+    requestAnimationFrame(step);
+}
+</script>
+
+</html>

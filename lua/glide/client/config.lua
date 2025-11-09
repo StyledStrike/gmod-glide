@@ -12,6 +12,7 @@ function Config:Reset()
     self.windVolume = 0.7
     self.warningVolume = 0.8
     self.vcVolume = 0.4
+    self.engineStreamBackend = 1
 
     -- Camera settings
     self.lookSensitivity = 1.0
@@ -119,6 +120,7 @@ function Config:Save( immediate )
         windVolume = self.windVolume,
         warningVolume = self.warningVolume,
         vcVolume = self.vcVolume,
+        engineStreamBackend = self.engineStreamBackend,
 
         -- Camera settings
         lookSensitivity = self.lookSensitivity,
@@ -235,6 +237,7 @@ function Config:Load()
     SetNumber( self, "windVolume", data.windVolume, 0, 1, self.windVolume )
     SetNumber( self, "warningVolume", data.warningVolume, 0, 1, self.warningVolume )
     SetNumber( self, "vcVolume", data.vcVolume, 0, 1, self.vcVolume )
+    self.engineStreamBackend = math.Round( Glide.ValidateNumber( data.engineStreamBackend, 1, 2, self.engineStreamBackend ) )
 
     -- Camera settings
     SetNumber( self, "lookSensitivity", data.lookSensitivity, 0.01, 5, self.lookSensitivity )
@@ -868,6 +871,18 @@ function Config:OpenFrame()
         self.vcVolume = value
         self:Save()
     end )
+
+    CreateCombo( panelAudio, L"audio.engine_stream_backend", {
+        L"audio.engine_stream_backend.bass",
+        L"audio.engine_stream_backend.webaudio"
+    }, self.engineStreamBackend, function( value )
+        self.engineStreamBackend = value
+        self:Save()
+    end )
+
+    local webaudioWarn = StyledTheme.CreateFormLabel( panelAudio, L"audio.engine_stream_webaudio_warning" )
+    webaudioWarn:SetContentAlignment( 5 )
+    webaudioWarn:SetColor( Color( 255, 255, 50 ) )
 
     ----- Misc -----
 

@@ -8,8 +8,42 @@ TOOL.Information = {
 }
 
 TOOL.ClientConVar = {
-    data = [[{"-1": 2.5, "1": 2.8, "2": 1.7, "3": 1.2,"4": 0.9, "5": 0.75, "6": 0.7 }]]
+    gearlist = "-1=2.5,1=2.8,2=1.7,3=1.2,4=0.9,5=0.75,6=0.7"
 }
+
+-- Use custom logic to handle parsing/stringifying the gear list
+local function GearListToString( gears )
+    gears = Glide.ValidateTransmissionData( gears )
+
+    local parts = {}
+    local index = 0
+
+    for gear, ratio in SortedPairs( gears ) do
+        index = index + 1
+        parts[index] = gear .. "=" .. ratio
+    end
+
+    return table.concat( parts, "," )
+end
+
+local function StringToGearList( str )
+    if str:len() < 2 then return {} end
+
+    local parts = string.Explode( ",", str, false )
+    local gears = {}
+
+    for _, part in ipairs( parts ) do
+        local sides = string.Explode( "=", part, false )
+        local gear = tonumber( sides[1] )
+        local ratio = tonumber( sides[2] )
+
+        if gear and ratio then
+            gears[gear] = ratio
+        end
+    end
+
+    return Glide.ValidateTransmissionData( gears )
+end
 
 local IsValid = IsValid
 
@@ -55,7 +89,8 @@ function TOOL:LeftClick( trace )
     if not vehicle then return false end
 
     if SERVER then
-        local data = Glide.FromJSON( self:GetClientInfo( "data" ) )
+        local data = self:GetClientInfo( "gearlist" )
+        data = StringToGearList( data )
         return ApplyTransmissionData( self:GetOwner(), vehicle, data )
     end
 
@@ -68,9 +103,8 @@ function TOOL:RightClick( trace )
 
     if SERVER then
         local gears = vehicle:GetGearList()
-        gears = Glide.ToJSON( gears, false )
-
-        self:GetOwner():ConCommand( "glide_transmission_editor_data " .. gears )
+        gears = GearListToString( gears )
+        self:GetOwner():ConCommand( "glide_transmission_editor_gearlist " .. gears )
     end
 
     return true
@@ -95,25 +129,19 @@ function Glide.RefreshTransmissionToolPanel()
     if not IsValid( panel ) then return end
 
     panel:Clear()
-
-    local cvarData = GetConVar( "glide_transmission_editor_data" )
-    if not cvarData then return end
-
     panel:Help( "#tool.glide_transmission_editor.desc" )
 
-    local data = Glide.FromJSON( cvarData:GetString() )
+    local cvarData = GetConVar( "glide_transmission_editor_gearlist" )
+    if not cvarData then return end
 
-    -- Make sure we've valid transmission data
-    data = Glide.ValidateTransmissionData( data )
+    local data = StringToGearList( cvarData:GetString() )
 
     local function OnDataChanged( updateUI )
-        local jsonData = Glide.ToJSON( data, false )
+        local strData = GearListToString( data )
 
-        if jsonData then
-            Glide._isChangingTransmissionToolCvar = true
-            cvarData:SetString( jsonData )
-            Glide._isChangingTransmissionToolCvar = nil
-        end
+        Glide._isChangingTransmissionToolCvar = true
+        cvarData:SetString( strData )
+        Glide._isChangingTransmissionToolCvar = nil
 
         if updateUI then
             Glide.RefreshTransmissionToolPanel()
@@ -232,7 +260,7 @@ function Glide.RefreshTransmissionToolPanel()
     buttonReset:SetIcon( "icon16/arrow_refresh.png" )
 
     buttonReset.DoClick = function()
-        data = Glide.FromJSON( cvarData:GetDefault() )
+        data = StringToGearList( cvarData:GetDefault() )
         OnDataChanged( true )
     end
 end
@@ -244,7 +272,7 @@ function TOOL.BuildCPanel( panel )
     Glide.RefreshTransmissionToolPanel()
 end
 
-cvars.AddChangeCallback( "glide_transmission_editor_data", function()
+cvars.AddChangeCallback( "glide_transmission_editor_gearlist", function()
     -- Ignore changes done by the tool panel
     if not Glide._isChangingTransmissionToolCvar then
         Glide.RefreshTransmissionToolPanel()

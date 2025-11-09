@@ -294,6 +294,17 @@ local STREAM_KV_LIMITS = {
 
 Glide.STREAM_KV_LIMITS = STREAM_KV_LIMITS
 
+local STREAM_VALID_CONTROLLER_IN = {
+    throttle = true,
+    rpmFraction = true,
+    redline = true
+}
+
+local STREAM_VALID_CONTROLLER_OUT = {
+    volume = true,
+    pitch = true
+}
+
 function Glide.ValidateStreamData( data )
     if type( data ) ~= "table" then
         return false, "Preset is not a table!"
@@ -342,6 +353,25 @@ function Glide.ValidateStreamData( data )
             type( c ) ~= "table"
         then
             return false, "Preset does not look like sound preset data!"
+        end
+
+        if not table.IsSequential( c ) then
+            return false, "Preset does not have valid controller data!"
+        end
+
+        for _, ctr in ipairs( c ) do
+            if not STREAM_VALID_CONTROLLER_IN[ctr[1]] or not STREAM_VALID_CONTROLLER_OUT[ctr[4]] then
+                return false, "Preset does not have valid controller data!"
+            end
+
+            if
+                type( ctr[2] ) ~= "number" or
+                type( ctr[3] ) ~= "number" or
+                type( ctr[5] ) ~= "number" or
+                type( ctr[6] ) ~= "number"
+            then
+                return false, "Preset does not have valid controller data!"
+            end
         end
 
         count = count + 1

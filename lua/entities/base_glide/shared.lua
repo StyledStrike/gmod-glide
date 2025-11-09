@@ -167,7 +167,7 @@ if CLIENT then
 
     -- Setup how far away players can hear sounds and update misc. features
     ENT.MaxSoundDistance = 6000
-    ENT.MaxMiscDistance = 3000
+    ENT.MaxMiscDistance = 5000
 
     -- Startup/ignition sounds, leave empty to disable
     ENT.StartSound = ""

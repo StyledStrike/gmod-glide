@@ -23,6 +23,8 @@ function ENT:GetPlayerSitSequence( _seatIndex )
 end
 
 if CLIENT then
+    ENT.MaxMiscDistance = 10000
+
     -- Set exhaust positions relative to the chassis
     ENT.ExhaustPositions = {}
 
