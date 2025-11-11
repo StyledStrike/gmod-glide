@@ -63,8 +63,22 @@ function PANEL:Init()
         end
     end
 
+    local webAudioParams = {}
+
     for k, _ in SortedPairs( Glide.DEFAULT_STREAM_PARAMS ) do
-        CreateStreamParam( k )
+        if k:sub( 1, 3 ) == "wa_" then
+            webAudioParams[#webAudioParams + 1] = k
+        else
+            CreateStreamParam( k )
+        end
+    end
+
+    if #webAudioParams > 0 and Glide.WebAudio.isReady then
+        StyledTheme.CreateFormHeader( scrollParams, "WebAudio" )
+
+        for _, v in ipairs( webAudioParams ) do
+            CreateStreamParam( v )
+        end
     end
 
     -- Simulated engine controls panel

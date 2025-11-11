@@ -1,45 +1,41 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>Web Audio API Engine Stream</title>
-</head>
-
 <body></body>
 
 <style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    .debugPanel {
-        display: block;
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 400px;
+.debugPanel {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 400px;
 
-        font-weight: 500;
-        color: white;
-        background-color: #00000011;
-    }
+    font-weight: 500;
+    color: white;
+    background-color: #00000011;
+}
 
-    th {
-        padding: 10px;
-        text-align: center;
-        background: #000;
-    }
+th {
+    padding: 10px;
+    text-align: center;
+    background: #000;
+}
 
-    td {
-        width: 100%;
-        padding: 6px;
-    }
+td {
+    width: 100%;
+    padding: 6px;
+}
 
-    tr {
-        background-color: #111111aa;
-    }
+tr {
+    background-color: #111111aa;
+}
 </style>
 
 <script>
@@ -138,13 +134,11 @@ debug.getRow = (id) => {
 };
 
 debug.setValue = (id, value) => {
-    if (!debug.enabled) return;
-
-    debug.getRow(id).value.innerHTML = value.toString();
+    if (debug.enabled) debug.getRow(id).value.innerHTML = value.toString();
 };
 
 /*
-    Engine stream logic, plus audio node management
+    Logic to handle each individual Engine Stream
 */
 
 let DEFAULT_STREAM_PARAMETERS = {};
@@ -159,7 +153,7 @@ class EngineStream {
 
         this.isPlaying = false;
         this.isRedlining = false;
-        this.isFirstAccel = false;
+        this.isFirstAccel = true;
         this.wobbleTime = 0;
         this.redlineTime = 0;
         this.volumeMultiplier = 0;
@@ -258,7 +252,9 @@ class EngineStream {
             layer.loadRequest.abort();
         }
 
-        // Remove layer gain node
+        // Remove audio nodes
+        this.stopLayer(id);
+
         layer.gainNode.disconnect();
         layer.gainNode = undefined;
 
@@ -266,7 +262,6 @@ class EngineStream {
         layer.audioBuffer = undefined;
         layer.loadRequest = undefined;
 
-        this.stopLayer(id);
         delete this.layers[id];
     }
 
@@ -381,24 +376,25 @@ class EngineStream {
             pitch = pitch + Math.cos(this.wobbleTime * params.wobbleFrequency) * this.wobbleTime * params.wobbleStrength * 0.3;
         }
 
+        // Throttle "punch"
         if (inputs.throttle > 0.5 && !this.isFirstAccel) {
             this.isFirstAccel = true;
 
-            const attackTime = 0.25;
-            const releaseTime = attackTime + 0.9;
-            const attackFreq = 1000.0;
+            const attackTime = params.wa_PunchAttack;
+            const releaseTime = attackTime + params.wa_PunchRelease;
+            const attackFreq = 1200.0;
             const releaseFreq = 100.0;
 
             const t = this.streamManager.audioContext.currentTime;
 
             const trebleGain = this.trebleBoostNode.gain;
             trebleGain.cancelAndHoldAtTime(t);
-            trebleGain.linearRampToValueAtTime(-4.0, t + attackTime);
+            trebleGain.linearRampToValueAtTime(-3.0 * params.wa_PunchStrength, t + attackTime);
             trebleGain.linearRampToValueAtTime(0.0, t + releaseTime);
 
             const bassGain = this.bassBoostNode.gain;
             bassGain.cancelAndHoldAtTime(t);
-            bassGain.linearRampToValueAtTime(5.0, t + attackTime);
+            bassGain.linearRampToValueAtTime(4.0 * params.wa_PunchStrength, t + attackTime);
             bassGain.linearRampToValueAtTime(0.0, t + releaseTime);
 
             const trebleFreq = this.trebleBoostNode.frequency;
@@ -537,7 +533,7 @@ class EngineStreamManager {
 
         // Add a compressor to prevent audio clipping
         const compressorNode = this.audioContext.createDynamicsCompressor();
-        compressorNode.threshold.value = -35;
+        compressorNode.threshold.value = -40;
         compressorNode.knee.value = 40;
         compressorNode.ratio.value = 4;
         compressorNode.attack.value = 0.1;

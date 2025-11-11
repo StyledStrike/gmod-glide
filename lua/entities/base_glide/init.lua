@@ -39,9 +39,17 @@ function ENT:OnEntityCopyTableFinish( data )
     if wheelCount > 0 then
         data["WheelRadius"] = wheelRadius
     end
+
+    -- Save model skin
+    data["VehicleSkin"] = self:GetSkin()
 end
 
 function ENT:OnDuplicated( data )
+    -- Restore skin
+    if type( data["VehicleSkin"] ) == "number" then
+        self:SetSkin( data["VehicleSkin"] )
+    end
+
     -- Restore radius for every individual wheel
     local wheelRadius = data["WheelRadius"]
     if type( wheelRadius ) ~= "table" then return end

@@ -275,7 +275,12 @@ local DEFAULT_STREAM_PARAMS = {
     redlineStrength = 0.2,
 
     wobbleFrequency = 25,
-    wobbleStrength = 0.13
+    wobbleStrength = 0.13,
+
+    -- WebAudio-only parameters
+    wa_PunchStrength = 1.0,
+    wa_PunchAttack = 0.25,
+    wa_PunchRelease = 0.9,
 }
 
 Glide.DEFAULT_STREAM_PARAMS = DEFAULT_STREAM_PARAMS
@@ -289,7 +294,12 @@ local STREAM_KV_LIMITS = {
     redlineStrength = { min = 0, max = 0.5, decimals = 2 },
 
     wobbleFrequency = { min = 10, max = 70, decimals = 0 },
-    wobbleStrength = { min = 0.0, max = 1.0, decimals = 2 }
+    wobbleStrength = { min = 0.0, max = 1.0, decimals = 2 },
+
+    -- WebAudio-only parameters
+    wa_PunchStrength = { min = 0.1, max = 3.0, decimals = 1 },
+    wa_PunchAttack = { min = 0.05, max = 0.5, decimals = 2 },
+    wa_PunchRelease = { min = 0.1, max = 2.0, decimals = 2 },
 }
 
 Glide.STREAM_KV_LIMITS = STREAM_KV_LIMITS

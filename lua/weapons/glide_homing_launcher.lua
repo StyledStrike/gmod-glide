@@ -339,8 +339,7 @@ if CLIENT then
         end
 
         local target = self:GetLockTarget()
-        local targetPos = IsValid( target ) and target:LocalToWorld( target:OBBCenter() ) or
-            ( user:GetShootPos() + user:GetAimVector() * self.LockOnMaxDistance )
+        local targetPos = IsValid( target ) and target:LocalToWorld( target:OBBCenter() ) or user:GetEyeTrace().HitPos
 
         local data = targetPos:ToScreen()
         if data.visible then

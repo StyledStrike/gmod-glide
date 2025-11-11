@@ -42,7 +42,8 @@ do
         ["PhysicsObjects"] = true,
         ["Model"] = true,
         ["EntityMods"] = true, -- Entity modifiers (colors, materials, etc.)
-        ["BuildDupeInfo"] = true -- Required for parenting to work
+        ["BuildDupeInfo"] = true, -- Required for parenting to work
+        ["BodyG"] = true,
     }
 
     function Glide.FilterEntityCopyTable( data, nwFields, entFields )
