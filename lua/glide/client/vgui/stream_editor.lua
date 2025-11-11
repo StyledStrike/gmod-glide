@@ -445,24 +445,24 @@ function PANEL:OnClickAddLayer()
         self.fileBrowser:Remove()
     end
 
-    self.fileBrowser = StyledTheme.CreateFileBrowser()
-    self.fileBrowser:SetTitle( L"stream_editor.open_audio" )
-    self.fileBrowser:SetIcon( "icon16/sound.png" )
-    self.fileBrowser:SetExtensionFilter( { "ogg", "wav", "mp3" } )
-    self.fileBrowser:SetBasePath( "sound/" )
+    self.fileBrowser = Glide.OpenSoundBrowser( function( path )
+        if not IsValid( self ) then return end
 
-    self.fileBrowser.OnConfirmPath = function( path )
-        path = string.sub( path, 7 ) -- remove "sound/"
         Glide.lastAudioFolderPath = string.GetPathFromFilename( path )
-
         panel = self:GetActiveTab()
+
         if panel then
             panel:AddLayer( nil, path )
         end
-    end
+    end )
+
+    self.fileBrowser:SetTitle( L"stream_editor.open_audio" )
+    self.fileBrowser:SetFileTypes( "*.wav *.ogg *.mp3" )
+    self.fileBrowser:SetTabIndexEnabled( 2, false )
+    self.fileBrowser:SetTabIndexEnabled( 3, false )
 
     if Glide.lastAudioFolderPath then
-        self.fileBrowser:NavigateTo( Glide.lastAudioFolderPath )
+        self.fileBrowser:SetCurrentFolder( Glide.lastAudioFolderPath )
     end
 end
 

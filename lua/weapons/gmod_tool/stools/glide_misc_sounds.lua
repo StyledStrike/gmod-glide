@@ -138,21 +138,18 @@ end
 local function OnClickPickPath( s )
     local key = s._key
     local refresh = s._refreshFunction
-    local title = language.GetPhrase( "tool.glide_misc_sounds.browse_sound" )
 
-    local browser = StyledTheme.CreateFileBrowser()
-    browser:SetIcon( "icon16/sound.png" )
-    browser:SetTitle( string.format( title, key ) )
-    browser:SetExtensionFilter( { "mp3", "wav" } )
-    browser:SetBasePath( "sound/" )
-    browser:NavigateTo( Glide.miscSoundsToolLastDir or "/" )
-
-    browser.OnConfirmPath = function( path )
-        path = path:sub( 7 ) -- Remove "sound/"
+    local browser = Glide.OpenSoundBrowser( function( path )
         Glide.miscSoundsToolLastDir = string.GetPathFromFilename( path )
-
         SetPresetData( key, path )
         refresh()
+    end )
+
+    browser:SetTitle( string.format( language.GetPhrase( "tool.glide_misc_sounds.browse_sound" ), key ) )
+    browser:SetFileTypes( "*.wav *.mp3" )
+
+    if Glide.miscSoundsToolLastDir then
+        browser:SetCurrentFolder( Glide.miscSoundsToolLastDir )
     end
 end
 

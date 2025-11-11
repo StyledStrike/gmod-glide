@@ -428,6 +428,7 @@ Glide.MISC_SOUND_CATEGORIES = {
         label = "#tool.glide_misc_sounds.category.brakes",
         acceptGlideSoundPresets = false,
         keys = {
+            "BrakeLoopSound",
             "BrakeReleaseSound",
             "BrakeSqueakSound"
         }

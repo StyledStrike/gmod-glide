@@ -121,18 +121,10 @@ function PANEL:OnClickRemoveController( index )
 end
 
 function PANEL:OnClickChangeAudio()
-    local fileBrowser = StyledTheme.CreateFileBrowser()
-    fileBrowser:SetTitle( L"stream_editor.open_audio" )
-    fileBrowser:SetIcon( "icon16/sound.png" )
-    fileBrowser:SetExtensionFilter( { "ogg", "wav", "mp3" } )
-    fileBrowser:SetBasePath( "sound/" )
-
-    fileBrowser.OnConfirmPath = function( path )
+    local browser = Glide.OpenSoundBrowser( function( path )
         if not IsValid( self ) then return end
 
-        path = string.sub( path, 7 ) -- remove "sound/"
         Glide.lastAudioFolderPath = string.GetPathFromFilename( path )
-
         local layer = self.layerData
 
         if IsValid( layer.channel ) then
@@ -145,10 +137,15 @@ function PANEL:OnClickChangeAudio()
 
         self.path = path
         self:OnChanged()
-    end
+    end )
+
+    browser:SetTitle( L"stream_editor.open_audio" )
+    browser:SetFileTypes( "*.wav *.ogg *.mp3" )
+    browser:SetTabIndexEnabled( 2, false )
+    browser:SetTabIndexEnabled( 3, false )
 
     if Glide.lastAudioFolderPath then
-        fileBrowser:NavigateTo( Glide.lastAudioFolderPath )
+        browser:SetCurrentFolder( Glide.lastAudioFolderPath )
     end
 end
 
