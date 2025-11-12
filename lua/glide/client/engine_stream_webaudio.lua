@@ -111,7 +111,8 @@ function WebAudio:OnHTMLReady()
         ["dryVolume"] = { 1.0, true },
         ["wetVolume"] = { 1.0, true },
         ["delayTime"] = { 0.1, true },
-        ["delayFeedback"] = { 0.1, 0.1, true }
+        ["delayFeedback"] = { 0.1, true },
+        ["postFilterQ"] = { 0.0, true },
     }
 
     self.room = {
@@ -300,7 +301,8 @@ do
 
             self:SetBusParameter( "delayTime", delayTime )
             self:SetBusParameter( "delayFeedback", delayFeedback )
-            self:SetBusParameter( "postFilterBandGain", Camera.muffleSound and -12.0 or 0.0 )
+            self:SetBusParameter( "postFilterBandGain", Camera.muffleSound and -9.0 or 1.0 )
+            self:SetBusParameter( "postFilterQ", Camera.muffleSound and 0.4 or 0.0 )
 
             local impulseResponseAudio = ROOM_INPULSE_RESPONSES[1][2]
 
@@ -373,8 +375,8 @@ function WebAudio:Think( dt )
     local wetMultiplier = ( 1 - room.hSize ) * ( 0.5 + ( 0.4 - room.vSize * 0.6 ) )
 
     self:SetBusParameter( "preGainVolume", GetVolume( "carVolume" ) )
-    self:SetBusParameter( "dryVolume", Round( Clamp( 1 - wetMultiplier * 0.1, 0.5, 1.0 ) * 1.15, 2 ) )
-    self:SetBusParameter( "wetVolume", Round( Clamp( wetMultiplier * 2.5, 0.1, 1.5 ), 2 ) )
+    self:SetBusParameter( "dryVolume", Round( Clamp( 1 - wetMultiplier * 0.1, 0.5, 1.0 ), 2 ) )
+    self:SetBusParameter( "wetVolume", Round( Clamp( wetMultiplier * 2.5, 0.1, 1.3 ), 2 ) )
 
     --[[
         Create one big Javascript snippet, which will:

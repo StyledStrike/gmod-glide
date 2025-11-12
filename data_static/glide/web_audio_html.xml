@@ -511,11 +511,11 @@ class EngineStreamManager {
 
         // Create a gain and delay nodes that points to
         // eachother, to apply the echo effect.
-        this.echoDelayNode = this.audioContext.createDelay();
-        this.echoGainNode = this.audioContext.createGain();
+        const echoDelayNode = this.audioContext.createDelay(1);
+        const echoFeedbackNode = this.audioContext.createGain();
 
-        this.echoDelayNode.connect(this.echoGainNode);
-        this.echoGainNode.connect(this.echoDelayNode);
+        echoDelayNode.connect(echoFeedbackNode);
+        echoFeedbackNode.connect(echoDelayNode);
 
         // Create a convolver node to apply the reverb effect.
         this.convolverNode = this.audioContext.createConvolver();
@@ -543,7 +543,7 @@ class EngineStreamManager {
         this.postFilterNode = this.audioContext.createBiquadFilter();
         this.postFilterNode.type = "peaking";
         this.postFilterNode.frequency.value = 12000.0;
-        this.postFilterNode.Q.value = 1.0;
+        this.postFilterNode.Q.value = 0.0;
 
         // Connect the "input" node to "dry" and "reverb" nodes.
         this.preGainNode.connect(compressorNode);
@@ -554,10 +554,10 @@ class EngineStreamManager {
         this.dryNode.connect(this.postFilterNode);
 
         // Connect the "reverb" node to the "echo" node
-        this.convolverNode.connect(this.echoDelayNode);
+        this.convolverNode.connect(echoDelayNode);
 
         // Connect the "echo" node to the "wet" node
-        this.echoDelayNode.connect(this.wetNode);
+        echoDelayNode.connect(this.wetNode);
 
         // Connect the "wet" node to the post-filter
         this.wetNode.connect(this.postFilterNode);
@@ -568,11 +568,12 @@ class EngineStreamManager {
         // Setup which node parameters from our "audio bus" can be tweaked
         this.registerBusParameter("preGainVolume", this.preGainNode.gain);
         this.registerBusParameter("postFilterBandGain", this.postFilterNode.gain);
+        this.registerBusParameter("postFilterQ", this.postFilterNode.Q);
 
         this.registerBusParameter("dryVolume", this.dryNode.gain);
         this.registerBusParameter("wetVolume", this.wetNode.gain);
-        this.registerBusParameter("delayTime", this.echoDelayNode.delayTime);
-        this.registerBusParameter("delayFeedback", this.echoGainNode.gain);
+        this.registerBusParameter("delayTime", echoDelayNode.delayTime);
+        this.registerBusParameter("delayFeedback", echoFeedbackNode.gain);
 
         // Set default node parameters
         this.setBusParameter("preGainVolume", 1.0);
@@ -594,7 +595,6 @@ class EngineStreamManager {
 
         if (nodeParam) {
             nodeParam.value = value;
-
             debug.setValue(name, value);
         }
     }
