@@ -140,6 +140,8 @@ end )
 
 -- Call a hook when a player finishes loading into the server
 -- and is ready to receive network events.
+local Player = Player
+
 hook.Add( "ClientSignOnStateChanged", "Glide.TriggerOnPlayerLoad", function( user, _, new )
     if new ~= SIGNONSTATE_FULL then return end
 

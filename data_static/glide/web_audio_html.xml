@@ -185,6 +185,12 @@ class EngineStream {
         this.trebleBoostNode.gain.value = 0.0;
         this.trebleBoostNode.Q.value = 0.1;
 
+        this.lowpassNode = context.createBiquadFilter();
+        this.lowpassNode.type = "highshelf";
+        this.lowpassNode.frequency.value = 20000.0;
+        this.lowpassNode.gain.value = -10.0;
+        this.lowpassNode.Q.value = 1.0;
+
         this.pannerNode = new PannerNode(context, {
             panningModel: "equalpower", //"HRTF",
             distanceModel: "linear",
@@ -201,7 +207,8 @@ class EngineStream {
         this.pannerNode.channelInterpretation = "discrete";
 
         this.bassBoostNode.connect(this.trebleBoostNode);
-        this.trebleBoostNode.connect(this.pannerNode);
+        this.trebleBoostNode.connect(this.lowpassNode);
+        this.lowpassNode.connect(this.pannerNode);
         this.pannerNode.connect(streamManager.preGainNode);
     }
 
@@ -716,6 +723,15 @@ class EngineStreamManager {
 
         const stream = this.streams[id];
         stream.wobbleTime = wobbleTime;
+    }
+
+    setStreamLowpassFilterFreq(id, frequency, time = 0.5) {
+        if (!(id in this.streams)) return;
+
+        const t = this.audioContext.currentTime;
+        const lowpassFreq = this.streams[id].lowpassNode.frequency;
+        lowpassFreq.cancelAndHoldAtTime(t);
+        lowpassFreq.linearRampToValueAtTime(frequency, t + time);
     }
 
     setStreamPlaying(id, isPlaying) {
