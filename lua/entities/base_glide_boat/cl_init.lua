@@ -46,13 +46,13 @@ function ENT:OnUpdateSounds()
     local dt = FrameTime()
     local isHonking = self:GetIsHonking()
 
-    if isHonking and self.HornSound then
+    if isHonking and self.HornSound and self.HornSound ~= "" then
         local volume = GetVolume( "hornVolume" )
 
         if sounds.horn then
             sounds.horn:ChangeVolume( volume )
         else
-            local snd = self:CreateLoopingSound( "horn", self.HornSound, 85, self )
+            local snd = self:CreateLoopingSound( "horn", Glide.GetRandomSound( self.HornSound ), 85, self )
             snd:PlayEx( volume, 100 )
         end
 

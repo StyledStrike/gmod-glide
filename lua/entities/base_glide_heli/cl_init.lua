@@ -14,8 +14,8 @@ end
 
 --- Implement this base class function.
 function ENT:OnTurnOn()
-    if self:GetPower() < 0.1 then
-        self:EmitSound( self.StartSound, 80, 100, 0.6 )
+    if self:GetPower() < 0.1 and self.StartSound ~= "" then
+        self:EmitSound( Glide.GetRandomSound( self.StartSound ), 80, 100, 0.6 )
     end
 end
 

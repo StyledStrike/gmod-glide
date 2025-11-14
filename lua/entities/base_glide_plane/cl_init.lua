@@ -4,8 +4,8 @@ DEFINE_BASECLASS( "base_glide_aircraft" )
 
 --- Implement the base class `OnTurnOn` function.
 function ENT:OnTurnOn()
-    if self:GetPower() < 0.01 then
-        self:EmitSound( self.StartSound, 80, 100, 0.6 )
+    if self:GetPower() < 0.01 and self.StartSound ~= "" then
+        self:EmitSound( Glide.GetRandomSound( self.StartSound ), 80, 100, 0.6 )
     end
 end
 

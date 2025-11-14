@@ -72,7 +72,7 @@ function ENT:UpdateTurboSound( sounds, dt )
     local inertia = ExpDecay( lastInertia, self:GetEngineThrottle(), 1, dt )
 
     if inertia < lastInertia and inertia > 0.6 and self.rpmFraction > 0.5 and self.TurboBlowoffSound ~= "" then
-        self:EmitSound( self.TurboBlowoffSound, 80, math.random( 100, 110 ), self.TurboBlowoffVolume * inertia )
+        Glide.PlaySoundSet( self.TurboBlowoffSound, self, self.TurboBlowoffVolume * inertia )
         inertia = 0
     end
 
@@ -86,7 +86,7 @@ function ENT:UpdateTurboSound( sounds, dt )
             sounds.turbo:ChangePitch( pitch )
 
         elseif self.TurboLoopSound ~= "" then
-            local snd = self:CreateLoopingSound( "turbo", self.TurboLoopSound, 80, self )
+            local snd = self:CreateLoopingSound( "turbo", Glide.GetRandomSound( self.TurboLoopSound ), 80, self )
             snd:PlayEx( volume, pitch )
         end
 
@@ -109,13 +109,14 @@ function ENT:OnUpdateSounds()
     local isSirenEnabled = self.lastSirenEnableTime and CurTime() - self.lastSirenEnableTime > 0.25
     local isHonking = self:GetIsHonking()
 
-    if isHonking and self.HornSound then
+    if isHonking and self.HornSound and self.HornSound ~= "" then
         local volume = GetVolume( "hornVolume" ) * ( isSirenEnabled and self.SirenVolume or 1 )
 
         if sounds.horn then
             sounds.horn:ChangeVolume( volume )
         else
-            local snd = self:CreateLoopingSound( "horn", isSirenEnabled and self.SirenLoopAltSound or self.HornSound, 85, self )
+            local snd = self:CreateLoopingSound( "horn", Glide.GetRandomSound(
+                isSirenEnabled and self.SirenLoopAltSound or self.HornSound ), 85, self )
             snd:PlayEx( volume, 100 )
         end
 
@@ -132,7 +133,7 @@ function ENT:OnUpdateSounds()
         if sounds.siren then
             sounds.siren:ChangeVolume( self.SirenVolume * GetVolume( "hornVolume" ) )
         else
-            local snd = self:CreateLoopingSound( "siren", self.SirenLoopSound, 90, self )
+            local snd = self:CreateLoopingSound( "siren", Glide.GetRandomSound( self.SirenLoopSound ), 90, self )
             snd:PlayEx( self.SirenVolume * GetVolume( "hornVolume" ), 100 )
         end
 
