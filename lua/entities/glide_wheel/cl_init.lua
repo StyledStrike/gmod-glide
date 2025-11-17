@@ -100,7 +100,7 @@ function ENT:Think()
     if t > selfTbl.modelCD then
         m:SetTranslation( self:GetModelOffset() )
         m:SetAngles( self:GetModelAngle() )
-        m:SetScale( self:GetModelScale2() )
+    --    m:SetScale( self:GetModelScale2() )
         self:EnableMatrix( "RenderMultiply", m )
         selfTbl.modelCD = t + 1
     end
@@ -125,6 +125,35 @@ function ENT:Think()
     -- Force water surface when contactPos is under water 
     if surfaceId > 0 and IsUnderWater( contactPos ) then
         surfaceId = MAT_SLOSH
+    end
+
+    if ( self:GetNWBool( ( "glide_wheel_blowed::%s" ):format( self:GetNWInt( "glide_wheel_index", 0 ) ) ) and speed > 50 ) then
+
+        if ( CurTime() > ( self.cooldownBlowSparks or 0 ) ) then
+            local height = 28.79
+            local effectData = EffectData()
+
+            local pos = contactPos
+            local ang = self:GetAngles()
+
+            pos = pos + ang:Up() * ( height / 2 )
+
+            effectData:SetOrigin( pos )
+            effectData:SetNormal( ang:Right() * 0.3 )
+            util.Effect( "manhacksparks", effectData )
+
+            self.cooldownBlowSparks = CurTime() + 0.05
+        end
+
+        if not self.blowSound or not self.blowSound:IsPlaying() then
+            self.blowSound = CreateSound( self, "svmod/tire/blowout_a.wav" )
+            self.blowSound:SetSoundLevel( 80 )
+            self.blowSound:PlayEx( 0.5, 100 )
+        end
+    else
+        if self.blowSound and self.blowSound:IsPlaying() then
+            self.blowSound:Stop()
+        end
     end
 
     -- Mute concrete sounds when this wheel is part of a tank

@@ -32,6 +32,7 @@ function ENT:CreateWheel( offset, params )
 
     self.wheelCount = index
     self.wheels[index] = wheel
+    wheel:SetNWInt( "glide_wheel_index", index )
 
     return wheel
 end

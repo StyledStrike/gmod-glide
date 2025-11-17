@@ -168,6 +168,7 @@ end
 function ENT:Blow()
     self:ChangeRadius( self.params.radius * 0.8 )
     self:EmitSound( "glide/wheels/blowout.wav", 80, math.random( 95, 105 ), 1 )
+    self:SetNWBool( ( "glide_wheel_blowed::%s" ):format( self:GetNWInt( "glide_wheel_index", 0 ) ), true )
 end
 
 function ENT:ChangeRadius( radius )
