@@ -269,7 +269,7 @@ Glide.MAX_STREAM_LAYERS = 8
 local DEFAULT_STREAM_PARAMS = {
     pitch = 1,
     volume = 1,
-    fadeDist = 1500,
+    fadeDist = 2500,
 
     redlineFrequency = 55,
     redlineStrength = 0.2,

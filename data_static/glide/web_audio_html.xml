@@ -188,7 +188,7 @@ class EngineStream {
         this.lowpassNode = context.createBiquadFilter();
         this.lowpassNode.type = "highshelf";
         this.lowpassNode.frequency.value = 20000.0;
-        this.lowpassNode.gain.value = -10.0;
+        this.lowpassNode.gain.value = -12.0;
         this.lowpassNode.Q.value = 1.0;
 
         this.pannerNode = new PannerNode(context, {
@@ -366,7 +366,7 @@ class EngineStream {
         if (!this.isPlaying) return;
 
         if (this.volumeMultiplier < 1) {
-            this.volumeMultiplier = approach(this.volumeMultiplier, 1, dt * 2);
+            this.volumeMultiplier = approach(this.volumeMultiplier, 1, dt);
         }
 
         const inputs = this.inputs;

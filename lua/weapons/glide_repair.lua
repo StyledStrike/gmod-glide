@@ -169,9 +169,6 @@ end
 
 if not CLIENT then return end
 
-local SetColor = surface.SetDrawColor
-local ICON_AIM = Material( "glide/aim_area.png", "smooth" )
-
 function SWEP:DrawHUD()
     if not self:IsWeaponVisible() then return end
 
@@ -179,11 +176,8 @@ function SWEP:DrawHUD()
     if not IsValid( ent ) then return end
 
     local x, y = ScrW() * 0.5, ScrH() * 0.5
-    local size = math.floor( ScrH() * 0.07 )
 
-    SetColor( 255, 255, 255, 255 )
-    surface.SetMaterial( ICON_AIM )
-    surface.DrawTexturedRectRotated( x, y, size, size, 0 )
+    Glide.DrawWeaponCrosshair( x, y, "glide/aim_dot.png", 0.05, Color( 255, 255, 255, 255 ) )
 
     local w = math.floor( ScrH() * 0.4 )
     local h = math.floor( ScrH() * 0.03 )

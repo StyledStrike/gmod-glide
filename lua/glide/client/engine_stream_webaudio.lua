@@ -265,11 +265,16 @@ local ROOM_ECHO_DELAYS = {
 }
 
 local TRACE_DIRECTIONS = {
-    Vector( 5000, 0, 0 ), -- North
-    Vector( -5000, 0, 0 ), -- South
-    Vector( 0, 5000, 0 ), -- West
-    Vector( 0, -5000, 0 ), -- East
-    Vector( 0, 0, 3000 ) -- Up
+    Vector( 5000.00, 0.00, -0.00 ),
+    Vector( 3535.53, 3535.53, -0.00 ),
+    Vector( -0.00, 5000.00, -0.00 ),
+    Vector( -3535.53, 3535.53, -0.00 ),
+    Vector( -5000.00, -0.00, -0.00 ),
+    Vector( -3535.53, -3535.53, -0.00 ),
+    Vector( 0.00, -5000.00, -0.00 ),
+    Vector( 3535.53, -3535.53, -0.00 ),
+    Vector( 5000.00, 0.00, -0.00 ),
+    Vector( 0, 0, 5000 ) -- Up
 }
 
 local Camera = Glide.Camera
@@ -287,8 +292,8 @@ function WebAudio:UpdateRoom( dt, eyePos )
 
     dirIndex = dirIndex + 1
 
-    if dirIndex > 5 then
-        room.targetHSize = hSize / 4
+    if dirIndex > 10 then
+        room.targetHSize = hSize / 9
         room.targetVSize = vSize
 
         dirIndex = 1
@@ -339,7 +344,7 @@ function WebAudio:UpdateRoom( dt, eyePos )
     local ray = TraceLine( eyePos, eyePos + TRACE_DIRECTIONS[dirIndex] )
     local isAir = ray.HitSky or not ray.Hit
 
-    if dirIndex > 4 then
+    if dirIndex > 9 then
         vSize = isAir and 1 or ray.Fraction
     else
         hSize = hSize + ( isAir and 1 or ray.Fraction )
@@ -384,8 +389,8 @@ function WebAudio:Think( dt )
     local wetMultiplier = ( 1 - room.hSize ) * ( 0.5 + ( 0.4 - room.vSize * 0.6 ) )
 
     self:SetBusParameter( "preGainVolume", GetVolume( "carVolume" ) )
-    self:SetBusParameter( "dryVolume", Round( Clamp( 1 - wetMultiplier * 0.1, 0.5, 1.0 ), 2 ) )
-    self:SetBusParameter( "wetVolume", Round( Clamp( wetMultiplier * 2.5, 0.1, 1.3 ), 2 ) )
+    self:SetBusParameter( "dryVolume", Round( Clamp( 1 - wetMultiplier * 0.3, 0.5, 1.0 ), 2 ) )
+    self:SetBusParameter( "wetVolume", Round( Clamp( wetMultiplier * 2.5, 0.1, 1.2 ), 2 ) )
 
     --[[
         Create one big Javascript snippet, which will:
