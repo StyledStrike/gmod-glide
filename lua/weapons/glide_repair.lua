@@ -83,6 +83,47 @@ end
 local CurTime = CurTime
 local REPAIR_SOUND = "glide/train/track_clank_%d.wav"
 
+local function AnimationWeapon( self, ent, ply )
+    if not IsValid( ent ) then return end
+    if not IsValid( ply ) or not ply:IsPlayer() then return end
+
+    self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
+    ply:SetAnimation( PLAYER_ATTACK1 )
+
+    if ent.UpdateHealthOutputs then
+        ent:UpdateHealthOutputs()
+    end
+
+    local trace = self.repairTrace
+
+    if trace then
+        local data = EffectData()
+        data:SetOrigin( trace.HitPos + trace.HitNormal * 5 )
+        data:SetNormal( trace.HitNormal )
+        data:SetScale( 1 )
+        data:SetMagnitude( 1 )
+        data:SetRadius( 3 )
+        util.Effect( "cball_bounce", data, false, true )
+    end
+end
+
+local function RepairRotor( ent, ply )
+    if not IsValid( ent ) then return end
+    if not IsValid( ply ) or not ply:IsPlayer() then return end
+
+    local rotors = ent.rotors
+    if not rotors then return end
+
+    for i = 1, #rotors do
+        if not IsValid( rotors[i] ) then
+            ent:Repair()
+            ply:EmitSound( "buttons/lever4.wav", 75, 150, 0.3 )
+            break
+        end
+    end
+
+end
+
 function SWEP:PrimaryAttack()
     local user = self:GetOwner()
     if not IsValid( user ) then return end
@@ -95,21 +136,11 @@ function SWEP:PrimaryAttack()
     if not ent then return end
 
     local repairMul = repairSpeedMulCvar:GetFloat()
-
     local engineHealth = ent:GetEngineHealth()
     local chassisHealth = ent:GetChassisHealth()
 
     if chassisHealth >= ent.MaxChassisHealth and engineHealth >= 1 then
-        local rotors = ent.rotors
-        if not rotors then return end
-
-        for i = 1, #rotors do
-            if not IsValid( rotors[i] ) then
-                ent:Repair()
-                user:EmitSound( "buttons/lever4.wav", 75, 150, 0.3 )
-                break
-            end
-        end
+        RepairRotor( ent, user )
 
         return
     end
@@ -137,41 +168,40 @@ function SWEP:PrimaryAttack()
         user:EmitSound( "buttons/lever6.wav", 75, math.random( 110, 120 ), 0.5 )
     end
 
-    if chassisHealth >= ent.MaxChassisHealth then
-        engineHealth = 1
-    end
-
     ent:SetChassisHealth( chassisHealth )
     ent:SetEngineHealth( engineHealth )
 
-    self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
-    user:SetAnimation( PLAYER_ATTACK1 )
-
-    if ent.UpdateHealthOutputs then
-        ent:UpdateHealthOutputs()
-    end
-
-    local trace = self.repairTrace
-
-    if trace then
-        local data = EffectData()
-        data:SetOrigin( trace.HitPos + trace.HitNormal * 5 )
-        data:SetNormal( trace.HitNormal )
-        data:SetScale( 1 )
-        data:SetMagnitude( 1 )
-        data:SetRadius( 3 )
-        util.Effect( "cball_bounce", data, false, true )
-    end
+    AnimationWeapon( self, ent, user )
 end
 
 function SWEP:SecondaryAttack()
 end
 
+hook.Add( "InitPostEntity", "GLide_RepairSWEP::CAMI", function()
+    if not CAMI or not CAMI.RegisterPrivilege then return end
+
+    CAMI.RegisterPrivilege( {
+        Name = "GLide::RepairSWEP",
+        MinAccess = "admin"
+    } )
+end )
+
+
+local function RepairAdminCheck( ply )
+    if not CAMI or not CAMI.PlayerHasAccess then
+        return ply:IsAdmin()
+    end
+
+    return CAMI.PlayerHasAccess( ply, "GLide::RepairSWEP" )
+end
+
 function SWEP:Reload()
     local ply = self:GetOwner()
     if not IsValid( ply ) then return end
+    if not RepairAdminCheck( ply ) then return end
 
-    if not ply:IsAdmin() then return end
+    if not SERVER then return end
+
     local ent = self.repairTarget
     if not ent then return end
 
@@ -181,39 +211,12 @@ function SWEP:Reload()
 
     ent:SetChassisHealth( ent.MaxChassisHealth )
     ent:SetEngineHealth( 1 )
+    ent:SetIsEngineOnFire( false )
 
-    local rotors = ent.rotors
-    if rotors then
-        for i = 1, #rotors do
-            if not IsValid( rotors[i] ) then
-                ent:Repair()
-                ply:EmitSound( "buttons/lever4.wav", 75, 150, 0.3 )
-                break
-            end
-        end
+    RepairRotor( ent, ply )
+    ply:EmitSound( "buttons/lever6.wav", 75, math.random( 110, 120 ), 0.5 )
 
-        return
-    end
-
-    self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
-    ply:SetAnimation( PLAYER_ATTACK1 )
-
-    if ent.UpdateHealthOutputs then
-        ent:UpdateHealthOutputs()
-    end
-
-    local trace = self.repairTrace
-
-    if trace then
-        local data = EffectData()
-        data:SetOrigin( trace.HitPos + trace.HitNormal * 5 )
-        data:SetNormal( trace.HitNormal )
-        data:SetScale( 1 )
-        data:SetMagnitude( 1 )
-        data:SetRadius( 3 )
-        util.Effect( "cball_bounce", data, false, true )
-    end
-
+    AnimationWeapon( self, ent, ply )
 end
 
 if not CLIENT then return end
