@@ -167,6 +167,55 @@ end
 function SWEP:SecondaryAttack()
 end
 
+function SWEP:Reload()
+    local ply = self:GetOwner()
+    if not IsValid( ply ) then return end
+
+    if not ply:IsAdmin() then return end
+    local ent = self.repairTarget
+    if not ent then return end
+
+    if ent:GetChassisHealth() >= ent.MaxChassisHealth and ent:GetEngineHealth() >= 1 then
+        return
+    end
+
+    ent:SetChassisHealth( ent.MaxChassisHealth )
+    ent:SetEngineHealth( 1 )
+
+    local rotors = ent.rotors
+    if rotors then
+        for i = 1, #rotors do
+            if not IsValid( rotors[i] ) then
+                ent:Repair()
+                ply:EmitSound( "buttons/lever4.wav", 75, 150, 0.3 )
+                break
+            end
+        end
+
+        return
+    end
+
+    self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
+    ply:SetAnimation( PLAYER_ATTACK1 )
+
+    if ent.UpdateHealthOutputs then
+        ent:UpdateHealthOutputs()
+    end
+
+    local trace = self.repairTrace
+
+    if trace then
+        local data = EffectData()
+        data:SetOrigin( trace.HitPos + trace.HitNormal * 5 )
+        data:SetNormal( trace.HitNormal )
+        data:SetScale( 1 )
+        data:SetMagnitude( 1 )
+        data:SetRadius( 3 )
+        util.Effect( "cball_bounce", data, false, true )
+    end
+
+end
+
 if not CLIENT then return end
 
 function SWEP:DrawHUD()
