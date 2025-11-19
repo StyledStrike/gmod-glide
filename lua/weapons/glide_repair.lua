@@ -135,6 +135,15 @@ function SWEP:PrimaryAttack()
 
         ent:Repair()
         user:EmitSound( "buttons/lever6.wav", 75, math.random( 110, 120 ), 0.5 )
+
+        if ent.wheels then
+            for _, w in Glide.EntityPairs( ent.wheels ) do
+                if IsValid( w ) and w:IsBlown() then
+                    w:UnBlow()
+                end
+            end
+        end
+
     end
 
     if chassisHealth >= ent.MaxChassisHealth then
