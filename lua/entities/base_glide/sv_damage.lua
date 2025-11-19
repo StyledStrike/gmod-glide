@@ -257,3 +257,28 @@ function ENT:PhysicsCollideFall( speed, data )
         end
     end )
 end
+
+-- Damage for Wheel
+hook.Add( "EntityFireBullets", "Glide_Wheel_BulletDamage", function( _, tData )
+    tData.Callback = function( _, tr, dmginfo )
+        local ent = tr.Entity
+
+        if not IsValid( ent ) then return end
+        if not ent.IsGlideVehicle then return end
+
+        local damage = dmginfo:GetDamage()
+        local wheel
+        for _, w in Glide.EntityPairs( ent.wheels ) do
+            local dist = w:GetPos():DistToSqr( tr.HitPos )
+            if dist < 10000 then
+                wheel = w
+                break
+            end
+        end
+
+        if IsValid( wheel ) then
+            wheel:SetHealth1( math.Clamp( wheel:GetHealth() - damage, 0, 100 ) )
+        end
+    end
+
+end )

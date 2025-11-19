@@ -29,3 +29,7 @@ end
 function ENT:IsBlown()
     return self:GetNWBool( ( "glide_wheel_blowed::%s" ):format( self:GetNWInt( "glide_wheel_index", 0 ) ), false )
 end
+
+function ENT:GetHealth()
+    return self:GetNWInt( "glide_wheel_health" , 100 )
+end

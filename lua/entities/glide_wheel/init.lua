@@ -86,6 +86,7 @@ function ENT:Initialize()
     self.expandSoundCD = 0
 
     self:SetupWheel()
+    self:SetHealth( 30 )
 end
 
 --- Set the size, models and steering properties to use on this wheel.
@@ -181,6 +182,20 @@ function ENT:UnBlow()
 
     if IsValid( self:GetParent() ) then
         self:GetParent():ApplyWheelBlowModifications()
+    end
+end
+
+function ENT:SetHealth1( iHealth )
+    print("WHEEL", self, iHealth)
+    if not iHealth then print("no", iHealth) return end
+
+    iHealth = math.Clamp( iHealth, 0, 100 )
+
+    print("Setting wheel health to "..iHealth)
+
+    self:SetNWInt( "glide_wheel_health",  iHealth )
+    if iHealth <= 0 and not self:IsBlown() then
+        self:Blow()
     end
 end
 
