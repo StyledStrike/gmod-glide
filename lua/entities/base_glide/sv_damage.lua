@@ -269,6 +269,8 @@ hook.Add( "EntityFireBullets", "Glide_Wheel_BulletDamage", function( _, tData )
         local damage = dmginfo:GetDamage()
         local wheel
         for _, w in Glide.EntityPairs( ent.wheels ) do
+            if w:IsBlown() or w:GetHealth() <= 0 then continue end
+
             local dist = w:GetPos():DistToSqr( tr.HitPos )
             if dist < 10000 then
                 wheel = w
