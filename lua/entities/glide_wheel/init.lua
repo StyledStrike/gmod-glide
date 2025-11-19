@@ -186,16 +186,15 @@ function ENT:UnBlow()
 end
 
 function ENT:SetHealth1( iHealth )
-    print("WHEEL", self, iHealth)
-    if not iHealth then print("no", iHealth) return end
+    if not iHealth then return end
 
     iHealth = math.Clamp( iHealth, 0, 100 )
-
-    print("Setting wheel health to "..iHealth)
 
     self:SetNWInt( "glide_wheel_health",  iHealth )
     if iHealth <= 0 and not self:IsBlown() then
         self:Blow()
+    elseif iHealth > 0 and self:IsBlown() then
+        self:UnBlow()
     end
 end
 
