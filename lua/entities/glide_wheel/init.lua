@@ -26,6 +26,7 @@ function ENT:Initialize()
     self:SetModel( "models/editor/axis_helper.mdl" )
     self:SetSolid( SOLID_NONE )
     self:SetMoveType( MOVETYPE_VPHYSICS )
+    self:AddSolidFlags( FSOLID_TRIGGER )
 
     self.params = {
         -- Suspension
@@ -86,7 +87,7 @@ function ENT:Initialize()
     self.expandSoundCD = 0
 
     self:SetupWheel()
-    self:SetHealth( 30 )
+    self:SetHealth1( 30 )
 end
 
 --- Set the size, models and steering properties to use on this wheel.
@@ -169,7 +170,7 @@ end
 function ENT:Blow()
     self:ChangeRadius( self.params.radius * 0.8 )
     self:EmitSound( "glide/wheels/blowout.wav", 80, math.random( 95, 105 ), 1 )
-    self:SetNWBool( ( "glide_wheel_blowed::%s" ):format( self:GetNWInt( "glide_wheel_index", 0 ) ), true )
+    self:SetNWBool( "glide_wheel_blowed", true )
 
     if IsValid( self:GetParent() ) then
         self:GetParent():ApplyWheelBlowModifications()
@@ -178,7 +179,7 @@ end
 
 function ENT:UnBlow()
     self:ChangeRadius( self.params.radius )
-    self:SetNWBool( ( "glide_wheel_blowed::%s" ):format( self:GetNWInt( "glide_wheel_index", 0 ) ), false )
+    self:SetNWBool( "glide_wheel_blowed", false )
 
     if IsValid( self:GetParent() ) then
         self:GetParent():ApplyWheelBlowModifications()
@@ -187,6 +188,9 @@ end
 
 function ENT:SetHealth1( iHealth )
     if not iHealth then return end
+
+    local canDamage = hook.Run( "Glide_CanWheelTakeDamage", self, iHealth )
+    if canDamage == false then return end
 
     iHealth = math.Clamp( iHealth, 0, 100 )
 
