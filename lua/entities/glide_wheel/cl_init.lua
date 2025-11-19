@@ -147,7 +147,7 @@ function ENT:Think()
         end
 
         if not self.blowSound or not self.blowSound:IsPlaying() then
-            self.blowSound = CreateSound( self, "svmod/tire/blowout_a.wav" )
+            self.blowSound = CreateSound( self, "glide/wheels/blowout_wheel_rim.wav" )
             self.blowSound:SetSoundLevel( 80 )
             self.blowSound:PlayEx( 0.5, 100 )
         end
