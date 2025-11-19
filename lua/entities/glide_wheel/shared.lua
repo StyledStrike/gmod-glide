@@ -25,3 +25,7 @@ function ENT:SetupDataTables()
     self:NetworkVar( "Int", "ContactSurface" )
     self:NetworkVar( "Bool", "SoundsEnabled" )
 end
+
+function ENT:IsBlown()
+    return self:GetNWBool( ( "glide_wheel_blowed::%s" ):format( self:GetNWInt( "glide_wheel_index", 0 ) ), false )
+end

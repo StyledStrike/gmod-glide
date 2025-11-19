@@ -50,6 +50,58 @@ function ENT:ChangeWheelRadius( radius )
     end
 end
 
+function ENT:ApplyWheelBlowModifications()
+    if not self.wheels then return end
+
+    local iBlow = 0
+    for _, w in EntityPairs( self.wheels ) do
+        if IsValid( w ) and w:IsBlown() then
+            print(_, " wheel is blown.")
+            iBlow = iBlow + 1
+        end
+    end
+
+    local iPercentage = ( iBlow / self.wheelCount ) * 100
+
+    print( "[Glide] Applying wheel blow modification: ", iBlow, " wheels blown (", iPercentage, "%)" )
+
+    if self.GetSteerConeChangeRate and self.SetSteerConeChangeRate then
+        self.iOldSteerConeChangeRate = self.iOldSteerConeChangeRate or self:GetSteerConeChangeRate()
+
+        self:SetSteerConeChangeRate(self:GetSteerConeChangeRate() * (1 - iPercentage / 100))
+    end
+
+    if self.GetMaxSteerAngle and self.SetMaxSteerAngle then
+        self.iOldMaxSteerAngle = self.iOldMaxSteerAngle or self:GetMaxSteerAngle()
+
+        self:SetMaxSteerAngle(self:GetMaxSteerAngle() * (1 - iPercentage / 100))
+    end
+
+    if iPercentage == 0 then
+        -- Restore old values
+        if self.iOldSteerConeChangeRate and self.GetSteerConeChangeRate and self.SetSteerConeChangeRate then
+            self:SetSteerConeChangeRate(self.iOldSteerConeChangeRate)
+            self.iOldSteerConeChangeRate = nil
+        end
+
+        if self.iOldMaxSteerAngle and self.GetMaxSteerAngle and self.SetMaxSteerAngle then
+            self:SetMaxSteerAngle(self.iOldMaxSteerAngle)
+            self.iOldMaxSteerAngle = nil
+        end
+    end
+
+    if iBlow == 0 then
+        return
+    end
+
+    local iDamage = self:GetChassisHealth() / 2 * ( iPercentage / 100 )
+    self:SetChassisHealth(self:GetChassisHealth() - iDamage)
+
+    --         ent:SetSteerConeChangeRate(ent:GetSteerConeChangeRate() * 0.6)
+    --         ent:SetMaxSteerAngle(ent:GetMaxSteerAngle() * 0.8)
+
+end
+
 --- The returned value from this function is multiplied with
 --- the yaw angle from `ENT.AngularDrag` before appling it to the vehicle.
 function ENT:GetYawDragMultiplier()
