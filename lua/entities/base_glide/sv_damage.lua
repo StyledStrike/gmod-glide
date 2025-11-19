@@ -263,24 +263,12 @@ hook.Add( "EntityFireBullets", "Glide_Wheel_BulletDamage", function( _, tData )
     tData.Callback = function( _, tr, dmginfo )
         local ent = tr.Entity
 
-        if not IsValid( ent ) then return end
-        if not ent.IsGlideVehicle then return end
+        if not IsValid( ent ) or ent:GetClass() ~= "glide_wheel" then
+            return
+        end
 
         local damage = dmginfo:GetDamage()
-        local wheel
-        for _, w in Glide.EntityPairs( ent.wheels ) do
-            if w:IsBlown() or w:GetHealth() <= 0 then continue end
-
-            local dist = w:GetPos():DistToSqr( tr.HitPos )
-            if dist < 10000 then
-                wheel = w
-                break
-            end
-        end
-
-        if IsValid( wheel ) then
-            wheel:SetHealth1( math.Clamp( wheel:GetHealth() - damage, 0, 100 ) )
-        end
+        ent:SetHealth1( math.Clamp( ent:GetHealth() - damage, 0, 100 ) )
     end
 
 end )
