@@ -32,7 +32,6 @@ function ENT:CreateWheel( offset, params )
 
     self.wheelCount = index
     self.wheels[index] = wheel
-    wheel:SetNWInt( "glide_wheel_index", index )
 
     return wheel
 end
@@ -53,53 +52,45 @@ end
 function ENT:ApplyWheelBlowModifications()
     if not self.wheels then return end
 
-    local iBlow = 0
+    local blow = 0
     for _, w in EntityPairs( self.wheels ) do
         if IsValid( w ) and w:IsBlown() then
-            print(_, " wheel is blown.")
-            iBlow = iBlow + 1
+            blow = blow + 1
         end
     end
 
-    local iPercentage = ( iBlow / self.wheelCount ) * 100
-
-    print( "[Glide] Applying wheel blow modification: ", iBlow, " wheels blown (", iPercentage, "%)" )
+    local percentage = 1 - ( blow / self.wheelCount )
 
     if self.GetSteerConeChangeRate and self.SetSteerConeChangeRate then
-        self.iOldSteerConeChangeRate = self.iOldSteerConeChangeRate or self:GetSteerConeChangeRate()
+        self.OldSteer = self.OldSteer or self:GetSteerConeChangeRate()
 
-        self:SetSteerConeChangeRate(self:GetSteerConeChangeRate() * (1 - iPercentage / 100))
+        self:SetSteerConeChangeRate( self:GetSteerConeChangeRate() * percentage )
     end
 
     if self.GetMaxSteerAngle and self.SetMaxSteerAngle then
-        self.iOldMaxSteerAngle = self.iOldMaxSteerAngle or self:GetMaxSteerAngle()
+        self.OldMaxSteer = self.OldMaxSteer or self:GetMaxSteerAngle()
 
-        self:SetMaxSteerAngle(self:GetMaxSteerAngle() * (1 - iPercentage / 100))
+        self:SetMaxSteerAngle( self:GetMaxSteerAngle() * percentage )
     end
 
-    if iPercentage == 0 then
-        -- Restore old values
-        if self.iOldSteerConeChangeRate and self.GetSteerConeChangeRate and self.SetSteerConeChangeRate then
-            self:SetSteerConeChangeRate(self.iOldSteerConeChangeRate)
-            self.iOldSteerConeChangeRate = nil
+    if percentage == 0 then
+        if self.OldSteer and self.GetSteerConeChangeRate and self.SetSteerConeChangeRate then
+            self:SetSteerConeChangeRate( self.OldSteer )
+            self.OldSteer = nil
         end
 
-        if self.iOldMaxSteerAngle and self.GetMaxSteerAngle and self.SetMaxSteerAngle then
-            self:SetMaxSteerAngle(self.iOldMaxSteerAngle)
-            self.iOldMaxSteerAngle = nil
+        if self.OldMaxSteer and self.GetMaxSteerAngle and self.SetMaxSteerAngle then
+            self:SetMaxSteerAngle( self.OldMaxSteer )
+            self.OldMaxSteer = nil
         end
     end
 
-    if iBlow == 0 then
+    if blow == 0 then
         return
     end
 
-    local iDamage = self:GetChassisHealth() / 2 * ( iPercentage / 100 )
-    self:SetChassisHealth(self:GetChassisHealth() - iDamage)
-
-    --         ent:SetSteerConeChangeRate(ent:GetSteerConeChangeRate() * 0.6)
-    --         ent:SetMaxSteerAngle(ent:GetMaxSteerAngle() * 0.8)
-
+    local damage = self:GetChassisHealth() / 2 * percentage
+    self:SetChassisHealth( self:GetChassisHealth() - damage )
 end
 
 --- The returned value from this function is multiplied with

@@ -127,7 +127,7 @@ function ENT:Think()
         surfaceId = MAT_SLOSH
     end
 
-    if ( self:GetNWBool( ( "glide_wheel_blowed::%s" ):format( self:GetNWInt( "glide_wheel_index", 0 ) ) ) and speed > 50 ) then
+    if ( self:GetNWBool( "glide_wheel_blowed" ) and speed > 50 ) then
 
         if ( CurTime() > ( self.cooldownBlowSparks or 0 ) ) then
             local height = 28.79
