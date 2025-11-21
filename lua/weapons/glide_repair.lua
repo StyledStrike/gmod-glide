@@ -134,8 +134,9 @@ hook.Add( "InitPostEntity", "GLide_RepairSWEP::CAMI", function()
     } )
 end )
 
+local IS_SINGLEPLAYER = game.SinglePlayer()
 local function IsAccess( ply, veh )
-    if game.SinglePlayer() then
+    if IS_SINGLEPLAYER then
         return true
     end
 
