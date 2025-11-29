@@ -17,6 +17,29 @@ function ENT:ResetInputs( seatIndex )
     end
 
     self.inputThrottleModifierToggle = false
+
+    if seatIndex > 1 then return end
+
+    for _, data in pairs( self.holdInputActions ) do
+        data.timer = nil
+        data.shouldRelease = nil
+    end
+end
+
+--- Mark a input action as one the vehicle's driver can hold.
+--- 
+--- When `action` is held for a specified amount of time,
+--- the `ENT:OnHoldInputAction` function runs instead of
+--- performing the original action.
+---
+--- `data` is a optional table that will be passed to `ENT:OnHoldInputAction`.
+function ENT:RegisterHoldAction( action, holdTime, data )
+    data = data or {}
+
+    assert( type( data ) == "table", "Hold action data must be a table!" )
+
+    data.holdTime = holdTime
+    self.holdInputActions[action] = data
 end
 
 --- Get the action's boolean value from a specific seat.
@@ -77,6 +100,30 @@ do
 end
 
 function ENT:SetInputBool( seatIndex, action, pressed )
+    -- Check if this vehicle has a "hold" version for this input action.
+    local holdData = self.holdInputActions[action]
+
+    if seatIndex < 2 and holdData then
+        if pressed then
+            -- Store when the player started pressing
+            holdData.timer = CurTime() + holdData.holdTime
+            holdData.shouldRelease = nil
+
+            -- Don't run the default logic for this action
+            return
+        else
+            -- If the driver released this action before the hold timer expired... 
+            if holdData.timer then
+                -- Clear the timer, run the original press action,
+                -- and then run the release action on the next tick.
+                holdData.timer = nil
+                holdData.shouldRelease = true
+
+                pressed = true
+            end
+        end
+    end
+
     local handled = self:OnSeatInput( seatIndex, action, pressed )
     if handled then return end
 

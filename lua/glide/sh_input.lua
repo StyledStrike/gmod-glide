@@ -56,12 +56,12 @@ function Glide.AddInputAction( groupId, action, defaultButton )
     local actions = Glide.InputGroups[groupId]
 
     if not actions then
-        ErrorNoHalt( "Invalid input group: " .. tostring( groupId ) )
+        ErrorNoHalt( "Invalid input group: " .. tostring( groupId ) .. "\n" )
         return
     end
 
     if actions[action] then
-        ErrorNoHalt( "Input action already exists: " .. tostring( action ) )
+        ErrorNoHalt( "Input action already exists: " .. tostring( action ) .. "\n" )
         return
     end
 

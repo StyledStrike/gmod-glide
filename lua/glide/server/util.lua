@@ -258,3 +258,78 @@ function Glide.GetNearbyPlayers( pos, radius )
 
     return found, count
 end
+
+-- Utility function used by the Repair SWEPs, to restore
+-- chassis/engine health either partially or completely, and
+-- to recreate parts and run extra functions when completely repaired.
+function Glide.PartialRepair( vehicle, chassisAmount, engineAmount )
+    local engineHealth = vehicle:GetEngineHealth()
+    local chassisHealth = vehicle:GetChassisHealth()
+
+    -- If the vehicle is at max. chassis and engine health...
+    if chassisHealth >= vehicle.MaxChassisHealth and engineHealth >= 1 then
+        local rotors = vehicle.rotors
+        if rotors then
+            -- If the vehicle has at least one broken rotor,
+            -- run it's `Repair` function to fix all of them.
+            for i = 1, #rotors do
+                if not IsValid( rotors[i] ) then
+                    vehicle:Repair()
+                    break
+                end
+            end
+        end
+
+        if vehicle.wheels then
+            -- Fix any blown wheels
+            for _, wheel in Glide.EntityPairs( vehicle.wheels ) do
+                if wheel:IsBlown() then
+                    wheel:Repair()
+                end
+            end
+        end
+
+        -- No need to run the code below
+        return false, false
+    end
+
+    local wasHealthIncreased = false
+    local hasFinished = false
+
+    -- Increate chassis/engine health, allowing overflow
+    if chassisHealth < vehicle.MaxChassisHealth then
+        chassisHealth = chassisHealth + chassisAmount
+        engineHealth = math.Clamp( engineHealth + engineAmount, 0, 1 )
+        wasHealthIncreased = true
+
+        if chassisHealth > 0.3 and vehicle.SetIsEngineOnFire then
+            vehicle:SetIsEngineOnFire( false )
+        end
+    end
+
+    -- If are at the health limit, or have overflowed it, set it to
+    -- the max. value, and call the vehicle's `Repair` function.
+    if chassisHealth > vehicle.MaxChassisHealth then
+        chassisHealth = vehicle.MaxChassisHealth
+        hasFinished = true
+
+        vehicle:Repair()
+    end
+
+    -- If we are at the max. chassis health already,
+    -- set the engine health to the max. value.
+    if chassisHealth >= vehicle.MaxChassisHealth then
+        engineHealth = 1
+        wasHealthIncreased = true
+    end
+
+    vehicle:SetChassisHealth( chassisHealth )
+    vehicle:SetEngineHealth( engineHealth )
+
+    -- Update Wiremod health outputs
+    if ( hasFinished or wasHealthIncreased ) and vehicle.UpdateHealthOutputs then
+        vehicle:UpdateHealthOutputs()
+    end
+
+    return wasHealthIncreased, hasFinished
+end

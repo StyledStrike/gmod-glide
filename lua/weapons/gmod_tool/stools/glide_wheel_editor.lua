@@ -101,7 +101,8 @@ if SERVER then
         wheel:SetModel( model )
 
         wheel.params.modelScale = scale
-        wheel:ChangeRadius( radius )
+        wheel.params.radius = radius
+        wheel:ChangeRadius()
 
         -- Flip the model offset/angle depending on which side of the vehicle it is
         if wheel.params.basePos[2] < 0 then

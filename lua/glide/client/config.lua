@@ -1040,6 +1040,7 @@ function Config:OpenFrame()
             { name = "glide_gib_enable_collisions", decimals = 0, min = 0, max = 1 },
             { name = "glide_pacifist_mode", decimals = 0, min = 0, max = 1 },
             { name = "glide_allow_gravity_gun_punt", decimals = 0, min = 0, max = 1 },
+            { name = "glide_enable_damage_player_on_collision", decimals = 0, min = 0, max = 1 },
 
             { name = "glide_ragdoll_enable", decimals = 0, min = 0, max = 1 },
             { name = "glide_ragdoll_max_time", decimals = 0, min = 0, max = 30 },

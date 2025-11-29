@@ -19,9 +19,14 @@ function ENT:SetupDataTables()
     self:NetworkVar( "Float", "LastSpin" )
     self:NetworkVar( "Float", "BaseZPos" )
 
+    self:NetworkVar( "Float", "TireHealth" )
     self:NetworkVar( "Float", "Radius" )
     self:NetworkVar( "Float", "SideSlip" )
     self:NetworkVar( "Float", "ForwardSlip" )
     self:NetworkVar( "Int", "ContactSurface" )
     self:NetworkVar( "Bool", "SoundsEnabled" )
+end
+
+function ENT:IsBlown()
+    return self:GetTireHealth() < 1
 end

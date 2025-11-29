@@ -29,6 +29,24 @@ if SERVER then
         return self.GlideCameraAngles or Angle()
     end
 
+    do
+        Glide._OriginalEnterVehicle = Glide._OriginalEnterVehicle or PlayerMeta.EnterVehicle
+        local EnterVehicle = Glide._OriginalEnterVehicle
+
+        function PlayerMeta:EnterVehicle( vehicle )
+            if vehicle.IsGlideVehicle and isfunction( vehicle.GetFreeSeat ) then
+                local seat = vehicle:GetFreeSeat()
+                if not IsValid( seat ) then
+                    return
+                end
+
+                return EnterVehicle( self, seat )
+            end
+
+            return EnterVehicle( self, vehicle )
+        end
+    end
+
     --- Utility function to get the entity creator
     --- or CPPI owner from a entity.
     function Glide.GetEntityCreator( source )

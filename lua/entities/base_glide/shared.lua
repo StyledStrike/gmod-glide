@@ -423,6 +423,7 @@ if SERVER then
     function ENT:OnDriverEnter() end
     function ENT:OnDriverExit() end
     function ENT:OnSeatInput( _seatIndex, _action, _pressed ) end
+    function ENT:OnHoldInputAction( _action, _data ) end
 
     function ENT:OnWeaponFire( _weapon, _weaponIndex )
         return true -- Allow the VSWEP script to run it's own weapon fire logic

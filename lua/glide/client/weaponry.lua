@@ -17,6 +17,7 @@ local MAX_DETAIL_DISTANCE = 4000 * 4000
 function Glide.CreateExplosion( pos, normal, explosionType )
     local volume = GetVolume( "explosionVolume" )
     local isTurret = explosionType == EXPLOSION_TYPE.TURRET
+    local isFirework = explosionType == EXPLOSION_TYPE.FIREWORK
     local isUnderWater = IsUnderWater( pos )
 
     if pos:DistToSqr( EyePos() ) < MAX_DETAIL_DISTANCE then
@@ -34,7 +35,8 @@ function Glide.CreateExplosion( pos, normal, explosionType )
             end
 
             EmitSound( "WaterExplosionEffect.Sound", pos, 0, 6, volume, 100 )
-        else
+
+        elseif not isFirework then
             if not isTurret then
                 EmitSound( "glide/explosions/impact_fire.wav", pos, 0, 6, volume * 0.8, 95 )
             end
@@ -52,6 +54,10 @@ function Glide.CreateExplosion( pos, normal, explosionType )
         eff:SetFlags( 2 )
         eff:SetNormal( normal )
         Effect( "WaterSplash", eff, true, true )
+
+    elseif isFirework then
+        PlaySoundSet( "Glide.Explosion.FireworkSparks", pos, volume )
+
     else
         local eff = EffectData()
         eff:SetOrigin( pos )
@@ -61,6 +67,7 @@ function Glide.CreateExplosion( pos, normal, explosionType )
     end
 
     if not isTurret then
-        PlaySoundSet( "Glide.Explosion.Distant", pos, volume )
+        PlaySoundSet( "Glide.Explosion.Distant", pos, volume * ( isFirework and 0.75 or 1.0 ),
+            isFirework and math.Rand( 80, 90 ) or nil )
     end
 end

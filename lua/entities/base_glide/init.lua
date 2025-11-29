@@ -31,7 +31,7 @@ function ENT:OnEntityCopyTableFinish( data )
 
     for i, w in Glide.EntityPairs( self.wheels ) do
         if IsValid( w ) then
-            wheelRadius[i] = w:GetRadius()
+            wheelRadius[i] = w.params.radius
             wheelCount = wheelCount + 1
         end
     end
@@ -61,6 +61,7 @@ function ENT:OnDuplicated( data )
         w = wheels[i]
 
         if IsValid( w ) and type( radius ) == "number" then
+            w.params.radius = radius
             w:ChangeRadius( radius )
         end
     end
@@ -120,6 +121,9 @@ function ENT:Initialize()
     self.autoTurnOffLights = false  -- User "turn off headlights" setting
     self.inputThrottleModifierMode = 0  -- User throttle modifier setting
     self.inputThrottleModifierToggle = false
+
+    -- Input actions that can be held to run alternative logic.
+    self.holdInputActions = {}
 
     -- Setup collision variables
     self.collisionShakeCooldown = 0
@@ -326,6 +330,7 @@ do
         if not IsValid( seat ) then return end
         if not seat.GlideSeatIndex then return end
         if not ragdollEnableCvar:GetBool() then return end
+        if RCD and RCD.GetSetting( "ejectActivate", "boolean" ) then return end
 
         time = time or maxRagdollTimeCvar:GetFloat()
         vel = vel or self:GetVelocity()
@@ -733,6 +738,19 @@ function ENT:Think()
     -- Update trailer sockets
     if selfTbl.socketCount > 0 then
         self:SocketThink( dt, time )
+    end
+
+    -- Handle hold input actions
+    for action, data in pairs( selfTbl.holdInputActions ) do
+        -- If this action has been held for long enough...
+        if data.timer and time > data.timer then
+            data.timer = nil
+            self:OnHoldInputAction( action, data )
+
+        elseif data.shouldRelease then
+            data.shouldRelease = nil
+            self:SetInputBool( 1, action, false )
+        end
     end
 
     -- Update bodygroups

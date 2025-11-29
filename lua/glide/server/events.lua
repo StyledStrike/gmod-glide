@@ -200,10 +200,8 @@ hook.Add( "EntityTakeDamage", "Glide.OverrideDamage", function( target, dmginfo 
 end, HOOK_HIGH )
 
 -- Mute the ringing sound effect while inside a Glide vehicle.
-hook.Add( "OnDamagedByExplosion", "Glide.DisableRingingSound", function( _, dmginfo )
-    local inflictor = dmginfo:GetInflictor()
-
-    if IsValid( inflictor ) and ( inflictor.IsGlideVehicle or inflictor:GetClass() == "glide_missile" ) then
+hook.Add( "OnDamagedByExplosion", "Glide.DisableRingingSound", function( ply, _ )
+    if IsValid( ply:GlideGetVehicle() ) then
         return true
     end
 end )

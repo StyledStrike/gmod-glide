@@ -23,9 +23,10 @@ if game.SinglePlayer() then
 end
 
 function ENT:Initialize()
-    self:SetModel( "models/editor/axis_helper.mdl" )
+    self:SetModel( "models/hunter/misc/sphere025x025.mdl" )
     self:SetSolid( SOLID_NONE )
     self:SetMoveType( MOVETYPE_VPHYSICS )
+    self:AddSolidFlags( FSOLID_TRIGGER )
 
     self.params = {
         -- Suspension
@@ -49,7 +50,8 @@ function ENT:Initialize()
         radius = 15,
         basePos = Vector(),
         steerMultiplier = 0,
-        enableAxleForces = false
+        enableAxleForces = false,
+        isBulletProof = false
     }
 
     self.state = {
@@ -66,6 +68,7 @@ function ENT:Initialize()
         -- Side traction multiplier
         sideTractionMult = 1,
 
+        isBlown = false,
         isOnGround = false,
         lastFraction = 1,
         lastSpringOffset = 0,
@@ -133,6 +136,9 @@ function ENT:SetupWheel( t )
     -- (Recommended for small vehicles like the Blazer)
     params.enableAxleForces = t.enableAxleForces or false
 
+    -- Can this wheel take damage?
+    params.isBulletProof = t.isBulletProof == true
+
     -- Should this wheel play sounds?
     self:SetSoundsEnabled( t.disableSounds ~= true )
 
@@ -162,11 +168,13 @@ function ENT:Repair()
         self:SetModel( self.params.model )
     end
 
+    self:SetTireHealth( 30 )
     self:ChangeRadius()
 end
 
 function ENT:Blow()
-    self:ChangeRadius( self.params.radius * 0.8 )
+    self:SetTireHealth( 0 )
+    self:ChangeRadius()
     self:EmitSound( "glide/wheels/blowout.wav", 80, math.random( 95, 105 ), 1 )
 end
 
@@ -184,12 +192,37 @@ function ENT:ChangeRadius( radius )
         scale[3] = s
     end
 
+    if self:IsBlown() then
+        radius = radius * 0.75
+    end
+
     self:SetRadius( radius )
     self:SetModelScale2( scale )
+    self.state.isBlown = self:IsBlown()
 
     -- Used on util.TraceHull
     self.traceData.mins = Vector( radius * -0.2, radius * -0.2, 0 )
     self.traceData.maxs = Vector( radius * 0.2, radius * 0.2, 1 )
+end
+
+do
+    local Abs = math.abs
+    local Max = math.max
+
+    function ENT:OnTakeDamage( dmginfo )
+        if self.params.isBulletProof then return end
+
+        local health = self:GetTireHealth()
+        if health < 1 then return end
+
+        health = Max( health - Abs( dmginfo:GetDamage() ), 0 )
+
+        if health < 1 then
+            self:Blow()
+        else
+            self:SetTireHealth( health )
+        end
+    end
 end
 
 do
@@ -379,6 +412,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Brake and torque forces
     surfaceGrip = vehSurfaceGrip[surfaceId] or 1
     maxTraction = params.forwardTractionMax * surfaceGrip * state.forwardTractionMult
+    maxTraction = state.isBlown and maxTraction * 0.5 or maxTraction
 
     -- Grip loss logic
     brakeForce = ( velF > 0 and -state.brake or state.brake ) * params.brakePower * surfaceGrip
@@ -415,6 +449,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Sideways traction ramp
     slipAngle = Abs( slipAngle * slipAngle )
     maxTraction = TractionRamp( slipAngle, params.sideTractionMaxAng, params.sideTractionMax, params.sideTractionMin )
+    maxTraction = state.isBlown and maxTraction * 0.2 or maxTraction
     sideForce = -rt:Dot( vel * params.sideTractionMultiplier * state.sideTractionMult )
 
     -- Reduce sideways traction force as the wheel slips forward

@@ -368,6 +368,8 @@ local JS_SET_BUS_PARAM = "manager.setBusParameter('%s', %f);"
 local JS_UPDATE_LISTENER = "manager.updateListener(%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f);"
 local JS_UPDATE_STREAM = "manager.setStreamData('%s', %.2f, %.2f, %.2f, %.2f, %.2f, %.1f, %s);"
 
+local cvarVolume = GetConVar( "volume" )
+
 local AddLine = WebAudio.AddLine
 local GetVolume = Glide.Config.GetVolume
 local GetLocalViewLocation = Glide.GetLocalViewLocation
@@ -388,7 +390,7 @@ function WebAudio:Think( dt )
 
     local wetMultiplier = ( 1 - room.hSize ) * ( 0.5 + ( 0.4 - room.vSize * 0.6 ) )
 
-    self:SetBusParameter( "preGainVolume", GetVolume( "carVolume" ) )
+    self:SetBusParameter( "preGainVolume", GetVolume( "carVolume" ) * cvarVolume:GetFloat() )
     self:SetBusParameter( "dryVolume", Round( Clamp( 1 - wetMultiplier * 0.3, 0.5, 1.0 ), 2 ) )
     self:SetBusParameter( "wetVolume", Round( Clamp( wetMultiplier * 2.5, 0.1, 1.2 ), 2 ) )
 

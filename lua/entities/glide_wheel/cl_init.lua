@@ -31,12 +31,14 @@ function ENT:CleanupSounds()
     table.Empty( self.soundSurface )
 end
 
+local IsString = isstring
 local Clamp = math.Clamp
 
 function ENT:ProcessSound( vehicle, id, surfaceId, soundSet, altSurface, volume, pitch )
     if not self:GetSoundsEnabled() then return end
 
-    local path = vehicle:OverrideWheelSound( id, surfaceId ) or soundSet[surfaceId]
+    local path = IsString( soundSet ) and soundSet or (
+        vehicle:OverrideWheelSound( id, surfaceId ) or soundSet[surfaceId] )
     local snd = self.sounds[id]
 
     -- Remove the sound if we're on the air, or the volume is too low,
@@ -90,6 +92,18 @@ local IsUnderWater = Glide.IsUnderWater
 local m = Matrix()
 local MAT_SLOSH = MAT_SLOSH
 
+local HARD_SURFACES = {
+    [MAT_DEFAULT] = true,
+    [MAT_CONCRETE] = true,
+    [MAT_PLASTIC] = true,
+    [MAT_VENT] = true,
+    [MAT_WOOD] = true,
+    [MAT_GLASS] = true,
+    [MAT_GRATE] = true,
+    [MAT_METAL] = true,
+    [MAT_TILE] = true,
+}
+
 function ENT:Think()
     local t = CurTime()
 
@@ -130,6 +144,9 @@ function ENT:Think()
     -- Mute concrete sounds when this wheel is part of a tank
     local muteRollSound = surfaceId == 67 and parent.VehicleType == 5
 
+    -- Disable some effects when a blown tire is touching a "hard" surface
+    local isBlownOnHardSurface = self:IsBlown() and HARD_SURFACES[surfaceId]
+
     -- Fast roll sound
     local fastFactor = speed / 600
 
@@ -137,7 +154,7 @@ function ENT:Think()
         Clamp( fastFactor * 0.75, 0, ROLL_VOLUME[surfaceId] or 0.4 ), 70 + 25 * fastFactor )
 
     -- Slow roll sound
-    local slowFactor = muteRollSound and 0 or 1.02 - fastFactor
+    local slowFactor = ( isBlownOnHardSurface or muteRollSound ) and 0 or 1.02 - fastFactor
 
     self:ProcessSound( parent, "slowRoll", surfaceId, WHEEL_SOUNDS.ROLL_SLOW, 88,
         slowFactor * fastFactor * 2, 110 - 30 * slowFactor )
@@ -148,14 +165,20 @@ function ENT:Think()
     sideSlipFactor = Clamp( sideSlipFactor * 1.5, 0, 0.8 )
 
     self:ProcessSound( parent, "sideSlip", surfaceId, WHEEL_SOUNDS.SIDE_SLIP, nil,
-        sideSlipFactor, 110 - 30 * sideSlipFactor )
+        isBlownOnHardSurface and 0 or sideSlipFactor, 110 - 30 * sideSlipFactor )
 
     -- Forward slip sound
     local forwardSlip = self:GetForwardSlip() * 0.04
     local forwardSlipFactor = Clamp( Abs( forwardSlip ) - 0.1, 0, 1 )
 
     self:ProcessSound( parent, "forwardSlip", surfaceId, WHEEL_SOUNDS.FORWARD_SLIP, 88,
-        forwardSlipFactor, 100 - forwardSlipFactor * 10 )
+        isBlownOnHardSurface and 0 or forwardSlipFactor, 100 - forwardSlipFactor * 10 )
+
+    -- Blown tire/rim sound
+    local blownTire = isBlownOnHardSurface and Clamp( sideSlipFactor + forwardSlipFactor + ( speed / 1000 ), 0, 1 ) or 0
+
+    self:ProcessSound( parent, "blownTire", surfaceId, "glide/wheels/blowout_wheel_rim.wav", 88,
+        blownTire * 0.8, 80 + blownTire * 30 )
 
     if muteRollSound then
         selfTbl.lastSkidId = nil
@@ -169,6 +192,19 @@ function ENT:Think()
     end
 
     selfTbl.particleCD = t + 0.05
+
+    if blownTire > 0.1 then
+        local normal = ( parent:GetForward() * ( forwardSlip > 1 and 1 or -1 ) ) + up * 0.2
+
+        local eff = EffectData()
+        eff:SetOrigin( contactPos + up )
+        eff:SetNormal( normal * blownTire * 2 )
+        eff:SetScale( blownTire )
+        eff:SetColor( 200 )
+        Effect( "glide_metal_impact", eff )
+    end
+
+    if isBlownOnHardSurface then return end
 
     -- Emit side slip/tire roll particles
     local particleSize = Clamp( self:GetRadius(), 5, 10 )

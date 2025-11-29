@@ -105,6 +105,18 @@ function ENT:OnTakeDamage( dmginfo )
     BaseClass.OnTakeDamage( self, dmginfo )
 end
 
+--- Override this base class function.
+function ENT:CreateWheel( offset, params )
+    -- Tweak default wheel params
+    params = params or {}
+
+    -- Make tanks have bullet proof wheels by default
+    params.isBulletProof = Either( params.isBulletProof == nil, true, params.isBulletProof  )
+
+    -- Let the base class create the wheel
+    return BaseClass.CreateWheel( self, offset, params )
+end
+
 function ENT:GetTurretOrigin()
     return self:LocalToWorld( self.TurretOffset )
 end

@@ -3,6 +3,10 @@ function ENT:Repair()
     self:SetChassisHealth( self.MaxChassisHealth )
     self:SetEngineHealth( 1.0 )
     self:UpdateHealthOutputs()
+
+    for _, w in Glide.EntityPairs( self.wheels ) do
+        w:Repair()
+    end
 end
 
 function ENT:Explode( attacker, inflictor )
@@ -153,6 +157,8 @@ local PlaySoundSet = Glide.PlaySoundSet
 
 local cvarCollision = GetConVar( "glide_physics_damage_multiplier" )
 local cvarWorldCollision = GetConVar( "glide_world_physics_damage_multiplier" )
+local cvarEnablePlayerCollisionDamage = GetConVar( "glide_enable_damage_player_on_collision" )
+local cvarPlayerCollisionDamageMult = GetConVar( "glide_player_collision_damage_multiplier" )
 
 function ENT:PhysicsCollide( data )
     if data.TheirSurfaceProps == 76 then -- default_silent
@@ -186,6 +192,7 @@ function ENT:PhysicsCollide( data )
     eff:SetOrigin( data.HitPos )
     eff:SetScale( math.min( speed * 0.02, 6 ) * self.CollisionParticleSize )
     eff:SetNormal( surfaceNormal )
+    eff:SetColor( 255 )
     util.Effect( "glide_metal_impact", eff )
 
     local isHardHit = speed > 300
@@ -222,6 +229,21 @@ function ENT:PhysicsCollide( data )
         dmg:SetDamageType( 1 ) -- DMG_CRUSH
         dmg:SetDamagePosition( data.HitPos )
         self:TakeDamageInfo( dmg )
+
+        if not cvarEnablePlayerCollisionDamage:GetBool() then return end
+
+        for _, seat in Glide.EntityPairs( self.seats or {} ) do
+            local ply = seat:GetDriver()
+            if IsValid( ply ) then
+                local dmgPlayer = DamageInfo()
+                dmgPlayer:SetAttacker( ent )
+                dmgPlayer:SetInflictor( self )
+                dmgPlayer:SetDamage( damage * cvarPlayerCollisionDamageMult:GetFloat() )
+                dmgPlayer:SetDamageType( DMG_VEHICLE )
+                ply:TakeDamageInfo( dmgPlayer )
+            end
+        end
+
     end
 end
 
