@@ -122,6 +122,12 @@ Glide.AddSoundSet( "Glide.Explosion.Distant", 140, 95, 105, {
     ")glide/explosions/explosion_dist_9.wav"
 } )
 
+Glide.AddSoundSet( "Glide.Explosion.FireworkSparks", 130, 95, 105, {
+    ")glide/explosions/firework_sparks_1.wav",
+    ")glide/explosions/firework_sparks_2.wav",
+    ")glide/explosions/firework_sparks_3.wav"
+} )
+
 ----- Suspension sounds
 
 Glide.AddSoundSet( "Glide.Suspension.Down", 70, 100, 120, {

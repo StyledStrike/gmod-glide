@@ -21,7 +21,8 @@ Glide.MAX_EXPLOSION_DISTANCE = 15000
 Glide.EXPLOSION_TYPE = {
     MISSILE = 0,
     VEHICLE = 1,
-    TURRET = 2
+    TURRET = 2,
+    FIREWORK = 3
 }
 
 -- Used to notify clients about incoming lock-on/missiles
