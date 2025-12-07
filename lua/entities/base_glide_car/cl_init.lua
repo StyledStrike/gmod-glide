@@ -294,7 +294,6 @@ function ENT:OnUpdateMisc()
 
     if self.lastSirenState ~= siren or self.lastFlashingState ~= flashing then
         self.lastSirenState = siren
-        self.lastFlashingState = flashing
 
         if siren > 0 then
             self.lastSirenEnableTime = CurTime()
@@ -307,11 +306,14 @@ function ENT:OnUpdateMisc()
         end
 
         -- Set bodygroups to default
-        for _, v in ipairs( self.SirenLights ) do
+        local SirenLights = self.SirenLights[self.lastFlashingState] or {}
+        for _, v in ipairs( SirenLights ) do
             if v.bodygroup then
                 self:SetBodygroup( v.bodygroup, 0 )
             end
         end
+
+        self.lastFlashingState = flashing
     end
 
     if flashing < 1 then return end
@@ -322,7 +324,9 @@ function ENT:OnUpdateMisc()
 
     local bodygroupState = {}
 
-    for _, v in ipairs( self.SirenLights ) do
+    local SirenLights = self.SirenLights[flashing] or {}
+
+    for _, v in ipairs( SirenLights ) do
         on = t > v.time and t < v.time + ( v.duration or 0.125 )
 
         -- Check for optional bodygroup requirement
