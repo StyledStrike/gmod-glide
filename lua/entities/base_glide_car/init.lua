@@ -263,7 +263,7 @@ function ENT:ChangeSirenState( state )
 
     state = math.floor( state )
 
-    if state < 0 then state = 1 end
+    if state < 0 then state = self.SirenVehicle and #self.SirenVehicle or 1 end
     if state > ( self.SirenVehicle and #self.SirenVehicle or 1 ) then state = 0 end
 
     self:SetSirenState( state )
