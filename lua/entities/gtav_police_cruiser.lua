@@ -7,11 +7,6 @@ ENT.PrintName = "Police Cruiser"
 ENT.GlideCategory = "Default"
 ENT.ChassisModel = "models/gta5/vehicles/police/chassis.mdl"
 ENT.CanSwitchSiren = true
-ENT.SirenVehicle = {
-    Glide.GetRandomSound( ENT.SirenLoopSound ),
-    "glide/horns/police_horn_2.wav",
-    "glide/alarms/police_siren_1.wav",
-}
 
 function ENT:GetFirstPersonOffset( _, localEyePos )
     localEyePos[1] = localEyePos[1] + 5
@@ -64,39 +59,37 @@ if CLIENT then
     }
 
     ENT.SirenLights = {
-        {
-            -- Top-right (blue) lights
-            { offset = Vector( -6, -21, 41 ), time = 0, color = Glide.DEFAULT_SIREN_COLOR_B },
-            { offset = Vector( -6, -21, 41 ), time = 0.25, color = Glide.DEFAULT_SIREN_COLOR_B },
-            { offset = Vector( -6, -11, 41 ), time = 0, color = Glide.DEFAULT_SIREN_COLOR_B },
-            { offset = Vector( -6, -11, 41 ), time = 0.25, color = Glide.DEFAULT_SIREN_COLOR_B },
+        -- Top-right (blue) lights
+        { offset = Vector( -6, -21, 41 ), time = 0, color = Glide.DEFAULT_SIREN_COLOR_B },
+        { offset = Vector( -6, -21, 41 ), time = 0.25, color = Glide.DEFAULT_SIREN_COLOR_B },
+        { offset = Vector( -6, -11, 41 ), time = 0, color = Glide.DEFAULT_SIREN_COLOR_B },
+        { offset = Vector( -6, -11, 41 ), time = 0.25, color = Glide.DEFAULT_SIREN_COLOR_B },
 
-            -- Top-left (red) lights
-            { offset = Vector( -6, 21, 41 ), time = 0.5, color = Glide.DEFAULT_SIREN_COLOR_A },
-            { offset = Vector( -6, 21, 41 ), time = 0.75, color = Glide.DEFAULT_SIREN_COLOR_A },
-            { offset = Vector( -6, 11, 41 ), time = 0.5, color = Glide.DEFAULT_SIREN_COLOR_A },
-            { offset = Vector( -6, 11, 41 ), time = 0.75, color = Glide.DEFAULT_SIREN_COLOR_A },
+        -- Top-left (red) lights
+        { offset = Vector( -6, 21, 41 ), time = 0.5, color = Glide.DEFAULT_SIREN_COLOR_A },
+        { offset = Vector( -6, 21, 41 ), time = 0.75, color = Glide.DEFAULT_SIREN_COLOR_A },
+        { offset = Vector( -6, 11, 41 ), time = 0.5, color = Glide.DEFAULT_SIREN_COLOR_A },
+        { offset = Vector( -6, 11, 41 ), time = 0.75, color = Glide.DEFAULT_SIREN_COLOR_A },
 
-            -- Top bodygroups
-            { bodygroup = 30, time = 0, duration = 0.5 },
-            { bodygroup = 31, time = 0.5, duration = 0.5 },
-            { bodygroup = 32, time = 0, duration = 0.5 },
-            { bodygroup = 27, time = 0.5, duration = 0.5 },
-            { bodygroup = 28, time = 0, duration = 0.5 },
-            { bodygroup = 29, time = 0.5, duration = 0.5 },
+        -- Top bodygroups
+        { bodygroup = 30, time = 0, duration = 0.5 },
+        { bodygroup = 31, time = 0.5, duration = 0.5 },
+        { bodygroup = 32, time = 0, duration = 0.5 },
+        { bodygroup = 27, time = 0.5, duration = 0.5 },
+        { bodygroup = 28, time = 0, duration = 0.5 },
+        { bodygroup = 29, time = 0.5, duration = 0.5 },
 
-            -- Front bodygroups
-            { bodygroup = 26, time = 0, duration = 0.5 },
-            { bodygroup = 25, time = 0.5, duration = 0.5 },
+        -- Front bodygroups
+        { bodygroup = 26, time = 0, duration = 0.5 },
+        { bodygroup = 25, time = 0.5, duration = 0.5 },
 
-            -- Front-right sprites
-            { offset = Vector( 114, -10, 5 ), dir = Vector( 1, 0, 0 ), time = 0, color = Glide.DEFAULT_SIREN_COLOR_B, lightRadius = 0 },
-            { offset = Vector( 114, -10, 5 ), dir = Vector( 1, 0, 0 ), time = 0.25, color = Glide.DEFAULT_SIREN_COLOR_B, lightRadius = 0 },
+        -- Front-right sprites
+        { offset = Vector( 114, -10, 5 ), dir = Vector( 1, 0, 0 ), time = 0, color = Glide.DEFAULT_SIREN_COLOR_B, lightRadius = 0 },
+        { offset = Vector( 114, -10, 5 ), dir = Vector( 1, 0, 0 ), time = 0.25, color = Glide.DEFAULT_SIREN_COLOR_B, lightRadius = 0 },
 
-            -- Front-left sprites
-            { offset = Vector( 114, 10, 5 ), dir = Vector( 1, 0, 0 ), time = 0.5, color = Glide.DEFAULT_SIREN_COLOR_A, lightRadius = 0 },
-            { offset = Vector( 114, 10, 5 ), dir = Vector( 1, 0, 0 ), time = 0.75, color = Glide.DEFAULT_SIREN_COLOR_A, lightRadius = 0 }
-        }
+        -- Front-left sprites
+        { offset = Vector( 114, 10, 5 ), dir = Vector( 1, 0, 0 ), time = 0.5, color = Glide.DEFAULT_SIREN_COLOR_A, lightRadius = 0 },
+        { offset = Vector( 114, 10, 5 ), dir = Vector( 1, 0, 0 ), time = 0.75, color = Glide.DEFAULT_SIREN_COLOR_A, lightRadius = 0 }
     }
 
     ENT.ExhaustPopSound = ""
