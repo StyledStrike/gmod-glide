@@ -277,7 +277,7 @@ function ENT:ChangeFlashingState( state )
     state = math.floor( state )
 
     if state < 0 then state = 1 end
-    if state > 1 then state = 0 end
+    if state > ( self.NumberFlashingLights or 1 ) then state = 0 end
 
     self:SetFlashingState( state )
 end

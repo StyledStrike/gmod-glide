@@ -306,7 +306,7 @@ function ENT:OnUpdateMisc()
         end
 
         -- Set bodygroups to default
-        local SirenLights = self.SirenLights[self.lastFlashingState] or {}
+        local SirenLights = self.NumberFlashingLights and self.SirenLights[self.lastFlashingState] or self.SirenLights
         for _, v in ipairs( SirenLights ) do
             if v.bodygroup then
                 self:SetBodygroup( v.bodygroup, 0 )
@@ -324,7 +324,7 @@ function ENT:OnUpdateMisc()
 
     local bodygroupState = {}
 
-    local SirenLights = self.SirenLights[flashing] or {}
+    local SirenLights = self.NumberFlashingLights and self.SirenLights[flashing] or self.SirenLights
 
     for _, v in ipairs( SirenLights ) do
         on = t > v.time and t < v.time + ( v.duration or 0.125 )
