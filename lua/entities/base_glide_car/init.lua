@@ -207,7 +207,8 @@ function ENT:OnSeatInput( seatIndex, action, pressed )
 
     if action == "siren" then
         self:ChangeSirenState( self:GetSirenState() + 1 )
-
+    elseif action == "flashinglights" then
+        self:ChangeFlashingState( self:GetFlashingState() + 1 )
     elseif action == "accelerate" and self:GetEngineState() == 0 and self:GetEngineRPM() < 1 then
         self:TurnOn()
     end
@@ -262,14 +263,23 @@ function ENT:ChangeSirenState( state )
 
     state = math.floor( state )
 
-    if state < 0 then state = 2 end
-    if state > 2 then state = 0 end
+    if state < 0 then state = 1 end
+    if state > ( self.SirenVehicle and #self.SirenVehicle or 1 ) then state = 0 end
 
     self:SetSirenState( state )
 
     if TriggerOutput then
         TriggerOutput( self, "SirenState", state )
     end
+end
+
+function ENT:ChangeFlashingState( state )
+    state = math.floor( state )
+
+    if state < 0 then state = 1 end
+    if state > 1 then state = 0 end
+
+    self:SetFlashingState( state )
 end
 
 --- Override this base class function.

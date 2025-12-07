@@ -35,6 +35,7 @@ function ENT:SetupDataTables()
     self:NetworkVar( "Bool", "IsRedlining" )
     self:NetworkVar( "Bool", "IsHonking" )
     self:NetworkVar( "Int", "SirenState" )
+    self:NetworkVar( "Int", "FlashingState" )
 
     self:NetworkVar( "Int", "Gear" )
     self:NetworkVar( "Float", "Steering" )

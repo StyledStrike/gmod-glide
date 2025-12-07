@@ -133,7 +133,9 @@ function ENT:OnUpdateSounds()
         if sounds.siren then
             sounds.siren:ChangeVolume( self.SirenVolume * GetVolume( "hornVolume" ) )
         else
-            local snd = self:CreateLoopingSound( "siren", Glide.GetRandomSound( self.SirenLoopSound ), 90, self )
+            local siren = self:GetSirenState()
+            local snd = self:CreateLoopingSound( "siren", self.SirenVehicle and self.SirenVehicle[siren] or Glide.GetRandomSound( self.SirenLoopSound ), 90, self )
+
             snd:PlayEx( self.SirenVolume * GetVolume( "hornVolume" ), 100 )
         end
 
@@ -288,13 +290,14 @@ function ENT:OnUpdateMisc()
 
     -- Siren lights/bodygroups
     local siren = self:GetSirenState()
+    local flashing = self:GetFlashingState()
 
-    if self.lastSirenState ~= siren then
+    if self.lastSirenState ~= siren or self.lastFlashingState ~= flashing then
         self.lastSirenState = siren
+        self.lastFlashingState = flashing
 
-        if siren > 1 then
+        if siren > 0 then
             self.lastSirenEnableTime = CurTime()
-
         elseif self.lastSirenEnableTime then
             if CurTime() - self.lastSirenEnableTime < 0.25 then
                 Glide.PlaySoundSet( self.SirenInterruptSound, self, self.SirenVolume )
@@ -311,7 +314,7 @@ function ENT:OnUpdateMisc()
         end
     end
 
-    if siren < 1 then return end
+    if flashing < 1 then return end
 
     local myPos = self:GetPos()
     local t = ( CurTime() % self.SirenCycle ) / self.SirenCycle
