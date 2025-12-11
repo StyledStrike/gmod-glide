@@ -34,6 +34,10 @@ function ENT:GetVehicleViewPosition( _role )
     return Vector(), Angle(), 0
 end
 
+function ENT:GetVehicleClass()
+    return self:GetClass()
+end
+
 if CLIENT then
     function ENT:GetAmmo()
         return 0, 0, 0

@@ -327,3 +327,25 @@ hook.Add( "ClientSignOnStateChanged", "Glide.RestoreVehicle", function( _, _, ne
         timer.Simple( 0.2, ResetAll )
     end
 end )
+
+-- The spawnmenu is configured to recognize it as a vehicle (Compatibility with all systems that require this hook, for example, a permission system that allows a vehicle to spawn)
+hook.Add( "PlayerSpawnSENT", "Glide.VehicleSpawnCheck", function( ply, entClass )
+    local entTable = scripted_ents.GetStored( entClass )
+    if not entTable then return end
+
+    local entGlide = entTable["t"]
+    if not entGlide or not isstring( entGlide["GlideCategory"] ) then return end
+
+    local bHook = hook.Run( "PlayerSpawnVehicle", ply, entTable.ChassisModel, entGlide["PrintName"], entGlide )
+
+    return bHook
+end )
+
+hook.Add( "PlayerSpawnedSENT", "Glide.VehicleSpawnSetup", function( ply, ent )
+    if not IsValid( ent ) then return end
+    if not ent.IsGlideVehicle then return end
+
+    hook.Run( "PlayerSpawnedVehicle", ply, ent )
+
+    return true
+end )
