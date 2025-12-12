@@ -81,7 +81,7 @@ do
         -- i cannont be bothered to make this a setting though, just here hard set
         local pretend_joy = 16000
 
-        if pretend_joy < deadzone then
+        if Abs( pretend_joy ) < deadzone then
             value = 0
         else
             value = pretend_joy / 32678
