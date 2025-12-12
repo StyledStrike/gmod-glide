@@ -72,7 +72,25 @@ do
     local Abs = math.abs
     local Clamp = math.Clamp
 
+    --- get the actions controller value, for joystick control
+
+    function ENT:GetInputCont( seatIndex, action )
+        local value = 0
+
+        local deadzone = 3000 -- ideally make this adjustable, as a percentage, in glide settings.
+        -- i cannont be bothered to make this a setting though, just here hard set
+        local pretend_joy = 16000
+
+        if pretend_joy < deadzone then
+            value = 0
+        else
+            value = pretend_joy / 32678
+        end
+        return Clamp( value, -1, 1 )
+    end
+
     --- Get the action's float value from a specific seat.
+
     function ENT:GetInputFloat( seatIndex, action )
         local value = 0
 
