@@ -79,12 +79,12 @@ do
 
         local deadzone = 3000 -- ideally make this adjustable, as a percentage, in glide settings.
         -- i cannot be bothered to make this a setting though, just here hard set
-        local pretend_joy = 16000
+        local joy = self.inputController
 
-        if Abs( pretend_joy ) < deadzone then
+        if Abs( joy ) < deadzone then
             value = 0
         else
-            value = pretend_joy / 32678
+            value = joy / 32678
         end
         return Clamp( value, -1, 1 )
     end
