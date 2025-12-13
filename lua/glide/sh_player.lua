@@ -90,9 +90,9 @@ if SERVER then
     hook.Add( "SetupMove", "Glide.CacheCameraLocation", function( ply, _, cmd )
         local vehicle = GetNWEntity( ply, "GlideVehicle", NULL )
         if not IsValid( vehicle ) then return end
-
+        local joy = cmd:GetSideMove()
+        ply.GlideController = joy
         local angles = cmd:GetViewAngles()
-
         ply.GlideCameraAngles = angles
         ply.GlideCameraAimPos = EntEyePos( ply ) + angles:Forward() * cmd:GetUpMove()
     end, HOOK_HIGH )

@@ -237,7 +237,7 @@ local function HandleMouseInput( ply, active, dt )
         -- debug for controller test
         if true then
         --if settings.controllerSteerMode == 1 then
-            vehicle:SetInputFloat( seatIndex, "steer", vehicle:GetInputCont() )
+            vehicle:SetInputFloat( seatIndex, "steer", vehicle:GetInputCont(ply) )
         -- Glide.MOUSE_STEER_MODE.AIM
         elseif settings.mouseSteerMode == 1 then
             local phys = vehicle:GetPhysicsObject()
@@ -317,6 +317,7 @@ hook.Add( "PlayerButtonUp", "Glide.VehicleInput", function( ply, button )
 end )
 
 hook.Add( "StartCommand", "Glide.MouseWheelInput", function( ply, cmd )
+
     if cmd:GetMouseWheel() ~= 0 then
         local active = activeData[ply]
 
