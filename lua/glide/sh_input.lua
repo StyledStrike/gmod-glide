@@ -87,7 +87,7 @@ Glide.SetupInputGroup( "land_controls" )
 Glide.AddInputAction( "land_controls", "steer_left", KEY_A )
 Glide.AddInputAction( "land_controls", "steer_right", KEY_D )
 
-Glide.AddInputAction( "land_controls", "steer_controller", ANALOG_JOY_X )
+Glide.AddInputAction( "land_controls", "steer_controller", 4 )
 
 Glide.AddInputAction( "land_controls", "accelerate", KEY_W )
 Glide.AddInputAction( "land_controls", "brake", KEY_S )

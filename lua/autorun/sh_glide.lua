@@ -59,6 +59,12 @@ Glide.MOUSE_STEER_MODE = {
     DIRECT = 2      -- Control movement directly
 }
 
+-- Expiermental controller steering mode
+Glide.CONTROLLER_STEER_MODE = {
+    DISABLED = 0,
+    DIRECT = 1
+}
+
 -- Default color for vehicle lights
 Glide.DEFAULT_HEADLIGHT_COLOR = Color( 255, 231, 176 )
 Glide.DEFAULT_TURN_SIGNAL_COLOR = Color( 255, 164, 45 )
