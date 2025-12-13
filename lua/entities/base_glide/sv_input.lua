@@ -78,7 +78,7 @@ do
         local value = 0
 
         local deadzone = 3000 -- ideally make this adjustable, as a percentage, in glide settings.
-        -- i cannont be bothered to make this a setting though, just here hard set
+        -- i cannot be bothered to make this a setting though, just here hard set
         local pretend_joy = 16000
 
         if Abs( pretend_joy ) < deadzone then
