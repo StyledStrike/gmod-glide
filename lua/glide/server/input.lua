@@ -233,11 +233,17 @@ local function HandleMouseInput( ply, active, dt )
 
     -- If this vehicle is not an aircraft
     if vehType ~= 3 and vehType ~= 4 then
+
         -- Glide.CONTROLLER_STEER_MODE.DIRECT
         -- debug for controller test
-        if true then
+        if true then --[[
+        ideally this isnt in the mouse handling function
+        but it was for a quick an dirty test
+        hopefully someone can clean up the code here
+        ]]
         --if settings.controllerSteerMode == 1 then
-            vehicle:SetInputFloat( seatIndex, "steer", vehicle:GetInputCont(ply) )
+            vehicle:SetInputFloat( seatIndex, "steer", vehicle:GetInputCont( ply ) )
+
         -- Glide.MOUSE_STEER_MODE.AIM
         elseif settings.mouseSteerMode == 1 then
             local phys = vehicle:GetPhysicsObject()
