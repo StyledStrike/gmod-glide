@@ -160,13 +160,41 @@ local MOUSE_ACTION_OVERRIDE = {
     ["yaw_right"] = "roll_right"
 }
 
+local function handleControllerSeatSwitch( vehicle )
+    -- put code here to handle seat switching on controller input mode
+end
+
+
 --- Handle button up/down events.
 local function HandleInput( ply, button, active, pressed )
     local vehicle = active.vehicle
+    local settings = playerSettings[ply]
 
     if not IsValid( vehicle ) then
         Glide.DeactivateInput( ply )
         return
+    end
+
+    local Abs = math.abs
+    local Clamp = math.clamp
+    -- Glide.CONTROLLER_INPUT_MODE.ENABLED
+    if true then -- if settings.controllerInputMode == 1 then
+
+        local input = {}
+        input.throttle = ply.GlideControllerThrottle or 0 -- -10000 to 10000
+        input.steer = ply.GlideControllerSteer or 0 -- -10000 to 10000
+        local deadzone = 750 -- deadzone for analog stick movement
+
+        for key, value in pairs( input ) do
+            if Abs( value ) < deadzone then
+                input[key] = 0
+            else
+                input[key] = Clamp( value / 8500, -1, 1 )
+            end
+        end
+        
+        vehicle:SetInputFloat( active.seatIndex, "steer", input.steer )
+        vehicle:SetInputFloat( active.seatIndex, "throttle", input.throttle )
     end
 
     -- Is this a "switch seat" button?
@@ -185,6 +213,8 @@ local function HandleInput( ply, button, active, pressed )
                     immediate = true
                 } )
             end
+        elseif true then -- GLIDE.CONTROLLER_INPUT_MODE.ENABLED
+            handleControllerSeatSwitch( vehicle )
         else
             Glide.SwitchSeat( ply, SEAT_SWITCH_BUTTONS[button] )
         end
@@ -232,20 +262,10 @@ local function HandleMouseInput( ply, active, dt )
     local seatIndex = active.seatIndex
 
     -- If this vehicle is not an aircraft
-    if vehType ~= 3 and vehType ~= 4 then
-
-        -- Glide.CONTROLLER_STEER_MODE.DIRECT
-        -- debug for controller test
-        if true then --[[
-        ideally this isnt in the mouse handling function
-        but it was for a quick an dirty test
-        hopefully someone can clean up the code here
-        ]]
-        --if settings.controllerSteerMode == 1 then
-            vehicle:SetInputFloat( seatIndex, "steer", vehicle:GetInputCont( ply ) )
+    if vehType ~= 3 and vehType ~= 4 then     
 
         -- Glide.MOUSE_STEER_MODE.AIM
-        elseif settings.mouseSteerMode == 1 then
+        if settings.mouseSteerMode == 1 then
             local phys = vehicle:GetPhysicsObject()
             if not IsValid( phys ) then return end
 

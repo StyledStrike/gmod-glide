@@ -60,9 +60,9 @@ Glide.MOUSE_STEER_MODE = {
 }
 
 -- Expiermental controller steering mode
-Glide.CONTROLLER_STEER_MODE = {
+Glide.CONTROLLER_INPUT_MODE = {
     DISABLED = 0,
-    DIRECT = 1
+    ENABLED = 1
 }
 
 -- Default color for vehicle lights
