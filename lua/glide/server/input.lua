@@ -176,7 +176,7 @@ local function HandleInput( ply, button, active, pressed )
     end
 
     local Abs = math.abs
-    local Clamp = math.clamp
+    local Clamp = math.Clamp
     -- Glide.CONTROLLER_INPUT_MODE.ENABLED
     if true then -- if settings.controllerInputMode == 1 then
 
