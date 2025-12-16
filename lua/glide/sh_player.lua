@@ -91,12 +91,14 @@ if SERVER then
         local vehicle = GetNWEntity( ply, "GlideVehicle", NULL )
         if not IsValid( vehicle ) then return end
 
+        ply.GlideController = {}
         local joythrottle = cmd:GetForwardMove()
         local joysteer = cmd:GetSideMove()
         local angles = cmd:GetViewAngles()
 
-        ply.GlideControllerThrottle = joythrottle
-        ply.GlideControllerSteer = joysteer
+        ply.GlideController.throttle = joythrottle
+        ply.GlideController.brake = joythrottle*-1
+        ply.GlideController.steer = joysteer
         ply.GlideCameraAngles = angles
         ply.GlideCameraAimPos = EntEyePos( ply ) + angles:Forward() * cmd:GetUpMove()
     end, HOOK_HIGH )

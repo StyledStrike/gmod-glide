@@ -164,37 +164,43 @@ local function handleControllerSeatSwitch( vehicle )
     -- put code here to handle seat switching on controller input mode
 end
 
-
---- Handle button up/down events.
-local function HandleInput( ply, button, active, pressed )
+local function handleControllerInput( ply, active, dt )
     local vehicle = active.vehicle
-    local settings = playerSettings[ply]
-
-    if not IsValid( vehicle ) then
-        Glide.DeactivateInput( ply )
-        return
-    end
+    local seatIndex = active.seatIndex
 
     local Abs = math.abs
     local Clamp = math.Clamp
     -- Glide.CONTROLLER_INPUT_MODE.ENABLED
     if true then -- if settings.controllerInputMode == 1 then
+        local inputs = {}
+        inputs.throttle = ply.GlideController.throttle or 0 -- -10000 to 10000
+        inputs.steer = ply.GlideController.steer or 0 -- -10000 to 10000
+        inputs.brake = ply.GlideController.brake or 0 -- -10000 to 10000
 
-        local input = {}
-        input.throttle = ply.GlideControllerThrottle or 0 -- -10000 to 10000
-        input.steer = ply.GlideControllerSteer or 0 -- -10000 to 10000
         local deadzone = 750 -- deadzone for analog stick movement
-
-        for key, value in pairs( input ) do
-            if Abs( value ) < deadzone then
-                input[key] = 0
+        for key, input in pairs( inputs ) do
+            if Abs( input ) < 750 then
+                inputs[key] = 0
             else
-                input[key] = Clamp( value / 8500, -1, 1 )
+                inputs[key] = input
             end
         end
         
-        vehicle:SetInputFloat( active.seatIndex, "steer", input.steer )
-        vehicle:SetInputFloat( active.seatIndex, "throttle", input.throttle )
+        vehicle:SetInputFloat( seatIndex, "steer", Clamp( inputs.steer, -1, 1 ) )
+        vehicle:SetInputFloat( seatIndex, "accelerate", Clamp( inputs.throttle, 0, 1 ) )
+        vehicle:SetInputFloat( seatIndex, "brake", Clamp( inputs.brake, 0, 1 ) )
+    end
+end
+
+--- Handle button up/down events.
+local function HandleInput( ply, button, active, pressed )
+    local vehicle = active.vehicle
+    local settings = playerSettings[ply]
+    local seatIndex = active.seatIndex
+
+    if not IsValid( vehicle ) then
+        Glide.DeactivateInput( ply )
+        return
     end
 
     -- Is this a "switch seat" button?
@@ -239,7 +245,7 @@ local function HandleInput( ply, button, active, pressed )
             action = MOUSE_ACTION_OVERRIDE[action]
         end
 
-        vehicle:SetInputBool( active.seatIndex, ACTION_ALIASES[action] or action, pressed )
+        vehicle:SetInputBool( seatIndex, ACTION_ALIASES[action] or action, pressed )
     end
 end
 
@@ -360,6 +366,7 @@ hook.Add( "Think", "Glide.ProcessMouseInput", function()
 
     for ply, active in pairs( activeData ) do
         HandleMouseInput( ply, active, dt )
+        handleControllerInput( ply, active, dt )
     end
 end )
 
