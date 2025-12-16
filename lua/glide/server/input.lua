@@ -173,16 +173,19 @@ local function handleControllerInput( ply, active, dt )
     -- Glide.CONTROLLER_INPUT_MODE.ENABLED
     if true then -- if settings.controllerInputMode == 1 then
         local inputs = {}
-        inputs.throttle = ply.GlideController.throttle or 0 -- -10000 to 10000
-        inputs.steer = ply.GlideController.steer or 0 -- -10000 to 10000
-        inputs.brake = ply.GlideController.brake or 0 -- -10000 to 10000
-
+        for key, value in pairs(ply.GlideController) do
+            inputs[key] = value
+        end
+        local divisor = 10000 -- usercmd side move is between -10000 and 10000
+        local s = 1.2 -- make this some glide sensitivity setting, i guess, between 1 and 2 maybe
+        local d = divisor / s
         local deadzone = 750 -- deadzone for analog stick movement
+
         for key, input in pairs( inputs ) do
-            if Abs( input ) < 750 then
+            if Abs( input ) < deadzone then
                 inputs[key] = 0
             else
-                inputs[key] = input
+                inputs[key] = input / d
             end
         end
         
