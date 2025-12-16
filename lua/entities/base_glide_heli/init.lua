@@ -126,17 +126,17 @@ function ENT:OnPostThink( dt, selfTbl )
     BaseClass.OnPostThink( self, dt, selfTbl )
 
     if selfTbl.inputFlyMode == 0 then -- Glide.MOUSE_FLY_MODE.AIM
-        selfTbl.inputPitch = self:GetInputFloat( 1, "pitch" )
-        selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll" ), 6, dt )
-        selfTbl.inputYaw = self:GetInputFloat( 1, "yaw" )
+        selfTbl.inputPitch = self:GetInputFloat( 1, "pitch", selfTbl )
+        selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll", selfTbl ), 6, dt )
+        selfTbl.inputYaw = self:GetInputFloat( 1, "yaw", selfTbl )
     else
-        selfTbl.inputPitch = ExpDecay( selfTbl.inputPitch, self:GetInputFloat( 1, "pitch" ), 6, dt )
-        selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll" ), 6, dt )
-        selfTbl.inputYaw = ExpDecay( selfTbl.inputYaw, self:GetInputFloat( 1, "yaw" ), 6, dt )
+        selfTbl.inputPitch = ExpDecay( selfTbl.inputPitch, self:GetInputFloat( 1, "pitch", selfTbl ), 6, dt )
+        selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll", selfTbl ), 6, dt )
+        selfTbl.inputYaw = ExpDecay( selfTbl.inputYaw, self:GetInputFloat( 1, "yaw", selfTbl ), 6, dt )
     end
 
     local power = self:GetPower()
-    local throttle = self:GetInputFloat( 1, "throttle" )
+    local throttle = self:GetInputFloat( 1, "throttle", selfTbl )
 
     -- If the main rotor was destroyed, turn off and disable power
     if not self:ShouldAllowRotorSpin( selfTbl ) then

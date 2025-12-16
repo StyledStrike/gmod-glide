@@ -55,14 +55,17 @@ function ENT:GetYawDragMultiplier()
     return 1
 end
 
-function ENT:WheelThink( dt )
+function ENT:WheelThink( dt, selfTbl )
     local phys = self:GetPhysicsObject()
     local isAsleep = phys:IsValid() and phys:IsAsleep()
 
     for _, w in EntityPairs( self.wheels ) do
-        w:Update( self, self.steerAngle, isAsleep, dt )
+        w:Update( self, selfTbl.steerAngle, isAsleep, dt )
     end
 end
+
+local EntityMeta = FindMetaTable( "Entity" )
+local GetTable = EntityMeta.GetTable
 
 local Abs = math.abs
 local Clamp = math.Clamp
@@ -71,8 +74,10 @@ local ClampForce = Glide.ClampForce
 local linForce, angForce = Vector(), Vector()
 
 function ENT:PhysicsSimulate( phys, dt )
+    local selfTbl = GetTable( self )
+
     -- Prepare output vectors, do angular drag
-    local drag = self.AngularDrag
+    local drag = selfTbl.AngularDrag
     local mass = phys:GetMass()
     local angVel = phys:GetAngleVelocity()
 
@@ -87,16 +92,16 @@ function ENT:PhysicsSimulate( phys, dt )
     local groundedCount = 0
 
     -- Do wheel physics
-    if self.wheelCount > 0 and self.wheelsEnabled then
-        local traceFilter = self.wheelTraceFilter
-        local surfaceGrip = self.surfaceGrip
-        local surfaceResistance = self.surfaceResistance
+    if selfTbl.wheelCount > 0 and selfTbl.wheelsEnabled then
+        local traceFilter = selfTbl.wheelTraceFilter
+        local surfaceGrip = selfTbl.surfaceGrip
+        local surfaceResistance = selfTbl.surfaceResistance
 
         local vehPos = phys:GetPos()
         local vehVel = phys:GetVelocity()
         local vehAngVel = phys:GetAngleVelocity()
 
-        for _, w in EntityPairs( self.wheels ) do
+        for _, w in EntityPairs( selfTbl.wheels ) do
             w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, vehVel, vehAngVel )
 
             if w.state.isOnGround then
@@ -114,7 +119,7 @@ function ENT:PhysicsSimulate( phys, dt )
 
     -- At slow speeds, try to prevent slipping sideways on mildly steep slopes
     if groundedCount > 0 then
-        local totalSpeed = self.totalSpeed + Abs( angVel[3] )
+        local totalSpeed = selfTbl.totalSpeed + Abs( angVel[3] )
         local factor = 1 - Clamp( totalSpeed / 30, 0, 1 )
 
         if factor > 0.1 then

@@ -725,6 +725,13 @@ class EngineStreamManager {
         stream.wobbleTime = wobbleTime;
     }
 
+    setStreamParam(id, paramId, value) {
+        if (!(id in this.streams)) return;
+
+        const params = this.streams[id].params;
+        params[paramId] = value;
+    }
+
     setStreamLowpassFilterFreq(id, frequency, time = 0.5) {
         if (!(id in this.streams)) return;
 

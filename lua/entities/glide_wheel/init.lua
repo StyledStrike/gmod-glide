@@ -3,25 +3,6 @@ AddCSLuaFile( "cl_init.lua" )
 
 include( "shared.lua" )
 
--- Store the TraceResult on this table instead of
--- creating a new one every time. It's contents are
--- overritten every time a wheel calls `util.TraceHull`.
-local ray = Glide.LastWheelTraceResult or {}
-
--- Keep the same table reference on Lua autorefresh.
--- Prevents errors on existing wheels when updating this file.
-Glide.LastWheelTraceResult = ray
-
-if game.SinglePlayer() then
-    -- Workaround for updating the TraceResult
-    -- table reference after a level transition.
-    hook.Add( "InitPostEntity", "Glide.WheelTraceResultWorkaround", function()
-        for _, w in ipairs( ents.FindByClass( "glide_wheel" ) ) do
-            w.traceData.output = ray
-        end
-    end )
-end
-
 function ENT:Initialize()
     self:SetModel( "models/hunter/misc/sphere025x025.mdl" )
     self:SetSolid( SOLID_NONE )
@@ -76,13 +57,18 @@ function ENT:Initialize()
         isDebugging = Glide.GetDevMode()
     }
 
+    -- Store the TraceResult on this table instead of
+    -- creating a new one every time. It's contents are
+    -- overritten every time a wheel calls `util.TraceHull`.
+    self.state.ray = {}
+
     -- Used for raycasting, updates with wheel radius
-    self.traceData = {
+    self.state.traceData = {
         mins = Vector(),
         maxs = Vector( 1, 1, 1 ),
 
         -- Output TraceResult to `ray`
-        output = ray
+        output = self.state.ray
     }
 
     self.contractSoundCD = 0
@@ -196,13 +182,15 @@ function ENT:ChangeRadius( radius )
         radius = radius * 0.75
     end
 
+    local state = self.state
+
     self:SetRadius( radius )
     self:SetModelScale2( scale )
-    self.state.isBlown = self:IsBlown()
+    state.isBlown = self:IsBlown()
 
     -- Used on util.TraceHull
-    self.traceData.mins = Vector( radius * -0.2, radius * -0.2, 0 )
-    self.traceData.maxs = Vector( radius * 0.2, radius * 0.2, 1 )
+    state.traceData.mins = Vector( radius * -0.2, radius * -0.2, 0 )
+    state.traceData.maxs = Vector( radius * 0.2, radius * 0.2, 1 )
 end
 
 do
@@ -314,7 +302,7 @@ local surfaceGrip, maxTraction, brakeForce, forwardForce, signForwardForce
 local tractionCycle, gripLoss, groundAngularVelocity, angularVelocity = Vector()
 local slipAngle, sideForce
 local force, linearImp, angularImp
-local state, params, traceData
+local state, params, traceData, ray
 
 function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfaceGrip, vehSurfaceResistance, vehPos, vehVel, vehAngVel )
     state, params = self.state, self.params
@@ -334,10 +322,11 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     radius = self:GetRadius()
     maxLen = state.suspensionLengthMult * params.suspensionLength + radius
 
-    traceData = self.traceData
+    traceData = state.traceData
     traceData.filter = traceFilter
     traceData.start = pos
     traceData.endpos = pos - up * maxLen
+    ray = state.ray
 
     -- TraceResult gets stored on the `ray` table
     TraceHull( traceData )

@@ -125,16 +125,16 @@ function ENT:OnPostThink( dt, selfTbl )
         self:UpdateHealthOutputs()
     end
 
-    selfTbl.inputPitch = ExpDecay( selfTbl.inputPitch, self:GetInputFloat( 1, "pitch" ), 10, dt )
-    selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll" ), 10, dt )
-    selfTbl.inputYaw = ExpDecay( selfTbl.inputYaw, self:GetInputFloat( 1, "yaw" ), 10, dt )
+    selfTbl.inputPitch = ExpDecay( selfTbl.inputPitch, self:GetInputFloat( 1, "pitch", selfTbl ), 10, dt )
+    selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll", selfTbl ), 10, dt )
+    selfTbl.inputYaw = ExpDecay( selfTbl.inputYaw, self:GetInputFloat( 1, "yaw", selfTbl ), 10, dt )
 
     self:SetElevator( selfTbl.inputPitch )
     self:SetRudder( selfTbl.inputYaw )
     self:SetAileron( selfTbl.inputRoll )
 
     local power = self:GetPower()
-    local throttle = self:GetInputFloat( 1, "throttle" )
+    local throttle = self:GetInputFloat( 1, "throttle", selfTbl )
 
     -- If the main propeller was destroyed, turn off and disable power
     if not IsValid( selfTbl.mainProp ) and selfTbl.PropModel ~= "" then

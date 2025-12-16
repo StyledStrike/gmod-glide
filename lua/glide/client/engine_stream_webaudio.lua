@@ -174,6 +174,12 @@ function WebAudio:RequestStreamCreation( stream )
     self.streams[id] = stream
     self.streamCount = self.streamCount + 1
     self.panel:RunJavascript( ( "manager.createStream('%s');" ):format( tostring( id ) ) )
+
+    stream.lastKV = {}
+
+    for k, v in pairs( Glide.DEFAULT_STREAM_PARAMS ) do
+        stream.lastKV[k] = v
+    end
 end
 
 function WebAudio:RequestStreamDeletion( id )
@@ -437,6 +443,14 @@ function WebAudio:Think( dt )
             if stream.isWebPlaying ~= stream.isPlaying then
                 stream.isWebPlaying = stream.isPlaying
                 self.panel:RunJavascript( ( "manager.setStreamPlaying('%s', %s);" ):format( id, stream.isPlaying and "true" or "false" ) )
+            end
+
+            -- Update KV parameters, if they have changed
+            for k, v in pairs( stream.lastKV ) do
+                if v ~= stream[k] then
+                    stream.lastKV[k] = stream[k]
+                    AddLine( "manager.setStreamParam('%s', '%s', %.2f);", id, k, stream[k] )
+                end
             end
 
             local position = stream.position
