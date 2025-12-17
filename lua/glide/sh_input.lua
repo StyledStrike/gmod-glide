@@ -5,6 +5,15 @@
     action names and the default key that triggers them.
 ]]
 
+JOYSTICK_AXIS_ENUMS = {
+    X = 4,
+    Y = 5,
+    Z = 6,
+    R = 7,
+    U = 8,
+    V = 9
+}
+
 -- Keys reserved for seat switching
 Glide.SEAT_SWITCH_BUTTONS = {
     [KEY_1] = 1,
