@@ -68,11 +68,18 @@ end
 
 local Abs = math.abs
 local Clamp = math.Clamp
+local mult = 1 / 32768
 
 local function ProcessInput( axis, deadzone, sensitivity )
-    local divide = 32768 / sensitivity
     local value = input.GetAnalogValue( axis )
     if Abs( value ) < deadzone then return 0 end
 
-    return Clamp( value / divide, -1, 1 )
+    -- all of this can look kinda scary i guess
+    local sign = value >= 0 and 1 or -1
+    local normalized = Abs( value * mult ) 
+    local out = sign * (normalized * normalized) * sensitivity 
+    -- i use only multiplication to try to save on cpu cycles
+    -- speed i feel is critical to keeping glide optimized and fast
+
+    return Clamp( out, -1, 1 )
 end
