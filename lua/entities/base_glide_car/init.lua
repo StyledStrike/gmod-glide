@@ -6,9 +6,6 @@ DEFINE_BASECLASS( "base_glide" )
 include( "shared.lua" )
 include( "sv_engine.lua" )
 
-local EntityMeta = FindMetaTable( "Entity" )
-local getTable = EntityMeta.GetTable
-
 --- Implement this base class function.
 function ENT:OnPostInitialize()
     -- Setup variables used on all cars
@@ -108,6 +105,47 @@ function ENT:OnPostInitialize()
     end
 end
 
+-- For testing, setup some default features if this class is spawned directly.
+-- Your vehicle should completely override this function.
+function ENT:CreateFeatures()
+    self:SetBrakePower( 2000 )
+    self:SetDifferentialRatio( 0.5 )
+
+    self:CreateSeat( Vector( 0, 0, 5 ), Angle( 0, 270, 0 ), Vector( 0, 60, 0 ), false )
+
+    self:CreateWheel( Vector( 20, 19, -1 ), {
+        model = "models/gta5/vehicles/caddy2/wheel.mdl",
+        modelAngle = Angle( 0, 90, 0 ),
+        modelScale = Vector( 0.38, 1, 1 ),
+        steerMultiplier = 1,
+        enableAxleForces = true
+    } )
+
+    self:CreateWheel( Vector( 20, -19, -1 ), {
+        model = "models/gta5/vehicles/caddy2/wheel.mdl",
+        modelAngle = Angle( 0, -90, 0 ),
+        modelScale = Vector( 0.38, 1, 1 ),
+        steerMultiplier = 1,
+        enableAxleForces = true
+    } )
+
+    self:CreateWheel( Vector( -20, 20, -1 ), {
+        model = "models/gta5/vehicles/caddy2/wheel.mdl",
+        modelAngle = Angle( 0, 90, 0 ),
+        modelScale = Vector( 0.38, 1, 1 ),
+        enableAxleForces = true
+    } )
+
+    self:CreateWheel( Vector( -20, -20, -1 ), {
+        model = "models/gta5/vehicles/caddy2/wheel.mdl",
+        modelAngle = Angle( 0, -90, 0 ),
+        modelScale = Vector( 0.38, 1, 1 ),
+        enableAxleForces = true
+    } )
+
+    self:ChangeWheelRadius( 10 )
+end
+
 --- Update the `params` table for each wheel,
 --- using values from our network variables.
 function ENT:UpdateWheelParameters()
@@ -142,7 +180,9 @@ end
 
 --- Implement this base class function.
 function ENT:OnDriverEnter()
-    self:TurnOn()
+    if self.autoTurnOnEngine then
+        self:TurnOn()
+    end
 end
 
 --- Implement this base class function.
@@ -409,7 +449,7 @@ function ENT:OnPostThink( dt, selfTbl )
                 self:SetFlywheelRPM( 0 )
             end
         else
-            self:EngineThink( dt )
+            self:EngineThink( dt, selfTbl )
         end
     else
         selfTbl.availableFrontTorque = 0
@@ -417,7 +457,7 @@ function ENT:OnPostThink( dt, selfTbl )
 
         local brake = self:GetInputFloat( 1, "brake" )
 
-        if self:GetInputBool( 1, "handbrake" ) then
+        if self:GetInputBool( 1, "handbrake", selfTbl ) then
             brake = 0.5
         end
 
@@ -428,16 +468,16 @@ function ENT:OnPostThink( dt, selfTbl )
     end
 
     -- Update driver inputs
-    self:UpdateSteering( dt )
+    self:UpdateSteering( dt, selfTbl )
     self:SetBrakeValue( Clamp( self.frontBrake + self.rearBrake + ( self:GetInputBool( 1, "handbrake" ) and 1 or 0 ), 0, 1 ) )
 
     local phys = self:GetPhysicsObject()
 
     if selfTbl.groundedCount < 1 and IsValid( phys ) and self:WaterLevel() < 3 then
         if selfTbl.totalSpeed > 200 then
-            self:UpdateAirControls( phys, dt )
+            self:UpdateAirControls( phys, dt, selfTbl )
         else
-            self:UpdateUnflip( phys, dt )
+            self:UpdateUnflip( phys, dt, selfTbl )
         end
     else
         selfTbl.inputAirRoll = 0
@@ -450,21 +490,21 @@ end
 
 local ExpDecay = Glide.ExpDecay
 
-function ENT:UpdateSteering( dt )
+function ENT:UpdateSteering( dt, selfTbl )
     local inputSteer = self:GetInputFloat( 1, "steer" )
     local absInputSteer = Abs( inputSteer )
 
-    local sideSlip = Clamp( self.avgSideSlip, -1, 1 )
-    local steerConeFactor = Clamp( self.totalSpeed / self:GetSteerConeMaxSpeed(), 0, 1 )
+    local sideSlip = Clamp( selfTbl.avgSideSlip, -1, 1 )
+    local steerConeFactor = Clamp( selfTbl.totalSpeed / self:GetSteerConeMaxSpeed(), 0, 1 )
 
     -- Limit the input depending on speed...
     local steerCone = 1 - steerConeFactor * ( 1 - self:GetSteerConeMaxAngle() )
 
     -- But only while not slipping.
     steerCone = Clamp( steerCone, Abs( sideSlip ), 1 )
-    inputSteer = ExpDecay( self.inputSteer, inputSteer * steerCone, self:GetSteerConeChangeRate(), dt )
+    inputSteer = ExpDecay( selfTbl.inputSteer, inputSteer * steerCone, self:GetSteerConeChangeRate(), dt )
 
-    self.inputSteer = inputSteer
+    selfTbl.inputSteer = inputSteer
 
     -- Counter-steer when slipping, going fast and not using steer input
     local counterSteer = sideSlip * steerConeFactor * ( 1 - absInputSteer )
@@ -473,23 +513,23 @@ function ENT:UpdateSteering( dt )
     inputSteer = Clamp( inputSteer + counterSteer, -1, 1 )
 
     self:SetSteering( inputSteer )
-    self.steerAngle[2] = -inputSteer * self:GetMaxSteerAngle()
+    selfTbl.steerAngle[2] = -inputSteer * self:GetMaxSteerAngle()
 
     -- Reduce front wheel sideways friction when trying to do a J-turn 
-    if self.forwardSpeed < -100 then
-        self.jTurnMultiplier = 0.5
+    if selfTbl.forwardSpeed < -100 then
+        selfTbl.jTurnMultiplier = 0.5
     else
-        self.jTurnMultiplier = ExpDecay( self.jTurnMultiplier, 1, 2, dt )
+        selfTbl.jTurnMultiplier = ExpDecay( selfTbl.jTurnMultiplier, 1, 2, dt )
     end
 
     -- Reduce wheel sideways friction when doing a burnout
-    if self.burnout > 0.1 then
+    if selfTbl.burnout > 0.1 then
         local frontBurnout = self:GetPowerDistribution() > 0
-        self.frontSideTractionMult = frontBurnout and 0.5 or 1
-        self.rearSideTractionMult = frontBurnout and 1 or 0.5
+        selfTbl.frontSideTractionMult = frontBurnout and 0.5 or 1
+        selfTbl.rearSideTractionMult = frontBurnout and 1 or 0.5
     else
-        self.frontSideTractionMult = self.jTurnMultiplier
-        self.rearSideTractionMult = 1
+        selfTbl.frontSideTractionMult = selfTbl.jTurnMultiplier
+        selfTbl.rearSideTractionMult = 1
     end
 end
 
@@ -510,8 +550,8 @@ function ENT:GetYawDragMultiplier()
 end
 
 --- Let the driver unflip the vehicle when it is upside down.
-function ENT:UpdateUnflip( phys, dt )
-    if Abs( self.inputSteer ) < 0.1 then return end
+function ENT:UpdateUnflip( phys, dt, selfTbl )
+    if Abs( selfTbl.inputSteer ) < 0.1 then return end
 
     local ang = self:GetAngles()
     if Abs( ang[3] ) < 70 then return end
@@ -521,25 +561,25 @@ function ENT:UpdateUnflip( phys, dt )
     end
 
     local angVel = phys:GetAngleVelocity()
-    local force = self.inputSteer * phys:GetMass() * Clamp( 1 - Abs( angVel[1] ) / 50, 0, 1 ) * self.UnflipForce
+    local force = selfTbl.inputSteer * phys:GetMass() * Clamp( 1 - Abs( angVel[1] ) / 50, 0, 1 ) * selfTbl.UnflipForce
 
     phys:AddAngleVelocity( Vector( force * dt, 0, 0 ) )
 end
 
 --- Let the driver spin the car while airborne.
-function ENT:UpdateAirControls( phys, dt )
+function ENT:UpdateAirControls( phys, dt, selfTbl )
     local mass = phys:GetMass()
     local angVel = phys:GetAngleVelocity()
 
     local roll, pitch, yaw = self:GetAirInputs()
 
-    self.inputAirRoll = Approach( self.inputAirRoll, roll, dt )
-    self.inputAirPitch = Approach( self.inputAirPitch, pitch, dt )
-    self.inputAirYaw = Approach( self.inputAirYaw, yaw, dt )
+    selfTbl.inputAirRoll = Approach( selfTbl.inputAirRoll, roll, dt )
+    selfTbl.inputAirPitch = Approach( selfTbl.inputAirPitch, pitch, dt )
+    selfTbl.inputAirYaw = Approach( selfTbl.inputAirYaw, yaw, dt )
 
-    local rollMult = Clamp( 1 - Abs( angVel[1] / self.AirMaxAngularVelocity[1] ), 0, 1 )
-    local pitchMult = Clamp( 1 - Abs( angVel[2] / self.AirMaxAngularVelocity[2] ), 0, 1 )
-    local yawMult = Clamp( 1 - Abs( angVel[3] / self.AirMaxAngularVelocity[3] ), 0, 1 )
+    local rollMult = Clamp( 1 - Abs( angVel[1] / selfTbl.AirMaxAngularVelocity[1] ), 0, 1 )
+    local pitchMult = Clamp( 1 - Abs( angVel[2] / selfTbl.AirMaxAngularVelocity[2] ), 0, 1 )
+    local yawMult = Clamp( 1 - Abs( angVel[3] / selfTbl.AirMaxAngularVelocity[3] ), 0, 1 )
 
     -- Logic to only apply the limit when rotating in the same direction as the input
     roll = roll * ( roll > 0 and ( angVel[1] > 0 and rollMult or 1 ) or ( angVel[1] < 0 and rollMult or 1 ) )
@@ -547,9 +587,9 @@ function ENT:UpdateAirControls( phys, dt )
     yaw = yaw * ( yaw > 0 and ( angVel[3] > 0 and yawMult or 1 ) or ( angVel[3] < 0 and yawMult or 1 ) )
 
     phys:AddAngleVelocity( Vector(
-        self.AirControlForce[1] * roll * mass * dt,
-        self.AirControlForce[2] * pitch * mass * dt,
-        self.AirControlForce[3] * yaw * mass * dt
+        selfTbl.AirControlForce[1] * roll * mass * dt,
+        selfTbl.AirControlForce[2] * pitch * mass * dt,
+        selfTbl.AirControlForce[3] * yaw * mass * dt
     ) )
 end
 
@@ -558,16 +598,17 @@ function ENT:CreateWheel( offset, params )
     params = params or {}
 
     local wheel = BaseClass.CreateWheel( self, offset, params )
+    local state = wheel.state
 
     -- If the `isFrontWheel` param is not forced, figure it out now
     if params.isFrontWheel == nil then
-        wheel.isFrontWheel = offset[1] > 0
+        state.isFrontWheel = offset[1] > 0
     else
-        wheel.isFrontWheel = params.isFrontWheel == true
+        state.isFrontWheel = params.isFrontWheel == true
     end
 
     -- Update power distribution next tick
-    wheel.distributionFactor = 0
+    state.distributionFactor = 0
     self.shouldUpdatePowerDistribution = true
 
     return wheel
@@ -590,13 +631,11 @@ local frontTorque, rearTorque, steerAngle, frontBrake, rearBrake
 local groundedCount, rpm, avgRPM, totalSideSlip, totalForwardSlip, state
 
 --- Implement this base class function.
-function ENT:WheelThink( dt )
-    local selfTbl = getTable( self )
-
+function ENT:WheelThink( dt, selfTbl )
     local phys = self:GetPhysicsObject()
     local isAsleep = IsValid( phys ) and phys:IsAsleep()
-    local maxRPM = self:GetTransmissionMaxRPM( self:GetGear() )
-    local inputHandbrake = self:GetInputBool( 1, "handbrake" )
+    local maxRPM = self:GetTransmissionMaxRPM( self:GetGear(), selfTbl )
+    local inputHandbrake = self:GetInputBool( 1, "handbrake", selfTbl )
 
     traction = self:GetForwardTractionBias()
     tractionFront = ( 1 + Clamp( traction, -1, 0 ) ) * selfTbl.frontTractionMult
@@ -615,16 +654,16 @@ function ENT:WheelThink( dt )
         totalSideSlip = totalSideSlip + w:GetSideSlip()
         totalForwardSlip = totalForwardSlip + w:GetForwardSlip()
 
-        rpm = w:GetRPM()
-        avgRPM = avgRPM + rpm * w.distributionFactor
-
         state = w.state
-        state.torque = w.distributionFactor * ( w.isFrontWheel and frontTorque or rearTorque )
-        state.brake = w.isFrontWheel and frontBrake or rearBrake
-        state.forwardTractionMult = w.isFrontWheel and tractionFront or tractionRear
-        state.sideTractionMult = w.isFrontWheel and selfTbl.frontSideTractionMult or selfTbl.rearSideTractionMult
+        rpm = w:GetRPM()
+        avgRPM = avgRPM + rpm * state.distributionFactor
 
-        if inputHandbrake and not w.isFrontWheel then
+        state.torque = state.distributionFactor * ( state.isFrontWheel and frontTorque or rearTorque )
+        state.brake = state.isFrontWheel and frontBrake or rearBrake
+        state.forwardTractionMult = state.isFrontWheel and tractionFront or tractionRear
+        state.sideTractionMult = state.isFrontWheel and selfTbl.frontSideTractionMult or selfTbl.rearSideTractionMult
+
+        if inputHandbrake and not state.isFrontWheel then
             state.angularVelocity = 0
         end
 

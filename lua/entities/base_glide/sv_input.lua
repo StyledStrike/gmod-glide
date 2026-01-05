@@ -73,17 +73,19 @@ do
     local Clamp = math.Clamp
 
     --- Get the action's float value from a specific seat.
-    function ENT:GetInputFloat( seatIndex, action )
+    function ENT:GetInputFloat( seatIndex, action, selfTbl )
+        selfTbl = selfTbl or self
+
         local value = 0
 
         -- Try to get the float value directly
-        local floats = self.inputFloats[seatIndex]
+        local floats = selfTbl.inputFloats[seatIndex]
         if floats then
             value = floats[action] or 0
         end
 
         -- Try to convert the boolean actions to a float action
-        local bools = self.inputBools[seatIndex]
+        local bools = selfTbl.inputBools[seatIndex]
         if bools then
             local indexes = BOOL_TO_FLOAT[action]
             local boolState = bools[indexes[1]] and -1 or ( bools[indexes[2]] and 1 or 0 )

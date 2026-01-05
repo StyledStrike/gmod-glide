@@ -177,13 +177,13 @@ class EngineStream {
         this.bassBoostNode.type = "lowshelf";
         this.bassBoostNode.frequency.value = 0.0;
         this.bassBoostNode.gain.value = 0.0;
-        this.bassBoostNode.Q.value = 0.1;
+        this.bassBoostNode.Q.value = 1.0;
 
         this.trebleBoostNode = context.createBiquadFilter();
         this.trebleBoostNode.type = "highshelf";
         this.trebleBoostNode.frequency.value = 0.0;
         this.trebleBoostNode.gain.value = 0.0;
-        this.trebleBoostNode.Q.value = 0.1;
+        this.trebleBoostNode.Q.value = 1.0;
 
         this.lowpassNode = context.createBiquadFilter();
         this.lowpassNode.type = "highshelf";
@@ -401,7 +401,7 @@ class EngineStream {
 
             const bassGain = this.bassBoostNode.gain;
             bassGain.cancelAndHoldAtTime(t);
-            bassGain.linearRampToValueAtTime(4.0 * params.wa_PunchStrength, t + attackTime);
+            bassGain.linearRampToValueAtTime(5.0 * params.wa_PunchStrength, t + attackTime);
             bassGain.linearRampToValueAtTime(0.0, t + releaseTime);
 
             const trebleFreq = this.trebleBoostNode.frequency;
@@ -723,6 +723,13 @@ class EngineStreamManager {
 
         const stream = this.streams[id];
         stream.wobbleTime = wobbleTime;
+    }
+
+    setStreamParam(id, paramId, value) {
+        if (!(id in this.streams)) return;
+
+        const params = this.streams[id].params;
+        params[paramId] = value;
     }
 
     setStreamLowpassFilterFreq(id, frequency, time = 0.5) {

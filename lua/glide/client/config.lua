@@ -69,6 +69,7 @@ function Config:Reset()
     self.autoHeadlightOn = true
     self.autoHeadlightOff = true
     self.autoTurnOffLights = true
+    self.autoTurnOnEngine = true
     self.enableTips = true
 end
 
@@ -176,6 +177,7 @@ function Config:Save( immediate )
         autoHeadlightOn = self.autoHeadlightOn,
         autoHeadlightOff = self.autoHeadlightOff,
         autoTurnOffLights = self.autoTurnOffLights,
+        autoTurnOnEngine = self.autoTurnOnEngine,
         enableTips = self.enableTips,
 
         -- Group-to-action-to-button dictionary
@@ -293,6 +295,7 @@ function Config:Load()
     LoadBool( "autoHeadlightOn", true )
     LoadBool( "autoHeadlightOff", true )
     LoadBool( "autoTurnOffLights", true )
+    LoadBool( "autoTurnOnEngine", true )
     LoadBool( "enableTips", true )
 
     -- Group-to-action-to-button dictionary
@@ -336,6 +339,7 @@ function Config:TransmitInputSettings( immediate )
 
         -- Misc. settings
         autoTurnOffLights = self.autoTurnOffLights,
+        autoTurnOnEngine = self.autoTurnOnEngine,
 
         -- Action-key dictionary
         binds = self.binds
@@ -985,6 +989,12 @@ function Config:OpenFrame()
 
     CreateToggle( panelMisc, L"misc.turn_off_headlights", self.autoTurnOffLights, function( value )
         self.autoTurnOffLights = value
+        self:Save()
+        self:TransmitInputSettings()
+    end )
+
+    CreateToggle( panelMisc, L"misc.turn_on_engine", self.autoTurnOnEngine, function( value )
+        self.autoTurnOnEngine = value
         self:Save()
         self:TransmitInputSettings()
     end )

@@ -29,20 +29,20 @@ end
 function ENT:OnDriverEnter()
     if self.startupTimer then return end
 
-    if self:GetEngineState() < 2 then
+    if self:GetEngineState() < 2 and self.autoTurnOnEngine then
         self:TurnOn()
     end
 end
 
 --- Implement this base class function.
 function ENT:OnDriverExit()
-    self:SetIsHonking( false )
+    local keepOn = IsValid( self.lastDriver ) and self.lastDriver:KeyDown( IN_WALK )
 
-    if self.hasTheDriverBeenRagdolled then
-        BaseClass.OnDriverExit( self )
-    else
+    if not self.hasTheDriverBeenRagdolled and not keepOn then
         self:TurnOff()
     end
+
+    self:SetIsHonking( false )
 end
 
 --- Implement this base class function.

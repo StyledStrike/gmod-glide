@@ -87,7 +87,7 @@ function ENT:UpdatePowerDistribution()
 
     -- First, count how many wheels are in the front/rear
     for _, w in EntityPairs( self.wheels ) do
-        if w.isFrontWheel then
+        if w.state.isFrontWheel then
             frontCount = frontCount + 1
         else
             rearCount = rearCount + 1
@@ -102,7 +102,7 @@ function ENT:UpdatePowerDistribution()
     rearDistribution = rearDistribution / rearCount
 
     for _, w in EntityPairs( self.wheels ) do
-        w.distributionFactor = w.isFrontWheel and frontDistribution or rearDistribution
+        w.state.distributionFactor = w.state.isFrontWheel and frontDistribution or rearDistribution
     end
 end
 
@@ -118,12 +118,12 @@ do
         self:SetEngineRPM( rpm )
     end
 
-    function ENT:TransmissionToEngineRPM( gear )
-        return self.avgPoweredRPM * self.gearRatios[gear] * self:GetDifferentialRatio() * 60 / TAU
+    function ENT:TransmissionToEngineRPM( gear, selfTbl )
+        return selfTbl.avgPoweredRPM * selfTbl.gearRatios[gear] * self:GetDifferentialRatio() * 60 / TAU
     end
 
-    function ENT:GetTransmissionMaxRPM( gear )
-        return self:GetFlywheelRPM() / self.gearRatios[gear] / self:GetDifferentialRatio()
+    function ENT:GetTransmissionMaxRPM( gear, selfTbl )
+        return self:GetFlywheelRPM() / selfTbl.gearRatios[gear] / self:GetDifferentialRatio()
     end
 end
 
@@ -171,36 +171,36 @@ end
 
 local Abs = math.abs
 
-function ENT:AutoGearSwitch( throttle )
+function ENT:AutoGearSwitch( throttle, selfTbl )
     -- Are we trying to go backwards?
-    if self.forwardSpeed < 100 and self:GetInputFloat( 1, "brake" ) > 0.2 then
+    if selfTbl.forwardSpeed < 100 and self:GetInputFloat( 1, "brake", selfTbl ) > 0.2 then
         self:SwitchGear( -1, 0 )
         return
     end
 
     -- Don't switch from reverse gear while still going backwards fast enough
     local currentGear = self:GetGear()
-    if currentGear < 0 and self.forwardSpeed < -100 then return end
+    if currentGear < 0 and selfTbl.forwardSpeed < -100 then return end
 
     -- Don't switch when the wheels are slipping forwards
-    if Abs( self.avgForwardSlip ) > 3 then return end
+    if Abs( selfTbl.avgForwardSlip ) > 3 then return end
 
-    local gear = Clamp( currentGear, 1, self.maxGear )
+    local gear = Clamp( currentGear, 1, selfTbl.maxGear )
     local minRPM, maxRPM = self:GetMinRPM(), self:GetMaxRPM()
 
     -- Avoid hitting the redline
     maxRPM = maxRPM * 0.95
 
     -- When accelerating, switch up early when the throttle is low
-    if self.forwardAcceleration > 0 then
+    if selfTbl.forwardAcceleration > 0 then
         maxRPM = maxRPM * ( 0.6 + throttle * 0.4 )
     end
 
     local gearRPM
 
     -- Pick the gear that matches better the engine-to-transmission RPM
-    for i = 1, self.maxGear do
-        gearRPM = self:TransmissionToEngineRPM( i )
+    for i = 1, selfTbl.maxGear do
+        gearRPM = self:TransmissionToEngineRPM( i, selfTbl )
 
         -- If this is the first gear, and it's transmission RPM is below the `minRPM`, OR;
         -- If this gear's transmission RPM is between `minRPM` and `maxRPM`...
@@ -220,10 +220,10 @@ end
 -- These locals are used both on `ENT:EngineClutch` and `ENT:EngineThink`
 local inputThrottle, inputBrake, inputHandbrake
 
-function ENT:EngineClutch( dt )
+function ENT:EngineClutch( dt, selfTbl )
     -- Is the gear switch on cooldown?
-    if self.switchCD > 0 then
-        self.switchCD = self.switchCD - dt
+    if selfTbl.switchCD > 0 then
+        selfTbl.switchCD = selfTbl.switchCD - dt
         inputThrottle = 0
         return 0
     end
@@ -232,15 +232,15 @@ function ENT:EngineClutch( dt )
         return 1
     end
 
-    local absForwardSpeed = Abs( self.forwardSpeed )
+    local absForwardSpeed = Abs( selfTbl.forwardSpeed )
 
     -- Are we airborne while going fast?
-    if self.groundedCount < 1 and absForwardSpeed > 30 then
+    if selfTbl.groundedCount < 1 and absForwardSpeed > 30 then
         return 1
     end
 
     -- Are we trying to break from a backwards velocity?
-    if self.forwardSpeed < -50 and inputBrake > 0 and self:GetGear() < 0 then
+    if selfTbl.forwardSpeed < -50 and inputBrake > 0 and self:GetGear() < 0 then
         return 1
     end
 
@@ -256,17 +256,17 @@ end
 local Max = math.max
 local Approach = math.Approach
 
-function ENT:EngineThink( dt )
+function ENT:EngineThink( dt, selfTbl )
     local gear = self:GetGear()
-    local amphibiousMode = self.IsAmphibious and self:GetWaterState() > 0
+    local amphibiousMode = selfTbl.IsAmphibious and self:GetWaterState() > 0
 
     -- These variables are used both on `ENT:EngineClutch` and `ENT:EngineThink`
-    inputThrottle = self:GetInputFloat( 1, "accelerate" )
-    inputBrake = self:GetInputFloat( 1, "brake" )
-    inputHandbrake = self:GetInputBool( 1, "handbrake" )
+    inputThrottle = self:GetInputFloat( 1, "accelerate", selfTbl )
+    inputBrake = self:GetInputFloat( 1, "brake", selfTbl )
+    inputHandbrake = self:GetInputBool( 1, "handbrake", selfTbl )
 
     if amphibiousMode then
-        self.burnout = 0
+        selfTbl.burnout = 0
         self:BoatEngineThink( dt )
         self:SetIsRedlining( false )
 
@@ -277,24 +277,24 @@ function ENT:EngineThink( dt )
             self:SwitchGear( -1, 0 )
         end
 
-    elseif self.burnout > 0 then
+    elseif selfTbl.burnout > 0 then
         self:SwitchGear( 1, 0 )
 
         if inputThrottle < 0.1 or inputBrake < 0.1 then
-            self.burnout = 0
+            selfTbl.burnout = 0
         end
 
-    elseif not self.inputManualShift then
-        self:AutoGearSwitch( inputThrottle )
+    elseif not selfTbl.inputManualShift then
+        self:AutoGearSwitch( inputThrottle, selfTbl )
     end
 
     -- Reverse the throttle/brake inputs while in reverse gear
-    if gear < 0 and not self.inputManualShift then
+    if gear < 0 and not selfTbl.inputManualShift then
         inputThrottle, inputBrake = inputBrake, inputThrottle
     end
 
     -- When the engine is damaged, reduce the throttle
-    if self.damageThrottleCooldown and self.damageThrottleCooldown < 0.3 then
+    if selfTbl.damageThrottleCooldown and selfTbl.damageThrottleCooldown < 0.3 then
         inputThrottle = inputThrottle * 0.3
     end
 
@@ -307,32 +307,32 @@ function ENT:EngineThink( dt )
     local minRPM = self:GetMinRPM()
 
     -- Handle auto-clutch
-    local clutch = amphibiousMode and 1 or self:EngineClutch( dt )
+    local clutch = amphibiousMode and 1 or self:EngineClutch( dt, selfTbl )
 
     -- Do a burnout when holding down the throttle and brake inputs
-    if inputThrottle > 0.1 and inputBrake > 0.1 and Abs( self.forwardSpeed ) < 50 then
-        self.burnout = Approach( self.burnout, 1, dt * 2 )
+    if inputThrottle > 0.1 and inputBrake > 0.1 and Abs( selfTbl.forwardSpeed ) < 50 then
+        selfTbl.burnout = Approach( selfTbl.burnout, 1, dt * 2 )
 
         clutch = 0
 
         -- Allow the driver to spin the car
         local phys = self:GetPhysicsObject()
         local mins, maxs = self:OBBMins(), self:OBBMaxs()
-        local burnoutForce = phys:GetMass() * self.BurnoutForce * self.burnout * dt
+        local burnoutForce = phys:GetMass() * selfTbl.BurnoutForce * selfTbl.burnout * dt
 
-        burnoutForce = burnoutForce * self.inputSteer * Clamp( Abs( self.avgForwardSlip ) * 0.1, 0, 1 )
+        burnoutForce = burnoutForce * selfTbl.inputSteer * Clamp( Abs( selfTbl.avgForwardSlip ) * 0.1, 0, 1 )
 
         local frontBurnout = self:GetPowerDistribution() > 0
         local dir = frontBurnout and self:GetRight() or -self:GetRight()
 
-        self.frontBrake = frontBurnout and 0 or 0.25
-        self.rearBrake = frontBurnout and 0.25 or 0
+        selfTbl.frontBrake = frontBurnout and 0 or 0.25
+        selfTbl.rearBrake = frontBurnout and 0.25 or 0
 
-        self.frontTractionMult = frontBurnout and 0.25 or 2
-        self.rearTractionMult = frontBurnout and 2 or 0.25
+        selfTbl.frontTractionMult = frontBurnout and 0.25 or 2
+        selfTbl.rearTractionMult = frontBurnout and 2 or 0.25
 
-        for _, w in EntityPairs( self.wheels ) do
-            if w.isFrontWheel == frontBurnout then
+        for _, w in EntityPairs( selfTbl.wheels ) do
+            if w.state.isFrontWheel == frontBurnout then
                 local pos = w:GetLocalPos()
 
                 pos[1] = pos[1] > 0 and maxs[1] * 2 or mins[1] * 2
@@ -343,12 +343,12 @@ function ENT:EngineThink( dt )
         end
 
     elseif inputHandbrake then
-        self.frontTractionMult = 1
-        self.rearTractionMult = 0.5
+        selfTbl.frontTractionMult = 1
+        selfTbl.rearTractionMult = 0.5
 
-        self.frontBrake = 0
-        self.rearBrake = 0.5
-        self.clutch = 1
+        selfTbl.frontBrake = 0
+        selfTbl.rearBrake = 0.5
+        selfTbl.clutch = 1
         clutch = 1
 
     else
@@ -358,21 +358,21 @@ function ENT:EngineThink( dt )
             ( gear == -1 or gear == 1 ) and
             inputThrottle < 0.05 and
             inputBrake < 0.1 and
-            self.groundedCount > 1 and
+            selfTbl.groundedCount > 1 and
             rpm < minRPM * 1.2
         then
             inputBrake = 0.2
         end
 
-        self.frontBrake = inputBrake * 0.5
-        self.rearBrake = inputBrake * 0.5
+        selfTbl.frontBrake = inputBrake * 0.5
+        selfTbl.rearBrake = inputBrake * 0.5
 
-        self.frontTractionMult = 1
-        self.rearTractionMult = 1
+        selfTbl.frontTractionMult = 1
+        selfTbl.rearTractionMult = 1
     end
 
-    clutch = Approach( self.clutch, clutch, dt * ( ( gear < 2 and inputThrottle > 0.1 ) and 6 or 2 ) )
-    self.clutch = clutch
+    clutch = Approach( selfTbl.clutch, clutch, dt * ( ( gear < 2 and inputThrottle > 0.1 ) and 6 or 2 ) )
+    selfTbl.clutch = clutch
 
     local isRedlining = false
     local transmissionRPM = 0
@@ -380,7 +380,7 @@ function ENT:EngineThink( dt )
     -- If we're not in neutral, convert the avg.
     -- transmission RPM back to the engine RPM.
     if gear ~= 0 then
-        transmissionRPM = self:TransmissionToEngineRPM( gear )
+        transmissionRPM = self:TransmissionToEngineRPM( gear, selfTbl )
         transmissionRPM = gear < 0 and -transmissionRPM or transmissionRPM
         rpm = ( rpm * clutch ) + ( Max( 0, transmissionRPM ) * ( 1 - clutch ) )
     end
@@ -395,7 +395,7 @@ function ENT:EngineThink( dt )
         availableTorque = availableTorque + gearTorque * 2
     else
         -- The vehicle is coasting, apply a custom engine brake torque.
-        local engineBrakeTorque = self:GetTransmissionTorque( gear, self.engineBrakeTorque, self.engineBrakeTorque )
+        local engineBrakeTorque = self:GetTransmissionTorque( gear, selfTbl.engineBrakeTorque, selfTbl.engineBrakeTorque )
         availableTorque = availableTorque - engineBrakeTorque * ( 1 - throttle ) * 0.5
     end
 
@@ -409,7 +409,7 @@ function ENT:EngineThink( dt )
 
         rpm = maxRPM
 
-        if gear ~= self.maxGear or self.groundedCount < self.wheelCount then
+        if gear ~= selfTbl.maxGear or selfTbl.groundedCount < selfTbl.wheelCount then
             isRedlining = true
         end
     end
@@ -422,22 +422,22 @@ function ENT:EngineThink( dt )
         availableTorque = availableTorque * ( 1 + ( rpm / maxRPM ) * 0.3 )
     end
 
-    if self.burnout > 0 then
-        availableTorque = availableTorque + availableTorque * self.burnout * 0.1
+    if selfTbl.burnout > 0 then
+        availableTorque = availableTorque + availableTorque * selfTbl.burnout * 0.1
     end
 
     -- Split torque between front and rear wheels
     local front = 0.5 + self:GetPowerDistribution() * 0.5
     local rear = 1 - front
 
-    self.availableFrontTorque = availableTorque * front
-    self.availableRearTorque = availableTorque * rear
+    selfTbl.availableFrontTorque = availableTorque * front
+    selfTbl.availableRearTorque = availableTorque * rear
 
     if not amphibiousMode then
         -- Accelerate the engine flywheel and update network variables
         throttle = Approach( throttle, inputThrottle, dt * 4 )
 
-        self:EngineAccelerate( self.flywheelFriction + self.flywheelTorque * throttle, dt )
+        self:EngineAccelerate( selfTbl.flywheelFriction + selfTbl.flywheelTorque * throttle, dt )
         self:SetEngineThrottle( throttle )
         self:SetIsRedlining( isRedlining and inputThrottle > 0 )
     end

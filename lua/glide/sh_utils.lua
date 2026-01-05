@@ -23,7 +23,7 @@ end
 --- transmitted (like how ENT:SetNoDraw does).
 function Glide.HideEntity( ent, hide )
     ent.GlideIsHidden = Either( hide, true, nil )
-    ent:SetRenderMode( hide and RENDERMODE_NONE or RENDERMODE_NORMAL )
+    ent:SetRenderMode( hide and RENDERMODE_TRANSCOLOR or RENDERMODE_NORMAL )
     ent:SetColor( Color( 255, 255, 255, hide and 0 or 255 ) )
 
     if hide then

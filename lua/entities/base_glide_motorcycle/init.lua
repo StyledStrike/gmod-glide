@@ -100,42 +100,42 @@ local Clamp = math.Clamp
 local ExpDecay = Glide.ExpDecay
 
 --- Override this base class function.
-function ENT:UpdateSteering( dt )
-    BaseClass.UpdateSteering( self, dt )
+function ENT:UpdateSteering( dt, selfTbl )
+    BaseClass.UpdateSteering( self, dt, selfTbl )
 
-    local isAnyWheelGrounded = self.groundedCount > 0
+    local isAnyWheelGrounded = selfTbl.groundedCount > 0
     local inputSteer = Clamp( self:GetInputFloat( 1, "steer" ), -1, 1 )
-    local sideSlip = Clamp( self.avgSideSlip, -1, 1 )
+    local sideSlip = Clamp( selfTbl.avgSideSlip, -1, 1 )
     local tilt = Clamp( sideSlip * -2, -0.5, 0.5 )
 
     if isAnyWheelGrounded then
-        tilt = tilt + inputSteer * Clamp( self.forwardSpeed / 300, 0, 1 )
+        tilt = tilt + inputSteer * Clamp( selfTbl.forwardSpeed / 300, 0, 1 )
 
-        if self.totalSpeed < 20 then
+        if selfTbl.totalSpeed < 20 then
             tilt = tilt - 0.3
         end
     end
 
-    self.steerTilt = ExpDecay( self.steerTilt, isAnyWheelGrounded and tilt or 0, 15, dt )
+    selfTbl.steerTilt = ExpDecay( selfTbl.steerTilt, isAnyWheelGrounded and tilt or 0, 15, dt )
 
     if
         isAnyWheelGrounded and
-        self:GetInputFloat( 1, "brake" ) > 0 and
-        self:GetInputFloat( 1, "accelerate" ) < 0.1 and
-        self.forwardSpeed < 10 and
-        self.forwardSpeed > -100
+        self:GetInputFloat( 1, "brake", selfTbl ) > 0 and
+        self:GetInputFloat( 1, "accelerate", selfTbl ) < 0.1 and
+        selfTbl.forwardSpeed < 10 and
+        selfTbl.forwardSpeed > -100
     then
-        self.reverseInput = 1 - Clamp( self.forwardSpeed / -100, 0, 1 )
-        self.frontBrake = 0
-        self.rearBrake = 0
-        self.clutch = 1
+        selfTbl.reverseInput = 1 - Clamp( selfTbl.forwardSpeed / -100, 0, 1 )
+        selfTbl.frontBrake = 0
+        selfTbl.rearBrake = 0
+        selfTbl.clutch = 1
         self:SetBrakeValue( 0 )
     else
-        self.reverseInput = 0
+        selfTbl.reverseInput = 0
     end
 
     -- Allow the motorcycle to fall if the physobj goes asleep without a driver
-    if not self.stayUpright then return end
+    if not selfTbl.stayUpright then return end
 
     local driver = self:GetDriver()
     local phys = self:GetPhysicsObject()
@@ -146,7 +146,7 @@ function ENT:UpdateSteering( dt )
 end
 
 --- Override this base class function.
-function ENT:UpdateUnflip( _phys, _dt ) end
+function ENT:UpdateUnflip( _phys, _dt, _selfTbl ) end
 
 local WORLD_UP = Vector( 0, 0, 1 )
 

@@ -48,6 +48,7 @@ do
             binds = binds,
             manualGearShifting = data.manualGearShifting == true,
             autoTurnOffLights = data.autoTurnOffLights == true,
+            autoTurnOnEngine = data.autoTurnOnEngine == true,
             mouseFlyMode = math.Round( Glide.ValidateNumber( data.mouseFlyMode, 0, 2, 0 ) ),
             mouseSteerMode = math.Round( Glide.ValidateNumber( data.mouseSteerMode, 0, 2, 0 ) ),
             throttleModifierMode = math.Round( Glide.ValidateNumber( data.throttleModifierMode, 0, 2, 0 ) ),
@@ -104,6 +105,7 @@ do
             vehicle.inputFlyMode = settings.mouseFlyMode
             vehicle.inputManualShift = settings.manualGearShifting
             vehicle.autoTurnOffLights = settings.autoTurnOffLights
+            vehicle.autoTurnOnEngine = settings.autoTurnOnEngine
             vehicle.inputThrottleModifierMode = settings.throttleModifierMode
             vehicle:ResetInputs( 1 )
         end
@@ -123,7 +125,8 @@ do
         activeData[ply] = {
             vehicle = vehicle,
             seatIndex = seatIndex,
-            buttons = buttons
+            buttons = buttons,
+            hasCamController = false
         }
     end
 end
@@ -144,6 +147,12 @@ function Glide.DeactivateInput( ply )
     end
 
     activeData[ply] = nil
+
+    if active and Glide.isWiremodInstalled and active.hasCamController then
+        Glide.StartCommand( Glide.CMD_IS_USING_CAM_CONTROLLER, false )
+        net.WriteBool( false )
+        net.Send( ply )
+    end
 end
 
 local ACTION_ALIASES = Glide.ACTION_ALIASES
@@ -332,4 +341,28 @@ end )
 hook.Add( "PlayerDisconnected", "Glide.InputCleanup", function( ply )
     Glide.DeactivateInput( ply )
     playerSettings[ply] = nil
+end )
+
+-- Workaround to let the client-side know when a Wiremod Cam Controller is active
+hook.Add( "InitPostEntity", "Glide.CheckWiremodCamControllerState", function()
+    local isWiremodInstalled = WireLib ~= nil
+    Glide.isWiremodInstalled = isWiremodInstalled
+
+    if not isWiremodInstalled then return end
+
+    timer.Create( "Glide.CheckWiremodCamControllerState", 0.2, 0, function()
+        local hasCamController
+
+        for ply, active in pairs( activeData ) do
+            hasCamController = IsValid( ply.CamController )
+
+            if active.hasCamController ~= hasCamController then
+                active.hasCamController = hasCamController
+
+                Glide.StartCommand( Glide.CMD_IS_USING_CAM_CONTROLLER, true )
+                net.WriteBool( hasCamController )
+                net.Send( ply )
+            end
+        end
+    end )
 end )

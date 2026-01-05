@@ -76,6 +76,7 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | `glide_physics_damage_multiplier` `<number>` | Damage multiplier taken by Glide vehicles after colliding against things that are not the world.
 | `glide_world_physics_damage_multiplier` `<number>` | Damage multiplier taken by Glide vehicles after colliding against the world.
 | `glide_global_damage_multiplier` `<number>` | Multiplier for damage taken from any source (except from collisions)
+| `glide_player_collision_damage_multiplier` `<number>` | Damage multiplier for players inside vehicles taking damage from hard collisions.
 
 ### Sandbox limits
 

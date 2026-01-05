@@ -38,6 +38,15 @@ function ENT:OnPostInitialize()
     end
 end
 
+--- Implement this base class function.
+function ENT:OnDriverExit()
+    local keepOn = IsValid( self.lastDriver ) and self.lastDriver:KeyDown( IN_WALK )
+
+    if not self.hasTheDriverBeenRagdolled and not keepOn then
+        self:TurnOff()
+    end
+end
+
 --- Override this base class function.
 function ENT:SetupWiremodPorts( inputs, outputs )
     BaseClass.SetupWiremodPorts( self, inputs, outputs )
