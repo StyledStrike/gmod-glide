@@ -8,10 +8,11 @@
 
     You really should not use these functions to control Glide vehicles.
 ]]
-local IS_CLIENT = CLIENT ~= nil
+local IS_CLIENT = CLIENT
 
+-- This server-side function may not return the correct result and is not recommended for use.
 function ENT:GetThirdPersonMode()
-    return true
+    return IS_CLIENT and not Glide.Camera.isInFirstPerson or self.ThirdPerson
 end
 
 function ENT:GetCameraDistance()
@@ -19,11 +20,23 @@ function ENT:GetCameraDistance()
 end
 
 function ENT:SetCameraDistance( _distance )
-    -- NOOP
+    if not IS_CLIENT then return end
+    self.CameraOffset[1] = -math.abs( _distance )
 end
 
 function ENT:SetThirdPersonMode( _enable )
-    -- NOOP
+
+    local players = self:GetAllPlayers()
+    if IS_CLIENT and table.HasValue( players, LocalPlayer() ) then
+        Glide.Camera:SetFirstPerson( not _enable )
+    else
+        net.Start( "glide.compatibility" )
+            net.WriteUInt( 1, 4 )
+            net.WriteBool( not _enable )
+        net.Send( players )
+
+        self.ThirdPerson = _enable
+    end
 end
 
 function ENT:GetPassenger( passenger )
@@ -82,7 +95,7 @@ if SERVER then
     end
 
     function ENT:GetRPM()
-        return 0
+        return self:GetFlywheelRPM()
     end
 
     function ENT:GetThrottle()
