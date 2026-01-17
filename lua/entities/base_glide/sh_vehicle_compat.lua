@@ -30,8 +30,7 @@ function ENT:SetThirdPersonMode( _enable )
     if IS_CLIENT and table.HasValue( players, LocalPlayer() ) then
         Glide.Camera:SetFirstPerson( not _enable )
     else
-        net.Start( "glide.compatibility" )
-            net.WriteUInt( 1, 4 )
+        net.Start( "glide.thirdperson" )
             net.WriteBool( not _enable )
         net.Send( players )
 

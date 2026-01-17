@@ -95,11 +95,7 @@ net.Receive( "glide.sync_weapon_data", function()
     end
 end )
 
-net.Receive( "glide.compatibility", function()
-    local id = net.ReadUInt( 4 )
-
-    if id == 1 then
-        local enable = net.ReadBool()
-        Glide.Camera:SetFirstPerson( enable )
-    end
+net.Receive( "glide.thirdperson", function()
+    local enable = net.ReadBool()
+    Glide.Camera:SetFirstPerson( enable )
 end )

@@ -1,7 +1,7 @@
 if SERVER then
     util.AddNetworkString( "glide.command" )
     util.AddNetworkString( "glide.sync_weapon_data" )
-    util.AddNetworkString( "glide.compatibility" )
+    util.AddNetworkString( "glide.thirdperson" )
 end
 
 -- Size limit for user JSON data
