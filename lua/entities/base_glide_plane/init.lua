@@ -67,6 +67,7 @@ function ENT:CreatePropeller( offset, radius, slowModel, fastModel )
     prop.maxSpinSpeed = 5000
 
     self.rotors[#self.rotors + 1] = prop
+    Glide.CopyEntityCreator( self, prop )
 
     return prop
 end

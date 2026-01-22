@@ -20,12 +20,36 @@ local function GetGlideVehicle( trace )
     return false
 end
 
+local ApplyRagdollDisabler
+
+if SERVER then
+    ApplyRagdollDisabler = function( _ply, ent, data )
+        if not IsGlideVehicle( ent ) then return false end
+
+        duplicator.ClearEntityModifier( ent, "glide_ragdoll_disabler" )
+
+        local enableFall = type( data == "table" ) and data.enableFall == true
+        ent.FallOnCollision = enableFall
+
+        duplicator.StoreEntityModifier( ent, "glide_ragdoll_disabler", {
+            enableFall = enableFall
+        } )
+
+        return true
+    end
+
+    duplicator.RegisterEntityModifier( "glide_ragdoll_disabler", ApplyRagdollDisabler )
+end
+
 function TOOL:LeftClick( trace )
     local veh = GetGlideVehicle( trace )
     if not veh then return false end
 
     if SERVER then
-        veh.FallOnCollision = false
+        local owner = self:GetOwner()
+        if not IsValid( owner ) then return end
+
+        ApplyRagdollDisabler( owner, veh, { enableFall = false } )
     end
 
     return true
@@ -36,7 +60,7 @@ function TOOL:RightClick( trace )
     if not veh then return false end
 
     if SERVER then
-        veh.FallOnCollision = true
+        ApplyRagdollDisabler( owner, veh, { enableFall = true } )
     end
 
     return true

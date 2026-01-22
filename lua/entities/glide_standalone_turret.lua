@@ -202,7 +202,7 @@ function ENT:SetTurretDamage( damage )
 end
 
 function ENT:SetTurretDelay( delay )
-    self.turretDelay = math.Clamp( delay, cvarMinDelay and cvarMinDelay:GetFloat() or 0.02, 0.5 )
+    self.turretDelay = math.max( delay, cvarMinDelay and cvarMinDelay:GetFloat() or 0.02 )
 end
 
 function ENT:SetTurretSpread( spread )

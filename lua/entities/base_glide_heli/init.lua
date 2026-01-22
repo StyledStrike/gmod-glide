@@ -64,6 +64,7 @@ function ENT:CreateRotor( offset, radius, slowModel, fastModel )
     rotor:SetupRotor( offset, radius, slowModel, fastModel )
 
     self.rotors[#self.rotors + 1] = rotor
+    Glide.CopyEntityCreator( self, rotor )
 
     return rotor
 end

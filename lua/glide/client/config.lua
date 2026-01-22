@@ -2,7 +2,7 @@ local Config = Glide.Config
 
 --- Reset settings to their default values.
 function Config:Reset()
-    self.version = 2
+    self.version = 3
 
     -- Audio settings
     self.carVolume = 1.0
@@ -85,6 +85,12 @@ function Config:ResetBinds()
             binds[groupId][action] = button
         end
     end
+
+    -- Use the player's movement keys for these binds, for users with different keyboard layouts
+    binds["land_controls"]["accelerate"] = input.GetKeyCode( input.LookupBinding( "+forward" ) )
+    binds["land_controls"]["brake"] = input.GetKeyCode( input.LookupBinding( "+back" ) )
+    binds["land_controls"]["steer_left"] = input.GetKeyCode( input.LookupBinding( "+moveleft" ) )
+    binds["land_controls"]["steer_right"] = input.GetKeyCode( input.LookupBinding( "+moveright" ) )
 
     self.binds = binds
 end
@@ -205,6 +211,11 @@ function Config:CheckVersion( data )
             data.binds.land_controls.detach_trailer = nil
         end
 
+        upgraded = true
+
+    elseif data.version == 2 then
+        -- Engine stream backend defaults to WebAudio
+        data.engineStreamBackend = 2
         upgraded = true
     end
 

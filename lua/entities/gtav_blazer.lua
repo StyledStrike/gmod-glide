@@ -157,6 +157,12 @@ if SERVER then
     ENT.AirControlForce = Vector( 3, 2, 0.2 ) -- Roll, pitch, yaw
     ENT.AirMaxAngularVelocity = Vector( 400, 400, 150 ) -- Roll, pitch, yaw
 
+    function ENT:InitializePhysics()
+        self:SetSolid( SOLID_VPHYSICS )
+        self:SetMoveType( MOVETYPE_VPHYSICS )
+        self:PhysicsInit( SOLID_VPHYSICS, Vector( 0, 0, -18 ) )
+    end
+
     function ENT:GetGears()
         return {
             [-1] = 3.0, -- Reverse
@@ -187,9 +193,9 @@ if SERVER then
         self:SetMinRPMTorque( 2000 )
         self:SetMaxRPMTorque( 3000 )
 
-        self:SetSuspensionLength( 10 )
-        self:SetSpringStrength( 300 )
-        self:SetSpringDamper( 2000 )
+        self:SetSuspensionLength( 9 )
+        self:SetSpringStrength( 200 )
+        self:SetSpringDamper( 1500 )
 
         self:SetSideTractionMultiplier( 15 )
         self:SetSideTractionMax( 2800 )
@@ -203,7 +209,6 @@ if SERVER then
             modelScale = Vector( 0.5, 1, 1 ),
             modelAngle = Angle( 0, 90, 0 ),
             steerMultiplier = 1,
-            enableAxleForces = true
         } )
 
         -- Front right
@@ -212,7 +217,6 @@ if SERVER then
             modelAngle = Angle( 0, -90, 0 ),
             modelScale = Vector( 0.5, 1, 1 ),
             steerMultiplier = 1,
-            enableAxleForces = true
         } )
 
         -- Rear left
@@ -220,7 +224,6 @@ if SERVER then
             model = "models/gta5/vehicles/blazer/wheel.mdl",
             modelScale = Vector( 0.5, 1, 1 ),
             modelAngle = Angle( 0, 90, 0 ),
-            enableAxleForces = true
         } )
 
         -- Rear right
@@ -228,7 +231,6 @@ if SERVER then
             model = "models/gta5/vehicles/blazer/wheel.mdl",
             modelAngle = Angle( 0, -90, 0 ),
             modelScale = Vector( 0.5, 1, 1 ),
-            enableAxleForces = true
         } )
 
         self:ChangeWheelRadius( 11 )

@@ -118,7 +118,6 @@ function ENT:CreateFeatures()
         modelAngle = Angle( 0, 90, 0 ),
         modelScale = Vector( 0.38, 1, 1 ),
         steerMultiplier = 1,
-        enableAxleForces = true
     } )
 
     self:CreateWheel( Vector( 20, -19, -1 ), {
@@ -126,21 +125,18 @@ function ENT:CreateFeatures()
         modelAngle = Angle( 0, -90, 0 ),
         modelScale = Vector( 0.38, 1, 1 ),
         steerMultiplier = 1,
-        enableAxleForces = true
     } )
 
     self:CreateWheel( Vector( -20, 20, -1 ), {
         model = "models/gta5/vehicles/caddy2/wheel.mdl",
         modelAngle = Angle( 0, 90, 0 ),
         modelScale = Vector( 0.38, 1, 1 ),
-        enableAxleForces = true
     } )
 
     self:CreateWheel( Vector( -20, -20, -1 ), {
         model = "models/gta5/vehicles/caddy2/wheel.mdl",
         modelAngle = Angle( 0, -90, 0 ),
         modelScale = Vector( 0.38, 1, 1 ),
-        enableAxleForces = true
     } )
 
     self:ChangeWheelRadius( 10 )
