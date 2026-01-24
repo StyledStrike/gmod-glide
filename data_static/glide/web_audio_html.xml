@@ -668,7 +668,6 @@ class EngineStreamManager {
     createStream(id) {
         if (!(id in this.streams)) {
             this.streams[id] = new EngineStream(id, this);
-            console.log("Created EngineStream #" + id);
             webaudio.OnStreamCreated(id);
         }
 
@@ -676,12 +675,9 @@ class EngineStreamManager {
     }
 
     destroyStream(id) {
-        console.log("destroyStream", id);
-
         if (id in this.streams) {
             this.streams[id].destroy();
             delete this.streams[id];
-            console.log("Destroyed EngineStream #" + id);
         }
     }
 

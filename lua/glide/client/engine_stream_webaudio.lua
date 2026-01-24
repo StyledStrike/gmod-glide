@@ -9,6 +9,15 @@ local function Print( str, ... )
     Glide.Print( "[WebAudio] " .. str, ... )
 end
 
+function WebAudio:IsAvailable()
+    if not file.Exists( self.HTML_FILE, "GAME" ) then
+        Print( "The Web Audio HTML file does not exist!" )
+        return false
+    end
+
+    return true
+end
+
 function WebAudio:Restart()
     self:Disable()
 
@@ -27,7 +36,14 @@ function WebAudio:Enable()
     self.isReady = false
     Print( "Preparing..." )
 
-    assert( file.Exists( self.HTML_FILE, "GAME" ), "The Web Audio HTML file does not exist!" )
+    if not self:IsAvailable() then
+        Print( "Falling back to Bass backend..." )
+
+        Glide.Config.engineStreamBackend = 1
+        self:Disable()
+
+        return
+    end
 
     panel = vgui.Create( "HTML", GetHUDPanel() )
     panel:Dock( FILL )

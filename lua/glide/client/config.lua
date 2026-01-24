@@ -12,7 +12,7 @@ function Config:Reset()
     self.windVolume = 0.7
     self.warningVolume = 0.8
     self.vcVolume = 0.4
-    self.engineStreamBackend = 1
+    self.engineStreamBackend = 2
 
     -- Camera settings
     self.lookSensitivity = 1.0
