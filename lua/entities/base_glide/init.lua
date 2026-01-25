@@ -141,7 +141,7 @@ function ENT:Initialize()
 
     -- Setup trace filter used by wheels to
     -- to ignore the vehicle's chassis and seats.
-    self.wheelTraceFilter = { self, "player" }
+    self.wheelTraceFilter = { self, "player", "npc_*" }
 
     -- Copy default surface multipliers to this vehicle.
     self.surfaceGrip = table.Copy( Glide.SURFACE_GRIP )

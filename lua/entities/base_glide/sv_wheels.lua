@@ -67,6 +67,9 @@ end
 local EntityMeta = FindMetaTable( "Entity" )
 local GetTable = EntityMeta.GetTable
 
+local VectorUnpack = FindMetaTable( "Vector" ).Unpack
+local VectorSetUnpacked = FindMetaTable( "Vector" ).SetUnpacked
+
 local Abs = math.abs
 local Clamp = math.Clamp
 local ClampForce = Glide.ClampForce
@@ -77,17 +80,18 @@ function ENT:PhysicsSimulate( phys, dt )
     local selfTbl = GetTable( self )
 
     -- Prepare output vectors, do angular drag
-    local drag = selfTbl.AngularDrag
     local mass = phys:GetMass()
-    local angVel = phys:GetAngleVelocity()
 
-    linForce[1] = 0
-    linForce[2] = 0
-    linForce[3] = 0
+    VectorSetUnpacked( linForce, 0, 0, 0 )
 
-    angForce[1] = angVel[1] * drag[1] * mass
-    angForce[2] = angVel[2] * drag[2] * mass
-    angForce[3] = angVel[3] * drag[3] * self:GetYawDragMultiplier() * mass
+    local angDragX, angDragY, angDragZ = VectorUnpack( selfTbl.AngularDrag )
+    local angVelX, angVelY, angVelZ = VectorUnpack( phys:GetAngleVelocity() )
+
+    VectorSetUnpacked( angForce,
+        angVelX * angDragX * mass,
+        angVelY * angDragY * mass,
+        angVelZ * angDragZ * self:GetYawDragMultiplier() * mass
+    )
 
     local groundedCount = 0
 
@@ -119,17 +123,12 @@ function ENT:PhysicsSimulate( phys, dt )
 
     -- At slow speeds, try to prevent slipping sideways on mildly steep slopes
     if groundedCount > 0 then
-        local totalSpeed = selfTbl.totalSpeed + Abs( angVel[3] )
+        local totalSpeed = selfTbl.totalSpeed + Abs( angVelZ )
         local factor = 1 - Clamp( totalSpeed / 30, 0, 1 )
 
         if factor > 0.1 then
-            local vel = phys:GetVelocity()
             local rt = self:GetRight()
-            local force = ( rt:Dot( vel ) / dt ) * mass * factor * rt
-
-            linForce[1] = linForce[1] - force[1]
-            linForce[2] = linForce[2] - force[2]
-            linForce[3] = linForce[3] - force[3]
+            linForce:Sub( ( rt:Dot( phys:GetVelocity() ) / dt ) * mass * factor * rt )
         end
     end
 

@@ -18,13 +18,14 @@ do
     end )
 
     local Clamp = math.Clamp
+    local VectorUnpack = FindMetaTable( "Vector" ).Unpack
+    local VectorSetUnpacked = FindMetaTable( "Vector" ).SetUnpacked
 
     --- Ensures that the force is within the range
     --- of a float, to prevent physics engine crashes.
     function Glide.ClampForce( v )
-        v[1] = Clamp( v[1], minForce, maxForce )
-        v[2] = Clamp( v[2], minForce, maxForce )
-        v[3] = Clamp( v[3], minForce, maxForce )
+        local x, y, z = VectorUnpack( v )
+        VectorSetUnpacked( v, Clamp( x, minForce, maxForce ), Clamp( y, minForce, maxForce ), Clamp( z, minForce, maxForce ) )
     end
 end
 
