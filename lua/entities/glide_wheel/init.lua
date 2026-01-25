@@ -318,7 +318,7 @@ do
             change = Abs( change )
 
             self.contractSoundCD = t + 0.3
-            PlaySoundSet( change > 0.03 and vehicle.SuspensionHeavySound or vehicle.SuspensionDownSound, self, Clamp( change * 20, 0, 1 ) )
+            PlaySoundSet( change > 0.03 and vehicle.SuspensionHeavySound or vehicle.SuspensionDownSound, self, Clamp( change * 10, 0, 1 ) )
         end
     end
 end

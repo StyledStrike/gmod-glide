@@ -672,6 +672,14 @@ function ENT:WheelThink( dt, selfTbl )
         end
     end
 
+    if groundedCount > selfTbl.groundedCount and selfTbl.groundedCount < 1 then
+        local vel = phys:GetVelocity():Length()
+
+        if vel > 100 and selfTbl.SuspensionLandFromFall ~= "" then
+            Glide.PlaySoundSet( selfTbl.SuspensionLandFromFall, self, Clamp( vel / 300, 0, 1 ) )
+        end
+    end
+
     selfTbl.avgPoweredRPM = avgRPM
     selfTbl.groundedCount = groundedCount
     selfTbl.avgSideSlip = totalSideSlip / selfTbl.wheelCount

@@ -223,6 +223,9 @@ if SERVER then
     -- How fast can the driver spin the vehicle while airborne?
     ENT.AirMaxAngularVelocity = Vector( 150, 200, 150 ) -- Roll, pitch, yaw
 
+    -- Extra suspension sounds
+    ENT.SuspensionLandFromFall = "Glide.OnLand.Car"
+
     --- Returns which inputs applies air control forces.
     --- Should return a roll, pitch and yaw input.
     function ENT:GetAirInputs()

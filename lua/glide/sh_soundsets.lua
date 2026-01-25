@@ -173,6 +173,21 @@ Glide.AddSoundSet( "Glide.Brakes.Squeak", 85, 95, 105, {
     "glide/wheels/brake_squeak_3.wav"
 } )
 
+Glide.AddSoundSet( "Glide.OnLand.Car", 80, 95, 105, {
+    "glide/suspension/fall_land_car_1.wav",
+    "glide/suspension/fall_land_car_2.wav",
+    "glide/suspension/fall_land_car_3.wav",
+    "glide/suspension/fall_land_car_4.wav",
+} )
+
+Glide.AddSoundSet( "Glide.OnLand.Bike", 80, 95, 105, {
+    "glide/suspension/fall_land_bike_1.wav",
+    "glide/suspension/fall_land_bike_2.wav",
+    "glide/suspension/fall_land_bike_3.wav",
+    "glide/suspension/fall_land_bike_4.wav",
+    "glide/suspension/fall_land_bike_5.wav",
+} )
+
 ----- Engine gear switch sounds
 
 Glide.AddSoundSet( "Glide.GearSwitch.Internal", 70, 98, 102, {

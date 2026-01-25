@@ -149,6 +149,7 @@ if SERVER then
     ENT.SpawnPositionOffset = Vector( 0, 0, 40 )
 
     ENT.SuspensionHeavySound = "Glide.Suspension.CompressBike"
+    ENT.SuspensionLandFromFall = "Glide.OnLand.Bike"
     ENT.StartupTime = 0.4
 
     ENT.UnflipForce = 20

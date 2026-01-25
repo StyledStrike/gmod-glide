@@ -113,7 +113,11 @@ if CLIENT then
         [MAT_METAL] = 1,
         [MAT_GRATE] = 1,
         [MAT_WOOD] = 1,
-        [MAT_SNOW] = 0.7
+        [MAT_SNOW] = 0.5,
+        [MAT_DIRT] = 0.6,
+        [MAT_SAND] = 0.7,
+        [MAT_FOLIAGE] = 0.7,
+        [MAT_GRASS] = 0.7,
     }
 
     Glide.WHEEL_SOUNDS.ROLL = {
@@ -122,10 +126,10 @@ if CLIENT then
         [MAT_SNOW] = "glide/wheels/roll_dirt.wav",
         [MAT_PLASTIC] = "physics/plastic/plastic_barrel_scrape_rough_loop1.wav",
         [MAT_METAL] = "glide/wheels/roll_metal.wav",
-        [MAT_SAND] = "glide/wheels/roll_dirt.wav",
-        [MAT_FOLIAGE] = "glide/wheels/roll_dirt.wav",
+        [MAT_SAND] = "glide/wheels/roll_sand.wav",
+        [MAT_FOLIAGE] = "glide/wheels/roll_foliage.wav",
         [MAT_SLOSH] = "glide/wheels/roll_road_wet.wav",
-        [MAT_GRASS] = "glide/wheels/roll_dirt.wav",
+        [MAT_GRASS] = "glide/wheels/roll_grass.wav",
         [MAT_VENT] = "ambient/machines/wall_ambient_loop1.wav",
         [MAT_WOOD] = "glide/wheels/roll_wood.wav"
     }
