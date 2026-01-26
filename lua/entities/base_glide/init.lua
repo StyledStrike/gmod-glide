@@ -841,3 +841,102 @@ function ENT:GetSpawnColor()
     local color = colors[math.random( #colors )]
     return Color( color.r, color.g, color.b )
 end
+
+function ENT:AttachTrailer( trailer )
+    if not IsValid( trailer ) then return end
+
+    trailer:AttachToVehicle( self )
+    self.AttachedTrailer = trailer
+
+    Glide.SendNotification( self:GetAllPlayers(), {
+        text = "#glide.notify.vehicle_attach",
+        icon = "materials/glide/icons/trailer.png",
+        sound = "buttons/button15.wav",
+        immediate = true
+    } )
+end
+
+function ENT:DetachTrailer()
+    if not IsValid( self.AttachedTrailer ) then return end
+
+    self.AttachedTrailer:DetachFromVehicle( self )
+    self.AttachedTrailer = nil
+
+    Glide.SendNotification( self:GetAllPlayers(), {
+        text = "#glide.notify.vehicle_detach",
+        icon = "materials/glide/icons/trailer.png",
+        sound = "buttons/button15.wav",
+        immediate = true
+    } )
+end
+
+local percentageWheel = GetConVar( "glide_trailer_attach_percentage_wheel" ):GetFloat() -- At least 60% of wheels must be on the trailer
+local minWheels = {
+    ["base_glide_heli"]       = 0,
+    ["base_glide_boat"]       = 0,
+    ["base_glide_bike"]       = 2,
+    ["base_glide_motorcycle"] = 2,
+    ["base_glide_plane"]      = 2,
+    ["base_glide_car"]        = 4,
+    ["base_glide_tank"]       = 4,
+}
+
+function ENT:AttachVehicle()
+    if self.cooldownAttachTrailer and CurTime() < self.cooldownAttachTrailer then return end
+    self.cooldownAttachTrailer = CurTime() + 0.5
+
+    if self:GetSpeed() > 5 then return end
+
+    local minWheel = minWheels[self.Base]
+    if not minWheel then return end
+
+    if IsValid( self.AttachedTrailer ) then
+        self:DetachTrailer()
+    else
+        local totalWheels = table.Count( self.wheels ) or 0
+        if minWheel == 0 or totalWheels == 0 then
+
+            local posVehicle = self:GetPos()
+            local Trace = util.TraceLine( {
+                start = posVehicle,
+                endpos = posVehicle - Vector( 0, 0, 200 ),
+                filter = function( ent )
+                    return ent:GetClass() ~= "glide_wheel" and ent ~= self
+                end
+            } )
+
+            local trailerEntity = Trace.Entity
+            if IsValid( trailerEntity ) and trailerEntity.Base == "base_glide_trailer" then
+                self:AttachTrailer( trailerEntity )
+            end
+        else
+            totalWheels = math.max( totalWheels, minWheel )
+
+            local wheelCount = 0
+            local trailerEntity = nil
+            for _, wheel in Glide.EntityPairs( self.wheels ) do
+                if not IsValid( wheel ) then continue end
+
+                local posWheel = wheel:GetPos()
+                local Trace = util.TraceLine( {
+                    start = posWheel,
+                    endpos = posWheel - Vector( 0, 0, 200 ),
+                    filter = function( ent )
+                        return ent:GetClass() ~= "glide_wheel" and ent ~= self
+                    end
+                } )
+
+                local trailer = Trace.Entity
+                if IsValid( trailer ) and trailer.Base == "base_glide_trailer" and ( not IsValid( trailerEntity ) or trailerEntity == trailer ) then
+                    wheelCount = wheelCount + 1
+
+                    trailerEntity = Trace.Entity
+                end
+            end
+
+            if math.ceil( wheelCount / totalWheels ) >= percentageWheel then
+                self:AttachTrailer( trailerEntity )
+            end
+        end
+    end
+end

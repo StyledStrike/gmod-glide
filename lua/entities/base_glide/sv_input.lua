@@ -174,6 +174,8 @@ function ENT:SetInputBool( seatIndex, action, pressed )
             icon = "materials/glide/icons/" .. ( self.inputThrottleModifierToggle and "play_next" or "fast_forward" ) .. ".png",
             immediate = true
         } )
+    elseif action == "attach_vehicle" then
+        self:AttachVehicle()
     end
 
     if action == "toggle_engine" then
