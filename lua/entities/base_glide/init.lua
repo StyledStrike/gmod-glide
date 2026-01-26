@@ -235,6 +235,7 @@ function ENT:Initialize()
 
     -- Let child classes create things like seats, turrets, etc.
     self:CreateFeatures()
+    self:SetEnableEngine( true )
 
     -- Allow players to shoot fast-moving vehicles when their ping is high
     self:SetLagCompensated( true )
@@ -290,6 +291,8 @@ function ENT:OnEngineStateChange( _, lastState, state )
 end
 
 function ENT:TurnOn()
+    if not self:GetEnableEngine() then return end
+
     local state = self:GetEngineState()
 
     if state == 3 then
