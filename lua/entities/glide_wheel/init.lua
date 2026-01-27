@@ -78,6 +78,10 @@ function ENT:Initialize()
         start = Vector(),
         endpos = Vector(),
 
+        -- Filter options
+        mask = MASK_SHOT_HULL,
+        collisiongroup = COLLISION_GROUP_VEHICLE,
+
         -- Output TraceResult to `ray`
         output = self.state.ray
     }
