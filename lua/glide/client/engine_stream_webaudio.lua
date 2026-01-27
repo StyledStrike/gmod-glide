@@ -316,7 +316,7 @@ function WebAudio:UpdateRoom( dt, eyePos )
 
     dirIndex = dirIndex + 1
 
-    if dirIndex > 10 then
+    if dirIndex > 10 then -- #TRACE_DIRECTIONS
         room.targetHSize = hSize / 9
         room.targetVSize = vSize
 
@@ -393,6 +393,7 @@ local JS_UPDATE_LISTENER = "manager.updateListener(%.2f, %.2f, %.2f, %.2f, %.2f,
 local JS_UPDATE_STREAM = "manager.setStreamData('%s', %.2f, %.2f, %.2f, %.2f, %.2f, %.1f, %s);"
 
 local cvarVolume = GetConVar( "volume" )
+local cvarMuteLoseFocus = GetConVar( "snd_mute_losefocus" )
 
 local AddLine = WebAudio.AddLine
 local GetVolume = Glide.Config.GetVolume
@@ -413,8 +414,13 @@ function WebAudio:Think( dt )
     end
 
     local wetMultiplier = ( 1 - room.hSize ) * ( 0.5 + ( 0.4 - room.vSize * 0.6 ) )
+    local preGainVolume = GetVolume( "carVolume" ) * cvarVolume:GetFloat()
 
-    self:SetBusParameter( "preGainVolume", GetVolume( "carVolume" ) * cvarVolume:GetFloat() )
+    if cvarMuteLoseFocus:GetBool() and not system.HasFocus() then
+        preGainVolume = 0
+    end
+
+    self:SetBusParameter( "preGainVolume", preGainVolume )
     self:SetBusParameter( "dryVolume", Round( Clamp( 1 - wetMultiplier * 0.3, 0.5, 1.0 ), 2 ) )
     self:SetBusParameter( "wetVolume", Round( Clamp( wetMultiplier * 2.5, 0.1, 1.2 ), 2 ) )
 
@@ -484,9 +490,6 @@ function WebAudio:Think( dt )
 
             -- Check if this stream is behind a wall
             if not checkedForWalls and not checkedWall[id] then
-                -- The max. filter frequency the BiquadFilterNode is 24000,
-                -- but using that value had a strange bug where the audio
-                -- would "drift" away from the source after some time.
                 local freq = TraceLine( stream.position, eyePos, true ).Hit and 2000 or 22000
                 AddLine( "manager.setStreamLowpassFilterFreq('%s', %.2f);", id, freq )
 

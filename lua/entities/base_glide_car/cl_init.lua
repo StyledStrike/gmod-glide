@@ -44,7 +44,20 @@ function ENT:OnTurnOff()
         Glide.PlaySoundSet( self.StoppedSound, self, GetVolume( "carVolume" ), nil, 85 )
     end
 
-    self:DeactivateSounds()
+    if self.stream then
+        self.stream:Destroy()
+        self.stream = nil
+    end
+
+    -- Remove all sounds except horns/sirens
+    local sounds = self.sounds
+
+    for k, snd in pairs( sounds ) do
+        if k ~= "horn" and k ~= "siren" then
+            snd:Stop()
+            sounds[k] = nil
+        end
+    end
 end
 
 --- Implement this base class function.

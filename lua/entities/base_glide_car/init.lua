@@ -204,7 +204,6 @@ end
 function ENT:TurnOff()
     BaseClass.TurnOff( self )
 
-    self:SetIsHonking( false )
     self:SetGear( 0 )
     self.startupTimer = nil
 

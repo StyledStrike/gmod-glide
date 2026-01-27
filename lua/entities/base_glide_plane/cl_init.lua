@@ -94,8 +94,6 @@ local GetVolume = Glide.Config.GetVolume
 
 --- Implement this base class function.
 function ENT:OnUpdateSounds()
-    if self.isLazyThink then return end
-
     local sounds = self.sounds
     local vol = GetVolume( "aircraftVolume" )
 
@@ -121,15 +119,17 @@ function ENT:OnUpdateSounds()
         sounds.thrust:ChangeVolume( power01 * thrustVol * vol )
     end
 
-    sounds.engine:ChangePitch( Remap( power, 1, 2, self.EngineSoundMinPitch, self.EngineSoundMaxPitch ) * power01 * pitch )
-    sounds.engine:ChangeVolume( power01 * self.EngineSoundVolume * vol )
+    if sounds.engine then
+        sounds.engine:ChangePitch( Remap( power, 1, 2, self.EngineSoundMinPitch, self.EngineSoundMaxPitch ) * power01 * pitch )
+        sounds.engine:ChangeVolume( power01 * self.EngineSoundVolume * vol )
+    end
 
     if sounds.exhaust then
         sounds.exhaust:ChangePitch( Remap( power, 1, 2, self.ExhaustSoundMinPitch, self.ExhaustSoundMaxPitch ) * power01 * pitch )
         sounds.exhaust:ChangeVolume( power01 * self.ExhaustSoundVolume * vol )
     end
 
-    vol = vol * Clamp( self.rfSounds.lastDistance / 1000000, 0, 1 )
+    vol = vol * Clamp( self.rfMisc.lastDistance / 1000000, 0, 1 )
 
     if sounds.distant then
         sounds.distant:ChangePitch( Remap( power, 1, 2, 80, 100 ) )

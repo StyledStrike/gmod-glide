@@ -77,6 +77,11 @@ commands[Glide.CMD_IS_USING_CAM_CONTROLLER] = function()
     Glide.Camera.isPlayerUsingCamController = net.ReadBool()
 end
 
+commands[Glide.CMD_FORCE_THIRDPERSON] = function()
+    local useThirdPerson = net.ReadBool()
+    Glide.Camera:SetFirstPerson( not useThirdPerson )
+end
+
 net.Receive( "glide.command", function()
     local cmd = net.ReadUInt( Glide.CMD_SIZE )
 

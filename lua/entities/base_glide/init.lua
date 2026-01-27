@@ -113,6 +113,7 @@ function ENT:Initialize()
     self.exitPos = {}   -- Per-seat exit offsets
     self.lastDriver = NULL
     self.lastBodygroups = {}
+    self.isEngineEnabled = true
 
     self.inputBools = {}        -- Per-seat bool inputs
     self.inputFloats = {}       -- Per-seat float inputs
@@ -290,6 +291,8 @@ function ENT:OnEngineStateChange( _, lastState, state )
 end
 
 function ENT:TurnOn()
+    if not self.isEngineEnabled then return end
+
     local state = self:GetEngineState()
 
     if state == 3 then

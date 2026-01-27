@@ -73,6 +73,8 @@ end
 function ENT:TurnOn()
     BaseClass.TurnOn( self )
 
+    if not self.isEngineEnabled then return end
+
     self:SetEngineState( 2 )
     self:SetOutOfControl( false )
 end

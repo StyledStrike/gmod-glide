@@ -8,22 +8,35 @@
 
     You really should not use these functions to control Glide vehicles.
 ]]
-local IS_CLIENT = CLIENT ~= nil
+local IS_CLIENT = CLIENT
 
 function ENT:GetThirdPersonMode()
-    return true
+    return IS_CLIENT and not Glide.Camera.isInFirstPerson or self.hasServerThirdPerson
 end
 
 function ENT:GetCameraDistance()
     return IS_CLIENT and math.abs( self.CameraOffset[1] ) or 0
 end
 
-function ENT:SetCameraDistance( _distance )
-    -- NOOP
+function ENT:SetCameraDistance( distance )
+    if IS_CLIENT then
+        self.CameraOffset[1] = -math.abs( distance )
+    end
 end
 
-function ENT:SetThirdPersonMode( _enable )
-    -- NOOP
+function ENT:SetThirdPersonMode( enable )
+    if IS_CLIENT then
+        Glide.Camera:SetFirstPerson( not enable )
+    else
+        local players = self:GetAllPlayers()
+        if #players == 0 then return end
+
+        Glide.StartCommand( Glide.CMD_FORCE_THIRDPERSON, false )
+        net.WriteBool( enable )
+        net.Send( players )
+
+        self.hasServerThirdPerson = enable
+    end
 end
 
 function ENT:GetPassenger( passenger )
@@ -46,11 +59,15 @@ end
 
 if SERVER then
     function ENT:EnableEngine( enable )
-        self:SetEngineHealth( enable and 1 or 0 )
+        self.isEngineEnabled = enable == true
+
+        if not self.isEngineEnabled and self:IsEngineOn() then
+            self:TurnOff()
+        end
     end
 
     function ENT:IsEngineEnabled()
-        return self:GetEngineHealth() > 0
+        return self.isEngineEnabled
     end
 
     function ENT:IsEngineStarted()
@@ -82,7 +99,7 @@ if SERVER then
     end
 
     function ENT:GetRPM()
-        return 0
+        return self:GetFlywheelRPM()
     end
 
     function ENT:GetThrottle()

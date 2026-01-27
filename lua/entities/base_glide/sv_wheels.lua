@@ -82,7 +82,7 @@ function ENT:PhysicsSimulate( phys, dt )
     -- Prepare output vectors, do angular drag
     local mass = phys:GetMass()
 
-    VectorSetUnpacked( linForce, 0, 0, 0 )
+    linForce:Zero()
 
     local angDragX, angDragY, angDragZ = VectorUnpack( selfTbl.AngularDrag )
     local angVelX, angVelY, angVelZ = VectorUnpack( phys:GetAngleVelocity() )
