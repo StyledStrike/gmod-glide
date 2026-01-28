@@ -848,7 +848,10 @@ function ENT:AttachTrailer( trailer )
     trailer:AttachToVehicle( self )
     self.AttachedTrailer = trailer
 
-    Glide.SendNotification( self:GetAllPlayers(), {
+    local driver = self:GetDriver()
+    if not IsValid( driver ) then return end
+
+    Glide.SendNotification( driver, {
         text = "#glide.notify.vehicle_attach",
         icon = "materials/glide/icons/trailer.png",
         sound = "buttons/button15.wav",
@@ -862,7 +865,10 @@ function ENT:DetachTrailer()
     self.AttachedTrailer:DetachFromVehicle( self )
     self.AttachedTrailer = nil
 
-    Glide.SendNotification( self:GetAllPlayers(), {
+    local driver = self:GetDriver()
+    if not IsValid( driver ) then return end
+
+    Glide.SendNotification( driver, {
         text = "#glide.notify.vehicle_detach",
         icon = "materials/glide/icons/trailer.png",
         sound = "buttons/button15.wav",
@@ -877,11 +883,17 @@ local minWheels = {
     ["base_glide_bike"]       = 2,
     ["base_glide_motorcycle"] = 2,
     ["base_glide_plane"]      = 2,
-    ["base_glide_car"]        = 4,
+    ["base_glide_car"]        = 3,
     ["base_glide_tank"]       = 4,
 }
 
-function ENT:AttachVehicle()
+local OFFSET_WHEEL = Vector( 0, 0, 200 )
+
+local function canFilter( vehicle, ent )
+    return ent:GetClass() ~= "glide_wheel" and ent ~= vehicle
+end
+
+function ENT:ToggleAttachDetachTrailer()
     if self.cooldownAttachTrailer and CurTime() < self.cooldownAttachTrailer then return end
     self.cooldownAttachTrailer = CurTime() + 0.5
 
@@ -895,14 +907,11 @@ function ENT:AttachVehicle()
     else
         local totalWheels = table.Count( self.wheels ) or 0
         if minWheel == 0 or totalWheels == 0 then
-
             local posVehicle = self:GetPos()
             local Trace = util.TraceLine( {
                 start = posVehicle,
-                endpos = posVehicle - Vector( 0, 0, 200 ),
-                filter = function( ent )
-                    return ent:GetClass() ~= "glide_wheel" and ent ~= self
-                end
+                endpos = posVehicle - OFFSET_WHEEL,
+                filter = function( ent ) return canFilter( self, ent ) end
             } )
 
             local trailerEntity = Trace.Entity
@@ -920,10 +929,8 @@ function ENT:AttachVehicle()
                 local posWheel = wheel:GetPos()
                 local Trace = util.TraceLine( {
                     start = posWheel,
-                    endpos = posWheel - Vector( 0, 0, 200 ),
-                    filter = function( ent )
-                        return ent:GetClass() ~= "glide_wheel" and ent ~= self
-                    end
+                    endpos = posWheel - OFFSET_WHEEL,
+                    filter = function( ent ) return canFilter( self, ent ) end
                 } )
 
                 local trailer = Trace.Entity

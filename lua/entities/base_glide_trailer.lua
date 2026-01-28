@@ -114,13 +114,11 @@ function ENT:AttachToVehicle( vehicle )
     self.listAttachedVehicle = self.listAttachedVehicle or {}
     self.listAttachedVehicle[vehicle] = true
 
-    vehicle:TurnOff()
     vehicle:EnableEngine( false )
     vehicle:SetIsAttachedToTrailer( true )
-    vehicle:CallOnRemove( "Glide_TrailerDetach_" .. tostring( self:EntIndex() ), function()
-        if IsValid( self ) then
-            self:DetachFromVehicle( vehicle )
-        end
+    vehicle:CallOnRemove( ( "Glide_TrailerDetach_%s" ):format( self:EntIndex() ), function()
+        if not IsValid( self ) then return end
+        self:DetachFromVehicle( vehicle )
     end )
 end
 
@@ -129,14 +127,13 @@ function ENT:DetachFromVehicle( vehicle )
 
     constraint.RemoveConstraints( vehicle, "Weld" )
     constraint.RemoveConstraints( vehicle, "NoCollide" )
+
     if self.listAttachedVehicle then
         self.listAttachedVehicle[vehicle] = nil
     end
 
-    vehicle.AttachedTrailer = nil
-    vehicle:TurnOff()
     vehicle:EnableEngine( true )
-    vehicle:RemoveCallOnRemove( "Glide_TrailerDetach_" .. tostring( self:EntIndex() ) )
+    vehicle:RemoveCallOnRemove( ( "Glide_TrailerDetach_%s" ):format( self:EntIndex() ) )
     vehicle:SetIsAttachedToTrailer( false )
 end
 

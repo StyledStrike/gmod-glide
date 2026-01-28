@@ -175,7 +175,7 @@ function ENT:SetInputBool( seatIndex, action, pressed )
             immediate = true
         } )
     elseif action == "attach_vehicle" then
-        self:AttachVehicle()
+        self:ToggleAttachDetachTrailer()
     end
 
     if action == "toggle_engine" then
