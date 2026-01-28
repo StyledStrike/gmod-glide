@@ -414,7 +414,7 @@ function WebAudio:Think( dt )
     end
 
     local wetMultiplier = ( 1 - room.hSize ) * ( 0.5 + ( 0.4 - room.vSize * 0.6 ) )
-    local preGainVolume = GetVolume( "carVolume" ) * cvarVolume:GetFloat()
+    local preGainVolume = GetVolume( "carVolume" ) * cvarVolume:GetFloat() * 0.5
 
     if cvarMuteLoseFocus:GetBool() and not system.HasFocus() then
         preGainVolume = 0
