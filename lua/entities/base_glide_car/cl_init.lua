@@ -473,7 +473,7 @@ function ENT:OnRemove()
     if self.lightbars then
         for _, lightbar in ipairs( self.lightbars ) do
             if not IsValid( lightbar ) then continue end
-            
+
             lightbar:Remove()
         end
         self.lightbars = nil
