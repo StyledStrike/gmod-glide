@@ -319,7 +319,9 @@ function ENT:OnUpdateMisc()
         -- Set bodygroups to default
         for _, v in ipairs( self.SirenLights ) do
             if v.bodygroup then
-                self:SetBodygroup( v.bodygroup, 0 )
+                local ent = v.target and v.target > 0 and self.lightbars and self.lightbars[v.target] or self
+
+                ent:SetBodygroup( v.bodygroup, 0 )
             end
         end
     end
@@ -465,6 +467,19 @@ end
 
 DEFINE_BASECLASS( "base_glide" )
 
+function ENT:OnRemove()
+    BaseClass.OnRemove( self )
+
+    if self.lightbars then
+        for _, lightbar in ipairs(self.lightbars) do
+            if IsValid(lightbar) then
+                lightbar:Remove()
+            end
+        end
+        self.lightbars = nil
+    end
+end
+
 local Floor = math.floor
 local SimpleText = draw.SimpleText
 local RoundedBox = draw.RoundedBox
@@ -552,4 +567,21 @@ function ENT:DrawVehicleHUD( screenW, screenH )
 
     -- Current gear
     DrawDataBox( GEAR_LABELS[self:GetGear()] or self:GetGear(), cornerRadius, x + size * 0.5, y + size * 0.78, size * 0.2, size * 0.1 )
+end
+
+function ENT:CreateLightbar(model, pos, ang)
+    local lightbar = ents.CreateClientProp(model)
+    if not IsValid(lightbar) then return end
+
+    lightbar:SetModel(model)
+    lightbar:SetPos(self:LocalToWorld(pos))
+    lightbar:SetAngles(self:LocalToWorldAngles(ang))
+    lightbar:SetParent(self)
+    lightbar:Spawn()
+    lightbar:Activate()
+
+    self.lightbars = self.lightbars or {}
+    table.insert(self.lightbars, lightbar)
+
+    return lightbar
 end
