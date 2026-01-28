@@ -471,10 +471,10 @@ function ENT:OnRemove()
     BaseClass.OnRemove( self )
 
     if self.lightbars then
-        for _, lightbar in ipairs(self.lightbars) do
-            if IsValid(lightbar) then
-                lightbar:Remove()
-            end
+        for _, lightbar in ipairs( self.lightbars ) do
+            if not IsValid( lightbar ) then continue end
+            
+            lightbar:Remove()
         end
         self.lightbars = nil
     end
@@ -569,19 +569,19 @@ function ENT:DrawVehicleHUD( screenW, screenH )
     DrawDataBox( GEAR_LABELS[self:GetGear()] or self:GetGear(), cornerRadius, x + size * 0.5, y + size * 0.78, size * 0.2, size * 0.1 )
 end
 
-function ENT:CreateLightbar(model, pos, ang)
-    local lightbar = ents.CreateClientProp(model)
-    if not IsValid(lightbar) then return end
+function ENT:CreateLightbar( model, pos, ang )
+    local lightbar = ents.CreateClientProp( model )
+    if not IsValid( lightbar ) then return end
 
-    lightbar:SetModel(model)
-    lightbar:SetPos(self:LocalToWorld(pos))
-    lightbar:SetAngles(self:LocalToWorldAngles(ang))
-    lightbar:SetParent(self)
+    lightbar:SetModel( model )
+    lightbar:SetPos( self:LocalToWorld( pos ) )
+    lightbar:SetAngles( self:LocalToWorldAngles( ang ) )
+    lightbar:SetParent( self )
     lightbar:Spawn()
     lightbar:Activate()
 
     self.lightbars = self.lightbars or {}
-    table.insert(self.lightbars, lightbar)
+    table.insert( self.lightbars, lightbar )
 
     return lightbar
 end
