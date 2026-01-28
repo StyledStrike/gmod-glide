@@ -116,6 +116,7 @@ function ENT:AttachToVehicle( vehicle )
 
     vehicle:TurnOff()
     vehicle:EnableEngine( false )
+    vehicle:SetIsAttachedToTrailer( true )
     vehicle:CallOnRemove( "Glide_TrailerDetach_" .. tostring( self:EntIndex() ), function()
         if IsValid( self ) then
             self:DetachFromVehicle( vehicle )
@@ -136,6 +137,7 @@ function ENT:DetachFromVehicle( vehicle )
     vehicle:TurnOff()
     vehicle:EnableEngine( true )
     vehicle:RemoveCallOnRemove( "Glide_TrailerDetach_" .. tostring( self:EntIndex() ) )
+    vehicle:SetIsAttachedToTrailer( false )
 end
 
 function ENT:GetAttachedVehicles()
