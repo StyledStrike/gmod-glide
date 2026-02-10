@@ -215,7 +215,7 @@ function ENT:Think()
         rollFactor = rollFactor + fastFactor
     end
 
-    if rollFactor > 0.1 and selfTbl.enableParticles then
+    if rollFactor > 0.1 and selfTbl.enableParticles and not parent:GetIsAttachedToTrailer() then
         rollFactor = Clamp( rollFactor, 0, 0.5 )
 
         local eff = EffectData()
@@ -227,7 +227,7 @@ function ENT:Think()
         Effect( "glide_tire_roll", eff )
     end
 
-    if forwardSlipFactor > 0.2 and selfTbl.enableParticles then
+    if forwardSlipFactor > 0.2 and selfTbl.enableParticles and not parent:GetIsAttachedToTrailer() then
         forwardSlipFactor = Clamp( forwardSlipFactor, 0, 1 )
 
         local eff = EffectData()
