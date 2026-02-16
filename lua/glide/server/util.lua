@@ -160,8 +160,8 @@ end )
 
 local IsValid = IsValid
 
-function Glide.CanSpawnVehicle( ply )
-    if hook.Run( "Glide_CanSpawnVehicle", ply ) == false then return false end
+function Glide.CanSpawnVehicle( ply, class )
+    if hook.Run( "Glide_CanSpawnVehicle", ply, class ) == false then return false end
 
     if not IsValid( ply ) then return false end
     if not ply:CheckLimit( "glide_vehicles" ) then return false end
@@ -170,7 +170,7 @@ function Glide.CanSpawnVehicle( ply )
 end
 
 function Glide.VehicleFactory( ply, data )
-    if not Glide.CanSpawnVehicle( ply ) then return end
+    if not Glide.CanSpawnVehicle( ply, data.Class ) then return end
 
     local ent = ents.Create( data.Class )
     if not IsValid( ent ) then return end
