@@ -83,6 +83,7 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | Command | Description
 | ------- | -----------
 | `sbox_maxglide_vehicles` `<number>` | Max. number of Glide vehicles that one player can have
+| `sbox_maxglide_trailers` `<number>` | Max. number of Glide trailers that one player can have (This is a separate from `sbox_maxglide_vehicles`)
 | `sbox_maxglide_standalone_turrets` `<number>` | Max. number of Glide Turrets that one player can have
 | `sbox_maxglide_missile_launchers` `<number>` | Max. number of Glide Missile Launchers that one player can have
 | `sbox_maxglide_projectile_launchers` `<number>` | Max. number of Glide Projectile Launchers that one player can have

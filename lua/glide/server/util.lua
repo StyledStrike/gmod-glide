@@ -158,13 +158,28 @@ hook.Add( "ClientSignOnStateChanged", "Glide.TriggerOnPlayerLoad", function( use
     end )
 end )
 
+local function IsTrailerClass( class )
+    if class == "base_glide_trailer" then
+        return true
+    end
+
+    return scripted_ents.IsBasedOn( class, "base_glide_trailer" )
+end
+
 local IsValid = IsValid
 
 function Glide.CanSpawnVehicle( ply, class )
-    if hook.Run( "Glide_CanSpawnVehicle", ply, class ) == false then return false end
-
     if not IsValid( ply ) then return false end
-    if not ply:CheckLimit( "glide_vehicles" ) then return false end
+
+    local limitName = IsTrailerClass( class ) and "glide_trailers" or "glide_vehicles"
+
+    if not ply:CheckLimit( limitName ) then
+        return false
+    end
+
+    if hook.Run( "Glide_CanSpawnVehicle", ply, class ) == false then
+        return false
+    end
 
     return true
 end
@@ -181,8 +196,10 @@ function Glide.VehicleFactory( ply, data )
     ent:Spawn()
     ent:Activate()
 
-    ply:AddCount( "glide_vehicles", ent )
-    cleanup.Add( ply, "glide_vehicles", ent )
+    local limitName = IsTrailerClass( data.Class ) and "glide_trailers" or "glide_vehicles"
+
+    ply:AddCount( limitName, ent )
+    cleanup.Add( ply, limitName, ent )
 
     return ent
 end

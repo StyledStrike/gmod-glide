@@ -1064,6 +1064,7 @@ function Config:OpenFrame()
 
         local cvarList = {
             { name = "sbox_maxglide_vehicles", decimals = 0, min = 0, max = 100 },
+            { name = "sbox_maxglide_trailers", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_standalone_turrets", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_missile_launchers", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_projectile_launchers", decimals = 0, min = 0, max = 100 },
