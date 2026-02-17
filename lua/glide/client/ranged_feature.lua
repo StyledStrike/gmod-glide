@@ -69,7 +69,7 @@ function RangedFeature:Think()
     self.lastDistance = dist
 
     if self.isActive then
-        if dist > self.deactivateDist or isDormant then
+        if ( dist > self.deactivateDist and not ent.isLocalPlayerInVehicle ) or isDormant then
             self:Deactivate()
         end
 
