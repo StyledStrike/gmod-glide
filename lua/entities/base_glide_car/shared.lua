@@ -164,7 +164,7 @@ if CLIENT then
     ENT.BrakeReleaseSound = ""
     ENT.BrakeSqueakSound = ""
 
-    ENT.BrakeLoopSound = ""
+    ENT.BrakeLoopSound = "Glide.BrakeDisk.Car"
     ENT.BrakeLoopVolume = 0.6
 
     -- Exhaust positions

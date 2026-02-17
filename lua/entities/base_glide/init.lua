@@ -379,56 +379,15 @@ local IsValid = IsValid
 
 do
     local GetDevMode = Glide.GetDevMode
-    local TraceLine = util.TraceLine
     local TraceHull = util.TraceHull
 
-    local ray = {}
     local traceData = {
-        mins = Vector( -20, -20, 0 ),
-        maxs = Vector( 20, 20, 50 ),
-        output = ray, -- Output TraceResult to this table
-        mask = MASK_NPCSOLID - MASK_WATER -- Ignore water
+        mask = MASK_SHOT_HULL - MASK_WATER, -- Ignore water
+        collisiongroup = COLLISION_GROUP_VEHICLE,
     }
 
     local function ValidateExitPos( vehicle, origin, localPos )
-        local exitPos = vehicle:LocalToWorld( localPos )
-
-        -- First, make sure there's nothing in between the vehicle's seat and `exitPos`
-        traceData.start = origin
-        traceData.endpos = exitPos
-
-        TraceLine( traceData )
-
-        if ray.Hit then
-            if GetDevMode() then
-                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 0, 0 ), true )
-                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<exit blocked>", 8, Color( 255, 0, 0 ) )
-            end
-
-            return true, exitPos
-        end
-
-        -- Second, make sure the player's hitbox can fit on the `exitPos`
-        traceData.start = exitPos
-        traceData.endpos = exitPos
-
-        TraceHull( traceData )
-
-        if ray.StartSolid then
-            if GetDevMode() then
-                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 100, 0 ), true )
-                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<exit is too small>", 8, Color( 255, 100, 0 ) )
-            end
-
-            return true, exitPos
-        end
-
-        if GetDevMode() then
-            debugoverlay.Line( origin, exitPos, 8, Color( 0, 255, 0 ), true )
-            debugoverlay.Box( exitPos, traceData.mins, traceData.maxs, 8, Color( 255, 255, 255, 20 ) )
-        end
-
-        return false, exitPos
+        return Glide.ValidateExitPos( origin, vehicle:LocalToWorld( localPos ), traceData )
     end
 
     --- Gets the exit position from a seat index.
@@ -489,8 +448,9 @@ do
             -- Put the exit position on the ground
             traceData.start = pos
             traceData.endpos = Vector( pos[1], pos[2], pos[3] - 100 )
+            traceData.ray = nil
 
-            TraceHull( traceData )
+            local ray = TraceHull( traceData )
 
             if ray.Hit then
                 pos = ray.HitPos
