@@ -176,7 +176,7 @@ function ENT:OnUpdateSounds()
         if sounds.brakeLoop then
             sounds.brakeLoop:ChangeVolume( ( self.fastBrakePressure - 0.1 ) * self.BrakeLoopVolume * brake )
 
-        elseif self.BrakeLoopSound ~= "" then
+        elseif self.BrakeLoopSound and self.BrakeLoopSound ~= "" then
             local snd = self:CreateLoopingSound( "brakeLoop", Glide.GetRandomSound( self.BrakeLoopSound ), 80, self )
             snd:PlayEx( 0.0, 100 )
         end
