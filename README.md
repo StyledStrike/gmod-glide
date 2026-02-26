@@ -78,6 +78,11 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | `glide_global_damage_multiplier` `<number>` | Multiplier for damage taken from any source (except from collisions)
 | `glide_player_collision_damage_multiplier` `<number>` | Damage multiplier for players inside vehicles taking damage from hard collisions.
 
+### Trailer
+| Command | Description
+| ------- | -----------
+| `glide_trailer_attach_percentage_wheel` `<number>` | Percentage of wheels required on trailer to attach it to a vehicle. Default : 0.6
+
 ### Sandbox limits
 
 | Command | Description
