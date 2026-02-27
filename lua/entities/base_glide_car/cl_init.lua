@@ -146,7 +146,9 @@ function ENT:OnUpdateSounds()
         if sounds.siren then
             sounds.siren:ChangeVolume( self.SirenVolume * GetVolume( "hornVolume" ) )
         else
-            local snd = self:CreateLoopingSound( "siren", Glide.GetRandomSound( self.SirenLoopSound ), 90, self )
+            local siren = self:GetSirenState()
+            local snd = self:CreateLoopingSound( "siren", self.SirenVehicle and self.SirenVehicle[siren] or Glide.GetRandomSound( self.SirenLoopSound ), 90, self )
+
             snd:PlayEx( self.SirenVolume * GetVolume( "hornVolume" ), 100 )
         end
 
@@ -301,13 +303,13 @@ function ENT:OnUpdateMisc()
 
     -- Siren lights/bodygroups
     local siren = self:GetSirenState()
+    local flashing = self:GetFlashingState()
 
-    if self.lastSirenState ~= siren then
+    if self.lastSirenState ~= siren or self.lastFlashingState ~= flashing then
         self.lastSirenState = siren
 
-        if siren > 1 then
+        if siren > 0 then
             self.lastSirenEnableTime = CurTime()
-
         elseif self.lastSirenEnableTime then
             if CurTime() - self.lastSirenEnableTime < 0.25 then
                 Glide.PlaySoundSet( self.SirenInterruptSound, self, self.SirenVolume )
@@ -317,14 +319,17 @@ function ENT:OnUpdateMisc()
         end
 
         -- Set bodygroups to default
-        for _, v in ipairs( self.SirenLights ) do
+        local SirenLights = self.NumberFlashingLights and self.SirenLights[self.lastFlashingState] or self.SirenLights
+        for _, v in ipairs( SirenLights ) do
             if v.bodygroup then
                 self:SetBodygroup( v.bodygroup, 0 )
             end
         end
+
+        self.lastFlashingState = flashing
     end
 
-    if siren < 1 then return end
+    if flashing < 1 then return end
 
     local myPos = self:GetPos()
     local t = ( CurTime() % self.SirenCycle ) / self.SirenCycle
@@ -332,7 +337,9 @@ function ENT:OnUpdateMisc()
 
     local bodygroupState = {}
 
-    for _, v in ipairs( self.SirenLights ) do
+    local SirenLights = self.NumberFlashingLights and self.SirenLights[flashing] or self.SirenLights
+
+    for _, v in ipairs( SirenLights ) do
         on = t > v.time and t < v.time + ( v.duration or 0.125 )
 
         -- Check for optional bodygroup requirement
