@@ -432,16 +432,22 @@ function ENT:OnPostThink( dt, selfTbl )
     if self:IsEngineOn() then
         -- Ignition cut-off, slowdown the flywheel and then turn off
         if state == 3 then
-            local rpm = self:GetFlywheelRPM()
+            selfTbl.clutch = 0
+            selfTbl.availableFrontTorque = 0
+            selfTbl.availableRearTorque = 0
 
-            selfTbl.clutch = 1
-            self:SetFlywheelRPM( rpm )
-            self:EngineAccelerate( selfTbl.flywheelFriction, dt )
-            self:SetEngineThrottle( Approach( self:GetEngineThrottle(), 0, dt ) )
+            local throttle = Approach( self:GetEngineThrottle(), 0, dt * 2 )
+            self:SetEngineThrottle( throttle )
 
-            if rpm < self:GetMinRPM() then
+            if self:GetFlywheelRPM() < 10 then
                 self:SetEngineState( 0 )
                 self:SetFlywheelRPM( 0 )
+            else
+                -- Slowdown flywheel
+                self:EngineAccelerate( selfTbl.flywheelFriction + selfTbl.flywheelTorque * throttle, dt )
+
+                -- Reassign flywheel RPM to update engine RPM
+                self:SetFlywheelRPM( Clamp( self:GetFlywheelRPM(), 0, self:GetMaxRPM() ) )
             end
         else
             self:EngineThink( dt, selfTbl )
