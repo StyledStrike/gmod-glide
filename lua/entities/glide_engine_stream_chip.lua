@@ -57,9 +57,15 @@ if CLIENT then
     local Pow = math.pow
 
     function ENT:UpdateSounds()
-        if not self:GetIsActive() then return end
-
         local stream = self.stream
+
+        if not self:GetIsActive() then
+            if stream then
+                self:DeactivateSounds()
+            end
+
+            return
+        end
 
         if not stream then
             self.stream = Glide.CreateEngineStream( self )
