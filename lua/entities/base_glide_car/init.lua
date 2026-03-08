@@ -677,7 +677,7 @@ function ENT:WheelThink( dt, selfTbl )
         end
     end
 
-    if groundedCount > selfTbl.groundedCount and selfTbl.groundedCount < 1 then
+    if groundedCount >= selfTbl.wheelCount * 0.5 and selfTbl.groundedCount < 1 then
         local vel = phys:GetVelocity():Length()
 
         if vel > 100 and selfTbl.SuspensionLandFromFall ~= "" then
