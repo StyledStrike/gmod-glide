@@ -183,6 +183,9 @@ if SERVER then
     CreateConVar( "glide_world_physics_damage_multiplier", "1", FCVAR_ARCHIVE + FCVAR_NOTIFY, "Damage multiplier taken by Glide vehicles after colliding against the world.", 0, 10 )
     CreateConVar( "glide_global_damage_multiplier", "1", FCVAR_ARCHIVE + FCVAR_NOTIFY, "Multiplier for damage taken from any source (except collisions).", 0, 10 )
     CreateConVar( "glide_player_collision_damage_multiplier", "0.5", FCVAR_ARCHIVE + FCVAR_NOTIFY, "Damage multiplier for players inside vehicles taking damage from hard collisions.", 0, 2 )
+
+    -- Trailer convars
+    CreateConVar( "glide_trailer_attach_percentage_wheel", "0.6", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Percentage of wheels required on trailer to attach it to a vehicle.", 0, 1 )
 end
 
 -- Toggles
