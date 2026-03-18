@@ -206,14 +206,15 @@ end
 
 --- Check if a player can lock the vehicle by either
 --- being it's creator or being a CPPI friend of the creator.
+local glide_enter_locked = CreateConVar( "glide_enter_locked", "1", { FCVAR_ARCHIVE, FCVAR_REPLICATED }, "Whether players can enter locked vehicles they don't own." )
 function Glide.CanLockVehicle( ply, vehicle )
     local creator = vehicle:GetCreator()
 
-    if creator == ply then
+    if creator == ply and glide_enter_locked:GetBool() then
         return true
     end
 
-    if CPPI then
+    if CPPI and glide_enter_locked:GetBool() then
         if vehicle:CPPIGetOwner() == ply then
             return true
         end
