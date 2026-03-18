@@ -9,6 +9,15 @@ local function Print( str, ... )
     Glide.Print( "[WebAudio] " .. str, ... )
 end
 
+function WebAudio:IsAvailable()
+    if not file.Exists( self.HTML_FILE, "GAME" ) then
+        Print( "The Web Audio HTML file does not exist!" )
+        return false
+    end
+
+    return true
+end
+
 function WebAudio:Restart()
     self:Disable()
 
@@ -27,7 +36,14 @@ function WebAudio:Enable()
     self.isReady = false
     Print( "Preparing..." )
 
-    assert( file.Exists( self.HTML_FILE, "GAME" ), "The Web Audio HTML file does not exist!" )
+    if not self:IsAvailable() then
+        Print( "Falling back to Bass backend..." )
+
+        Glide.Config.engineStreamBackend = 1
+        self:Disable()
+
+        return
+    end
 
     panel = vgui.Create( "HTML", GetHUDPanel() )
     panel:Dock( FILL )
@@ -174,6 +190,12 @@ function WebAudio:RequestStreamCreation( stream )
     self.streams[id] = stream
     self.streamCount = self.streamCount + 1
     self.panel:RunJavascript( ( "manager.createStream('%s');" ):format( tostring( id ) ) )
+
+    stream.lastKV = {}
+
+    for k, v in pairs( Glide.DEFAULT_STREAM_PARAMS ) do
+        stream.lastKV[k] = v
+    end
 end
 
 function WebAudio:RequestStreamDeletion( id )
@@ -231,15 +253,17 @@ do
 
     local traceData = {
         output = ray,
-        collisiongroup = COLLISION_GROUP_WORLD
+        collisiongroup = COLLISION_GROUP_WORLD,
+        filter = {}
     }
 
     local TraceLine = util.TraceLine
 
-    function WebAudio.TraceLine( s, e, worldOnly )
+    function WebAudio.TraceLine( s, e, worldOnly, ignoreEnt )
         traceData.start = s
         traceData.endpos = e
         traceData.mask = worldOnly and MASK_NPCWORLDSTATIC or nil
+        traceData.filter = ignoreEnt
 
         TraceLine( traceData )
 
@@ -292,7 +316,7 @@ function WebAudio:UpdateRoom( dt, eyePos )
 
     dirIndex = dirIndex + 1
 
-    if dirIndex > 10 then
+    if dirIndex > 10 then -- #TRACE_DIRECTIONS
         room.targetHSize = hSize / 9
         room.targetVSize = vSize
 
@@ -302,7 +326,7 @@ function WebAudio:UpdateRoom( dt, eyePos )
 
         -- Update room delay parameters now
         local delayTime = 0.4
-        local delayFeedback = Clamp( ( 0.6 - room.hSize * 0.6 ) + ( 0.4 - room.vSize * 0.4 ), 0.05, 0.8 )
+        local delayFeedback = Clamp( ( 0.6 - room.hSize * 0.6 ) + ( 0.4 - room.vSize * 0.4 ), 0.05, 0.7 )
 
         if Camera.muffleSound then
             delayTime = 0.03
@@ -318,8 +342,8 @@ function WebAudio:UpdateRoom( dt, eyePos )
 
         self:SetBusParameter( "delayTime", delayTime )
         self:SetBusParameter( "delayFeedback", delayFeedback )
-        self:SetBusParameter( "postFilterBandGain", Camera.muffleSound and -9.0 or 1.0 )
-        self:SetBusParameter( "postFilterQ", Camera.muffleSound and 0.4 or 0.0 )
+        self:SetBusParameter( "postFilterBandGain", Camera.muffleSound and -10.0 or 1.0 )
+        self:SetBusParameter( "postFilterQ", Camera.muffleSound and 0.8 or 0.0 )
 
         local impulseResponseAudio = ROOM_INPULSE_RESPONSES[1][2]
 
@@ -341,7 +365,7 @@ function WebAudio:UpdateRoom( dt, eyePos )
     room.vSize = ExpDecay( room.vSize, room.targetVSize, 10, dt )
 
     -- Do one trace at a time
-    local ray = TraceLine( eyePos, eyePos + TRACE_DIRECTIONS[dirIndex] )
+    local ray = TraceLine( eyePos, eyePos + TRACE_DIRECTIONS[dirIndex], false, Glide.currentVehicle )
     local isAir = ray.HitSky or not ray.Hit
 
     if dirIndex > 9 then
@@ -369,6 +393,8 @@ local JS_UPDATE_LISTENER = "manager.updateListener(%.2f, %.2f, %.2f, %.2f, %.2f,
 local JS_UPDATE_STREAM = "manager.setStreamData('%s', %.2f, %.2f, %.2f, %.2f, %.2f, %.1f, %s);"
 
 local cvarVolume = GetConVar( "volume" )
+local cvarVolumeSfx = GetConVar( "volume_sfx" )
+local cvarMuteLoseFocus = GetConVar( "snd_mute_losefocus" )
 
 local AddLine = WebAudio.AddLine
 local GetVolume = Glide.Config.GetVolume
@@ -389,8 +415,14 @@ function WebAudio:Think( dt )
     end
 
     local wetMultiplier = ( 1 - room.hSize ) * ( 0.5 + ( 0.4 - room.vSize * 0.6 ) )
+    -- WebAudio bypasses Source Engine audio, so we need to apply volume convars manually
+    local preGainVolume = GetVolume( "carVolume" ) * cvarVolume:GetFloat() * cvarVolumeSfx:GetFloat()
 
-    self:SetBusParameter( "preGainVolume", GetVolume( "carVolume" ) * cvarVolume:GetFloat() )
+    if cvarMuteLoseFocus:GetBool() and not system.HasFocus() then
+        preGainVolume = 0
+    end
+
+    self:SetBusParameter( "preGainVolume", preGainVolume )
     self:SetBusParameter( "dryVolume", Round( Clamp( 1 - wetMultiplier * 0.3, 0.5, 1.0 ), 2 ) )
     self:SetBusParameter( "wetVolume", Round( Clamp( wetMultiplier * 2.5, 0.1, 1.2 ), 2 ) )
 
@@ -437,6 +469,14 @@ function WebAudio:Think( dt )
                 self.panel:RunJavascript( ( "manager.setStreamPlaying('%s', %s);" ):format( id, stream.isPlaying and "true" or "false" ) )
             end
 
+            -- Update KV parameters, if they have changed
+            for k, v in pairs( stream.lastKV ) do
+                if v ~= stream[k] then
+                    stream.lastKV[k] = stream[k]
+                    AddLine( "manager.setStreamParam('%s', '%s', %.2f);", id, k, stream[k] )
+                end
+            end
+
             local position = stream.position
             local inputs = stream.inputs
 
@@ -452,10 +492,7 @@ function WebAudio:Think( dt )
 
             -- Check if this stream is behind a wall
             if not checkedForWalls and not checkedWall[id] then
-                -- The max. filter frequency the BiquadFilterNode is 24000,
-                -- but using that value had a strange bug where the audio
-                -- would "drift" away from the source after some time.
-                local freq = TraceLine( stream.position, eyePos, true ).Hit and 2000 or 23000
+                local freq = TraceLine( stream.position, eyePos, true ).Hit and 2000 or 22000
                 AddLine( "manager.setStreamLowpassFilterFreq('%s', %.2f);", id, freq )
 
                 -- Flag that we've checked this stream already

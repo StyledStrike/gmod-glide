@@ -76,12 +76,14 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | `glide_physics_damage_multiplier` `<number>` | Damage multiplier taken by Glide vehicles after colliding against things that are not the world.
 | `glide_world_physics_damage_multiplier` `<number>` | Damage multiplier taken by Glide vehicles after colliding against the world.
 | `glide_global_damage_multiplier` `<number>` | Multiplier for damage taken from any source (except from collisions)
+| `glide_player_collision_damage_multiplier` `<number>` | Damage multiplier for players inside vehicles taking damage from hard collisions.
 
 ### Sandbox limits
 
 | Command | Description
 | ------- | -----------
 | `sbox_maxglide_vehicles` `<number>` | Max. number of Glide vehicles that one player can have
+| `sbox_maxglide_trailers` `<number>` | Max. number of Glide trailers that one player can have (This is a separate from `sbox_maxglide_vehicles`)
 | `sbox_maxglide_standalone_turrets` `<number>` | Max. number of Glide Turrets that one player can have
 | `sbox_maxglide_missile_launchers` `<number>` | Max. number of Glide Missile Launchers that one player can have
 | `sbox_maxglide_projectile_launchers` `<number>` | Max. number of Glide Projectile Launchers that one player can have

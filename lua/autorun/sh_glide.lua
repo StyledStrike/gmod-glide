@@ -113,7 +113,11 @@ if CLIENT then
         [MAT_METAL] = 1,
         [MAT_GRATE] = 1,
         [MAT_WOOD] = 1,
-        [MAT_SNOW] = 0.7
+        [MAT_SNOW] = 0.5,
+        [MAT_DIRT] = 0.6,
+        [MAT_SAND] = 0.7,
+        [MAT_FOLIAGE] = 0.7,
+        [MAT_GRASS] = 0.7,
     }
 
     Glide.WHEEL_SOUNDS.ROLL = {
@@ -122,10 +126,10 @@ if CLIENT then
         [MAT_SNOW] = "glide/wheels/roll_dirt.wav",
         [MAT_PLASTIC] = "physics/plastic/plastic_barrel_scrape_rough_loop1.wav",
         [MAT_METAL] = "glide/wheels/roll_metal.wav",
-        [MAT_SAND] = "glide/wheels/roll_dirt.wav",
-        [MAT_FOLIAGE] = "glide/wheels/roll_dirt.wav",
+        [MAT_SAND] = "glide/wheels/roll_sand.wav",
+        [MAT_FOLIAGE] = "glide/wheels/roll_foliage.wav",
         [MAT_SLOSH] = "glide/wheels/roll_road_wet.wav",
-        [MAT_GRASS] = "glide/wheels/roll_dirt.wav",
+        [MAT_GRASS] = "glide/wheels/roll_grass.wav",
         [MAT_VENT] = "ambient/machines/wall_ambient_loop1.wav",
         [MAT_WOOD] = "glide/wheels/roll_wood.wav"
     }
@@ -188,11 +192,14 @@ CreateConVar( "glide_enable_damage_player_on_collision", "0", FCVAR_ARCHIVE + FC
 
 -- Sandbox limits
 cleanup.Register( "glide_vehicles" )
+cleanup.Register( "glide_trailers" )
 cleanup.Register( "glide_standalone_turrets" )
 cleanup.Register( "glide_missile_launchers" )
 cleanup.Register( "glide_projectile_launchers" )
 
 CreateConVar( "sbox_maxglide_vehicles", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide vehicles that one player can have", 0 )
+CreateConVar( "sbox_maxglide_trailers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide trailers that one player can have (separate from sbox_maxglide_vehicles)", 0 )
+
 CreateConVar( "sbox_maxglide_standalone_turrets", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Turrets that one player can have", 0 )
 CreateConVar( "sbox_maxglide_missile_launchers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Missile Launchers that one player can have", 0 )
 CreateConVar( "sbox_maxglide_projectile_launchers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Projectile Launchers that one player can have", 0 )
