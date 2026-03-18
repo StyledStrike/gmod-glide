@@ -78,6 +78,10 @@ function ENT:Initialize()
         start = Vector(),
         endpos = Vector(),
 
+        -- Filter options
+        mask = MASK_SHOT_HULL,
+        collisiongroup = COLLISION_GROUP_VEHICLE,
+
         -- Output TraceResult to `ray`
         output = self.state.ray
     }
@@ -253,7 +257,7 @@ do
 
         if isAsleep or not state.isOnGround then
             -- Let the torque spin the wheel's fake mass
-            state.angularVelocity = state.angularVelocity + ( state.torque / 10 ) * dt
+            state.angularVelocity = state.angularVelocity + ( state.torque / 8 ) * dt
 
             -- Slow down eventually
             state.angularVelocity = Approach( state.angularVelocity, 0, dt * 4 )

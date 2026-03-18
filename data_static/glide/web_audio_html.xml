@@ -188,18 +188,18 @@ class EngineStream {
         this.lowpassNode = context.createBiquadFilter();
         this.lowpassNode.type = "highshelf";
         this.lowpassNode.frequency.value = 20000.0;
-        this.lowpassNode.gain.value = -12.0;
+        this.lowpassNode.gain.value = -20.0;
         this.lowpassNode.Q.value = 1.0;
 
         this.pannerNode = new PannerNode(context, {
             panningModel: "equalpower", //"HRTF",
-            distanceModel: "linear",
+            distanceModel: "inverse",
             positionX: this.position[0],
             positionY: this.position[1],
             positionZ: this.position[2],
+            refDistance: this.params.fadeDist * 0.1,
             maxDistance: this.params.fadeDist,
-            refDistance: 1,
-            rolloffFactor: 10
+            rolloffFactor: 0.8
         });
 
         this.pannerNode.channelCount = 1;
@@ -372,6 +372,7 @@ class EngineStream {
         const inputs = this.inputs;
         const params = this.params;
 
+        this.pannerNode.refDistance = params.fadeDist * 0.1;
         this.pannerNode.maxDistance = params.fadeDist;
 
         let baseVol = params.volume * this.volumeMultiplier;

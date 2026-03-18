@@ -24,6 +24,7 @@ Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET = 10
 Glide.CMD_UPLOAD_MISC_SOUNDS_PRESET = 11
 Glide.CMD_RELOAD_VSWEP = 13
 Glide.CMD_IS_USING_CAM_CONTROLLER = 14
+Glide.CMD_FORCE_THIRDPERSON = 15
 
 function Glide.StartCommand( id, unreliable )
     net.Start( "glide.command", unreliable or false )

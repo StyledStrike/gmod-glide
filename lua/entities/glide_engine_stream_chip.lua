@@ -20,10 +20,9 @@ end
 if CLIENT then
     function ENT:Initialize()
         -- Create a RangedFeature to handle the engine steam sound
-        self.rfSounds = Glide.CreateRangedFeature( self, 5000 )
-        self.rfSounds:SetTestCallback( "ShouldActivateSounds" )
-        self.rfSounds:SetDeactivateCallback( "DeactivateSounds" )
-        self.rfSounds:SetUpdateCallback( "UpdateSounds" )
+        self.rangedFeature = Glide.CreateRangedFeature( self, 5000 )
+        self.rangedFeature:SetDeactivateCallback( "DeactivateSounds" )
+        self.rangedFeature:SetUpdateCallback( "UpdateSounds" )
 
         self.streamJSONOverride = nil
         self.doWobble = false
@@ -32,24 +31,20 @@ if CLIENT then
     function ENT:OnRemove( fullUpdate )
         if fullUpdate then return end
 
-        if self.rfSounds then
-            self.rfSounds:Destroy()
-            self.rfSounds = nil
+        if self.rangedFeature then
+            self.rangedFeature:Destroy()
+            self.rangedFeature = nil
         end
     end
 
     function ENT:Think()
         self:SetNextClientThink( CurTime() )
 
-        if self.rfSounds then
-            self.rfSounds:Think()
+        if self.rangedFeature then
+            self.rangedFeature:Think()
         end
 
         return true
-    end
-
-    function ENT:ShouldActivateSounds()
-        return self:GetIsActive()
     end
 
     function ENT:DeactivateSounds()
@@ -63,6 +58,14 @@ if CLIENT then
 
     function ENT:UpdateSounds()
         local stream = self.stream
+
+        if not self:GetIsActive() then
+            if stream then
+                self:DeactivateSounds()
+            end
+
+            return
+        end
 
         if not stream then
             self.stream = Glide.CreateEngineStream( self )

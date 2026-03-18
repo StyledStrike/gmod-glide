@@ -55,6 +55,13 @@ function ENT:TurnOff()
 end
 
 --- Override this base class function.
+function ENT:OnDriverEnter()
+    BaseClass.OnDriverEnter( self )
+
+    self:SetStaySpright( true )
+end
+
+--- Override this base class function.
 function ENT:OnDriverExit()
     if self.hasTheDriverBeenRagdolled or math.abs( self.totalSpeed ) > 100 then
         self:SetStaySpright( false )

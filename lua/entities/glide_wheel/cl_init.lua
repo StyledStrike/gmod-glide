@@ -10,6 +10,7 @@ function ENT:Initialize()
 
     self.sounds = {}
     self.soundSurface = {}
+    self.soundPitchMult = math.Rand( 0.9, 1.1 )
 
     self.enableParticles = true
     self.enableSkidmarks = true
@@ -71,7 +72,7 @@ function ENT:ProcessSound( vehicle, id, surfaceId, soundSet, altSurface, volume,
     end
 
     snd:ChangeVolume( volume )
-    snd:ChangePitch( pitch )
+    snd:ChangePitch( pitch * self.soundPitchMult )
 end
 
 local WHEEL_SOUNDS = Glide.WHEEL_SOUNDS

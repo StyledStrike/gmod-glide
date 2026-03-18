@@ -393,6 +393,7 @@ local JS_UPDATE_LISTENER = "manager.updateListener(%.2f, %.2f, %.2f, %.2f, %.2f,
 local JS_UPDATE_STREAM = "manager.setStreamData('%s', %.2f, %.2f, %.2f, %.2f, %.2f, %.1f, %s);"
 
 local cvarVolume = GetConVar( "volume" )
+local cvarVolumeSfx = GetConVar( "volume_sfx" )
 local cvarMuteLoseFocus = GetConVar( "snd_mute_losefocus" )
 
 local AddLine = WebAudio.AddLine
@@ -414,7 +415,8 @@ function WebAudio:Think( dt )
     end
 
     local wetMultiplier = ( 1 - room.hSize ) * ( 0.5 + ( 0.4 - room.vSize * 0.6 ) )
-    local preGainVolume = GetVolume( "carVolume" ) * cvarVolume:GetFloat()
+    -- WebAudio bypasses Source Engine audio, so we need to apply volume convars manually
+    local preGainVolume = GetVolume( "carVolume" ) * cvarVolume:GetFloat() * cvarVolumeSfx:GetFloat()
 
     if cvarMuteLoseFocus:GetBool() and not system.HasFocus() then
         preGainVolume = 0

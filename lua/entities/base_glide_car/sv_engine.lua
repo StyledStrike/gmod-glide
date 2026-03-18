@@ -113,7 +113,11 @@ do
         return self.flywheelVelocity * 60 / TAU
     end
 
+    local Max = math.max
+
     function ENT:SetFlywheelRPM( rpm )
+        rpm = Max( rpm, 0 )
+
         self.flywheelVelocity = rpm * TAU / 60
         self:SetEngineRPM( rpm )
     end

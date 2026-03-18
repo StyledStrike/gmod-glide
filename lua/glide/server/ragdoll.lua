@@ -177,6 +177,7 @@ function Glide.RagdollPlayer( ply, velocity, unragdollTime )
     end
 
     hook.Run( "Glide_PrePlayerRagdoll", ply )
+
     -- Create ragdoll
     local ragdoll = ents.Create( "prop_ragdoll" )
     if not IsValid( ragdoll ) then return end
@@ -239,32 +240,97 @@ function Glide.RagdollPlayer( ply, velocity, unragdollTime )
     hook.Run( "Glide_PostPlayerRagdoll", ply )
 end
 
-local traceData = {
-    mins = Vector( -16, -16, 0 ),
-    maxs = Vector( 16, 16, 64 )
-}
+do
+    local GetDevMode = Glide.GetDevMode
+    local TraceLine = util.TraceLine
+    local TraceHull = util.TraceHull
 
-local function GetFreeSpace( origin )
-    local offset = Vector( 0, 0, 20 )
-    local rad, tr
+    local ray = {}
 
-    for ang = 0, 360, 30 do
-        rad = math.rad( ang )
+    --- Check if a vehicle exit position/ragdoll respawn point is unobstructed.
+    function Glide.ValidateExitPos( origin, pos, traceData )
+        traceData = traceData or {}
 
-        offset[1] = math.cos( rad ) * 20
-        offset[2] = math.sin( rad ) * 20
+        traceData.mins = traceData.mins or Vector( -20, -20, 0 )
+        traceData.maxs = traceData.maxs or Vector( 20, 20, 50 )
 
-        traceData.start = origin + offset
-        traceData.endpos = origin
+        -- First, make sure there's nothing in between `origin` and `pos`
+        traceData.start = origin
+        traceData.endpos = pos
+        traceData.output = ray -- Output TraceResult to this table
 
-        tr = util.TraceHull( traceData )
+        TraceLine( traceData )
 
-        if tr.Hit and not tr.StartSolid then
-            return tr.HitPos
+        if ray.Hit then
+            if GetDevMode() then
+                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 0, 0 ), true )
+                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<blocked>", 8, Color( 255, 0, 0 ) )
+            end
+
+            return true, pos
         end
+
+        -- Second, make sure the player's hitbox can fit on `pos`
+        traceData.start = pos
+        traceData.endpos = pos
+
+        TraceHull( traceData )
+
+        if ray.StartSolid then
+            if GetDevMode() then
+                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 100, 0 ), true )
+                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<too small>", 8, Color( 255, 100, 0 ) )
+            end
+
+            return true, pos
+        end
+
+        if GetDevMode() then
+            debugoverlay.Line( origin, pos, 8, Color( 0, 255, 0 ), true )
+            debugoverlay.Box( pos, traceData.mins, traceData.maxs, 8, Color( 255, 255, 255, 20 ) )
+        end
+
+        return false, pos
     end
 
-    return origin
+    --- Attempt to find and place `origin` into a
+    --- unobstructed spot suitable for a player.
+    function Glide.GetFreeSpaceForPlayer( ply, origin, range )
+        range = range or 80
+
+        local traceData = {
+            mask = MASK_SHOT_HULL - MASK_WATER, -- Ignore water
+            collisiongroup = COLLISION_GROUP_VEHICLE
+        }
+
+        traceData.mins, traceData.maxs = ply:GetHull()
+
+        -- Check if the `origin` is unobstructed
+        local offset = Vector( 0, 0, 5 )
+        local blocked, endPos = Glide.ValidateExitPos( origin, origin + offset, traceData )
+
+        if not blocked then
+            return endPos
+        end
+
+        -- Check for unobstructed positions around `origin`
+        local rad
+
+        for ang = 0, 360, 30 do
+            rad = math.rad( ang )
+
+            offset[1] = math.cos( rad ) * range
+            offset[2] = math.sin( rad ) * range
+
+            blocked, endPos = Glide.ValidateExitPos( origin, origin + offset, traceData )
+
+            if not blocked then
+                return endPos
+            end
+        end
+
+        return origin
+    end
 end
 
 function Glide.UnRagdollPlayer( ply, restoreCallback )
@@ -305,7 +371,7 @@ function Glide.UnRagdollPlayer( ply, restoreCallback )
 
     -- Restore health, armor and inventory
     Glide.RestoreSpawnInfo( ply, function( restoredPly )
-        restoredPly:SetPos( GetFreeSpace( pos ) )
+        restoredPly:SetPos( Glide.GetFreeSpaceForPlayer( restoredPly, pos ) )
         restoredPly:SetEyeAngles( ang )
         restoredPly:SetVelocity( velocity )
 
