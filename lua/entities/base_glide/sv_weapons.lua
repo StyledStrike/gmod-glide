@@ -149,11 +149,11 @@ local CurTime = CurTime
 local CanLockOnEntity = Glide.CanLockOnEntity
 local FindLockOnTarget = Glide.FindLockOnTarget
 
-function ENT:WeaponThink()
+function ENT:WeaponThink( selfTbl )
     local time = CurTime()
-    local state = self.weaponState
+    local state = selfTbl.weaponState
 
-    local weapon = self.weapons[state.index]
+    local weapon = selfTbl.weapons[state.index]
     if not weapon then return end
 
     weapon:InternalThink()
@@ -200,13 +200,13 @@ function ENT:WeaponThink()
         end
 
         -- Stick to the same target for as long as possible
-        if CanLockOnEntity( target, myPos, myDir, self.LockOnThreshold, self.LockOnMaxDistance, driver, true, self.selfTraceFilter ) then
+        if CanLockOnEntity( target, myPos, myDir, selfTbl.LockOnThreshold, selfTbl.LockOnMaxDistance, driver, true, selfTbl.selfTraceFilter ) then
             return
         end
     end
 
     -- Find a new target
-    target = FindLockOnTarget( myPos, myDir, self.LockOnThreshold, self.LockOnMaxDistance, driver, self.selfTraceFilter, self.seats )
+    target = FindLockOnTarget( myPos, myDir, selfTbl.LockOnThreshold, selfTbl.LockOnMaxDistance, driver, selfTbl.selfTraceFilter, selfTbl.seats )
 
     if target ~= self:GetLockOnTarget() then
         self:SetLockOnTarget( target )

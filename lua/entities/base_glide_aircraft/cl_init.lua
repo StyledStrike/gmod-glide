@@ -8,8 +8,8 @@ function ENT:ShouldActivateSounds()
 end
 
 --- Override this base class function.
-function ENT:ActivateSounds()
-    BaseClass.ActivateSounds( self )
+function ENT:InternalActivateFeatures()
+    BaseClass.InternalActivateFeatures( self )
 
     -- Setup variables for the beat sounds
     self.nextBeat = 0
@@ -46,9 +46,16 @@ end
 local RealTime = RealTime
 local DrawLight = Glide.DrawLight
 local DrawLightSprite = Glide.DrawLightSprite
+local GetTable = FindMetaTable( "Entity" ).GetTable
 
 --- Implement this base class function.
 function ENT:OnUpdateMisc()
+    local selfTbl = GetTable( self )
+
+    if self:GetPower() > 0.1 and selfTbl.RotorBeatInterval and selfTbl.RotorBeatInterval > 0 then
+        self:DoRotorBeatSounds( selfTbl )
+    end
+
     if self:GetDriver() == NULL and self:GetPower() < 0.1 then return end
 
     -- Update strobe lights
@@ -57,32 +64,19 @@ function ENT:OnUpdateMisc()
 
     t = t % 1
 
-    for i, v in ipairs( self.StrobeLights ) do
+    for i, v in ipairs( selfTbl.StrobeLights ) do
         on = t > v.blinkTime and t < v.blinkTime + ( v.blinkDuration or 0.05 )
 
         if on then
             pos = self:LocalToWorld( v.offset )
-            color = self.StrobeLightColors[i]
+            color = selfTbl.StrobeLightColors[i]
 
-            if self.StrobeLightRadius > 0 then
-                DrawLight( pos, color, self.StrobeLightRadius )
+            if selfTbl.StrobeLightRadius > 0 then
+                DrawLight( pos, color, selfTbl.StrobeLightRadius )
             end
 
-            DrawLightSprite( pos, nil, self.StrobeLightSpriteSize, color )
+            DrawLightSprite( pos, nil, selfTbl.StrobeLightSpriteSize, color )
         end
-    end
-end
-
-local GetTable = FindMetaTable( "Entity" ).GetTable
-
---- Override this base class function.
-function ENT:UpdateSounds()
-    BaseClass.UpdateSounds( self )
-
-    local selfTbl = GetTable( self )
-
-    if selfTbl.RotorBeatInterval and selfTbl.RotorBeatInterval > 0 then
-        self:DoRotorBeatSounds( selfTbl )
     end
 end
 

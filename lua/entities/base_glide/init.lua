@@ -113,12 +113,14 @@ function ENT:Initialize()
     self.exitPos = {}   -- Per-seat exit offsets
     self.lastDriver = NULL
     self.lastBodygroups = {}
+    self.isEngineEnabled = true
 
     self.inputBools = {}        -- Per-seat bool inputs
     self.inputFloats = {}       -- Per-seat float inputs
     self.inputFlyMode = 0           -- User mouse flying mode
     self.inputManualShift = false   -- User manual gear shifting setting
     self.autoTurnOffLights = false  -- User "turn off headlights" setting
+    self.autoTurnOnEngine = true
     self.inputThrottleModifierMode = 0  -- User throttle modifier setting
     self.inputThrottleModifierToggle = false
 
@@ -140,7 +142,7 @@ function ENT:Initialize()
 
     -- Setup trace filter used by wheels to
     -- to ignore the vehicle's chassis and seats.
-    self.wheelTraceFilter = { self, "player" }
+    self.wheelTraceFilter = { self, "player", "npc_*" }
 
     -- Copy default surface multipliers to this vehicle.
     self.surfaceGrip = table.Copy( Glide.SURFACE_GRIP )
@@ -166,7 +168,7 @@ function ENT:Initialize()
     phys:SetDamping( 0, 0 )
     phys:SetDragCoefficient( 0 )
     phys:SetAngleDragCoefficient( 0 )
-    phys:SetBuoyancyRatio( 0.05 )
+    phys:SetBuoyancyRatio( 0.07 )
     phys:EnableMotion( true )
     phys:Wake()
 
@@ -289,6 +291,8 @@ function ENT:OnEngineStateChange( _, lastState, state )
 end
 
 function ENT:TurnOn()
+    if not self.isEngineEnabled then return end
+
     local state = self:GetEngineState()
 
     if state == 3 then
@@ -375,56 +379,15 @@ local IsValid = IsValid
 
 do
     local GetDevMode = Glide.GetDevMode
-    local TraceLine = util.TraceLine
     local TraceHull = util.TraceHull
 
-    local ray = {}
     local traceData = {
-        mins = Vector( -20, -20, 0 ),
-        maxs = Vector( 20, 20, 50 ),
-        output = ray, -- Output TraceResult to this table
-        mask = MASK_NPCSOLID - MASK_WATER -- Ignore water
+        mask = MASK_SHOT_HULL - MASK_WATER, -- Ignore water
+        collisiongroup = COLLISION_GROUP_VEHICLE,
     }
 
     local function ValidateExitPos( vehicle, origin, localPos )
-        local exitPos = vehicle:LocalToWorld( localPos )
-
-        -- First, make sure there's nothing in between the vehicle's seat and `exitPos`
-        traceData.start = origin
-        traceData.endpos = exitPos
-
-        TraceLine( traceData )
-
-        if ray.Hit then
-            if GetDevMode() then
-                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 0, 0 ), true )
-                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<exit blocked>", 8, Color( 255, 0, 0 ) )
-            end
-
-            return true, exitPos
-        end
-
-        -- Second, make sure the player's hitbox can fit on the `exitPos`
-        traceData.start = exitPos
-        traceData.endpos = exitPos
-
-        TraceHull( traceData )
-
-        if ray.StartSolid then
-            if GetDevMode() then
-                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 100, 0 ), true )
-                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<exit is too small>", 8, Color( 255, 100, 0 ) )
-            end
-
-            return true, exitPos
-        end
-
-        if GetDevMode() then
-            debugoverlay.Line( origin, exitPos, 8, Color( 0, 255, 0 ), true )
-            debugoverlay.Box( exitPos, traceData.mins, traceData.maxs, 8, Color( 255, 255, 255, 20 ) )
-        end
-
-        return false, exitPos
+        return Glide.ValidateExitPos( origin, vehicle:LocalToWorld( localPos ), traceData )
     end
 
     --- Gets the exit position from a seat index.
@@ -485,8 +448,9 @@ do
             -- Put the exit position on the ground
             traceData.start = pos
             traceData.endpos = Vector( pos[1], pos[2], pos[3] - 100 )
+            traceData.ray = nil
 
-            TraceHull( traceData )
+            local ray = TraceHull( traceData )
 
             if ray.Hit then
                 pos = ray.HitPos
@@ -651,6 +615,7 @@ function ENT:CreateSeat( offset, angle, exitPos, isHidden )
     return seat
 end
 
+local Abs = math.abs
 local CurTime = CurTime
 local TickInterval = engine.TickInterval
 local GetDevMode = Glide.GetDevMode
@@ -705,7 +670,7 @@ function ENT:Think()
 
     -- Update weapons
     if selfTbl.weaponCount > 0 then
-        self:WeaponThink()
+        self:WeaponThink( selfTbl )
     end
 
     -- Update water logic
@@ -716,11 +681,11 @@ function ENT:Think()
         if self:WaterLevel() > 2 then
             self:SetIsEngineOnFire( false )
         else
-            local attacker = IsValid( self.lastDamageAttacker ) and self.lastDamageAttacker or self
-            local inflictor = IsValid( self.lastDamageInflictor ) and self.lastDamageInflictor or self
+            local attacker = IsValid( selfTbl.lastDamageAttacker ) and selfTbl.lastDamageAttacker or self
+            local inflictor = IsValid( selfTbl.lastDamageInflictor ) and selfTbl.lastDamageInflictor or self
 
             local dmg = DamageInfo()
-            dmg:SetDamage( self.MaxChassisHealth * self.ChassisFireDamageMultiplier * dt )
+            dmg:SetDamage( selfTbl.MaxChassisHealth * selfTbl.ChassisFireDamageMultiplier * dt )
             dmg:SetAttacker( attacker )
             dmg:SetInflictor( inflictor )
             dmg:SetDamageType( 0 )
@@ -732,7 +697,7 @@ function ENT:Think()
 
     -- Update wheels
     if selfTbl.wheelCount > 0 then
-        self:WheelThink( dt )
+        self:WheelThink( dt, selfTbl )
     end
 
     -- Update trailer sockets
@@ -765,7 +730,23 @@ function ENT:Think()
     local phys = self:GetPhysicsObject()
 
     if IsValid( phys ) then
-        self:ValidatePhysSettings( phys )
+        local lin, ang = phys:GetDamping()
+
+        if lin > 0 or ang > 0 then
+            phys:SetDamping( 0, 0 )
+        end
+
+        -- Make sure the physics stay awake when necessary,
+        -- otherwise the driver's input won't do anything.
+        local driverInput =
+            self:GetInputFloat( 1, "accelerate", selfTbl ) +
+            self:GetInputFloat( 1, "brake", selfTbl ) +
+            self:GetInputFloat( 1, "steer", selfTbl ) +
+            self:GetInputFloat( 1, "throttle", selfTbl )
+
+        if phys:IsAsleep() and Abs( driverInput ) > 0.01 then
+            phys:Wake()
+        end
     end
 
     -- Draw debug overlays, if `developer` cvar is active
@@ -774,32 +755,6 @@ function ENT:Think()
     end
 
     return true
-end
-
-local Abs = math.abs
-
---- Make sure nothing messed with
---- our physics damping and buoyancy values.
-function ENT:ValidatePhysSettings( phys )
-    phys:SetBuoyancyRatio( 0.02 )
-
-    local lin, ang = phys:GetDamping()
-
-    if lin > 0 or ang > 0 then
-        phys:SetDamping( 0, 0 )
-    end
-
-    -- Make sure the physics stay awake when necessary,
-    -- otherwise the driver's input won't do anything.
-    local driverInput =
-        self:GetInputFloat( 1, "accelerate" ) +
-        self:GetInputFloat( 1, "brake" ) +
-        self:GetInputFloat( 1, "steer" ) +
-        self:GetInputFloat( 1, "throttle" )
-
-    if phys:IsAsleep() and Abs( driverInput ) > 0.01 then
-        phys:Wake()
-    end
 end
 
 function ENT:UpdateHealthOutputs()

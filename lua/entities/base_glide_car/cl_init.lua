@@ -44,7 +44,20 @@ function ENT:OnTurnOff()
         Glide.PlaySoundSet( self.StoppedSound, self, GetVolume( "carVolume" ), nil, 85 )
     end
 
-    self:DeactivateSounds()
+    if self.stream then
+        self.stream:Destroy()
+        self.stream = nil
+    end
+
+    -- Remove all sounds except horns/sirens
+    local sounds = self.sounds
+
+    for k, snd in pairs( sounds ) do
+        if k ~= "horn" and k ~= "siren" then
+            snd:Stop()
+            sounds[k] = nil
+        end
+    end
 end
 
 --- Implement this base class function.
@@ -165,8 +178,8 @@ function ENT:OnUpdateSounds()
         if sounds.brakeLoop then
             sounds.brakeLoop:ChangeVolume( ( self.fastBrakePressure - 0.1 ) * self.BrakeLoopVolume * brake )
 
-        elseif self.BrakeLoopSound ~= "" then
-            local snd = self:CreateLoopingSound( "brakeLoop", self.BrakeLoopSound, 80, self )
+        elseif self.BrakeLoopSound and self.BrakeLoopSound ~= "" then
+            local snd = self:CreateLoopingSound( "brakeLoop", Glide.GetRandomSound( self.BrakeLoopSound ), 80, self )
             snd:PlayEx( 0.0, 100 )
         end
 

@@ -38,6 +38,15 @@ function ENT:OnPostInitialize()
     end
 end
 
+--- Implement this base class function.
+function ENT:OnDriverExit()
+    local keepOn = IsValid( self.lastDriver ) and self.lastDriver:KeyDown( IN_WALK )
+
+    if not self.hasTheDriverBeenRagdolled and not keepOn then
+        self:TurnOff()
+    end
+end
+
 --- Override this base class function.
 function ENT:SetupWiremodPorts( inputs, outputs )
     BaseClass.SetupWiremodPorts( self, inputs, outputs )
@@ -83,10 +92,6 @@ function ENT:CreateWheel( offset, params )
     params.forwardTractionMax = params.forwardTractionMax or 50000
     params.sideTractionMultiplier = params.sideTractionMultiplier or 200
     params.brakePower = params.brakePower or 1000
-
-    if params.enableAxleForces == nil then
-        params.enableAxleForces = true
-    end
 
     -- Let the base class create the wheel
     local wheel = BaseClass.CreateWheel( self, offset, params )

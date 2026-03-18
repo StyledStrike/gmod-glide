@@ -240,6 +240,28 @@ do
     end )
 end
 
+-- The spawnmenu is configured to recognize it as a vehicle,
+-- so we should run spawn hooks that are for vehicles too.
+hook.Add( "PlayerSpawnSENT", "Glide.RunVehiclePreSpawnHook", function( ply, entClass )
+    local entTable = scripted_ents.GetStored( entClass )
+    if not entTable then return end
+
+    local vehicleTable = entTable["t"]
+    if not vehicleTable or not isstring( vehicleTable["GlideCategory"] ) then return end
+
+    local bAllow = hook.Run( "PlayerSpawnVehicle", ply, vehicleTable["ChassisModel"], vehicleTable["PrintName"], vehicleTable )
+    return bAllow ~= false
+end )
+
+hook.Add( "PlayerSpawnedSENT", "Glide.RunVehiclePostSpawnHook", function( ply, ent )
+    if not IsValid( ent ) then return end
+    if not ent.IsGlideVehicle then return end
+
+    hook.Run( "PlayerSpawnedVehicle", ply, ent )
+
+    return true
+end )
+
 if not game.SinglePlayer() then return end
 
 local function ResetVehicle( vehicle )

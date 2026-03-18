@@ -165,9 +165,11 @@ if CLIENT then
     -- Added to ENT.CameraCenterOffset while a trailer is attached.
     ENT.CameraTrailerOffset = Vector( -150, 0, 10 ) -- Push the camera backwards and a little bit up
 
-    -- Setup how far away players can hear sounds and update misc. features
-    ENT.MaxSoundDistance = 6000
-    ENT.MaxMiscDistance = 5000
+    -- Setup how close players need to be for many client-side features
+    -- (animations, sounds, lights, particles, etc) to become active.
+    -- Also note that, those features will also deactivate
+    -- if the vehicle is not on the player's potential visible set.
+    ENT.MaxFeaturesDistance = 5000
 
     -- Startup/ignition sounds, leave empty to disable
     ENT.StartSound = ""
