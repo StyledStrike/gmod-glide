@@ -551,7 +551,7 @@ do
     function ENT:PhysicsCollide( data )
         BaseClass.PhysicsCollide( self, data )
 
-        if data.TheirSurfaceProps ~= 76 then -- default_silent
+        if data.TheirSurfaceProps ~= 76 then -- we hit non-skybox! (default_silent) 
             return
         end
 
@@ -564,6 +564,8 @@ do
 
         phys:SetVelocityInstantaneous( newVel )
         phys:SetAngleVelocityInstantaneous( data.OurOldAngularVelocity )
+
+        hook.Run( "Glide_OnAircraftSkyboxCollide", self, data )
     end
 end
 
