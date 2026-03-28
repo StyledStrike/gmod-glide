@@ -804,13 +804,3 @@ function ENT:GetSpawnColor()
     local color = colors[math.random( #colors )]
     return Color( color.r, color.g, color.b )
 end
-
-hook.Add( "AcceptInput", "Glide.VehicleAcceptInput", function( ent, input )
-    if not IsValid( ent ) or not ent.IsGlideVehicle then return end
-
-    if ( input == "unlock" ) then
-        ent:SetLocked( false, true )
-    elseif ( input == "lock" ) then
-        ent:SetLocked( true, true )
-    end
-end )

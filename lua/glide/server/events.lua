@@ -108,6 +108,16 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply )
     hook.Run( "Glide_OnExitVehicle", ply, vehicle )
 end )
 
+hook.Add( "AcceptInput", "Glide.VehicleAcceptLockInputs", function( ent, inputName )
+    if not IsValid( ent ) or not ent.IsGlideVehicle then return end
+
+    if inputName == "unlock" then
+        ent:SetLocked( false, true )
+    elseif inputName == "lock" then
+        ent:SetLocked( true, true )
+    end
+end )
+
 -- Validate editable float variables and let the vehicle know they have changed.
 hook.Add( "CanEditVariable", "Glide.ValidateEditVariables", function( ent, _, _, value, editor )
     if not ent.IsGlideVehicle then return end

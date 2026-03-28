@@ -206,15 +206,14 @@ end
 
 --- Check if a player can lock the vehicle by either
 --- being it's creator or being a CPPI friend of the creator.
-local glide_enter_locked = CreateConVar( "glide_enter_locked", "1", { FCVAR_ARCHIVE, FCVAR_REPLICATED }, "Whether players can enter locked vehicles they don't own." )
 function Glide.CanLockVehicle( ply, vehicle )
     local creator = vehicle:GetCreator()
 
-    if creator == ply and glide_enter_locked:GetBool() then
+    if creator == ply then
         return true
     end
 
-    if CPPI and glide_enter_locked:GetBool() then
+    if CPPI then
         if vehicle:CPPIGetOwner() == ply then
             return true
         end
@@ -227,9 +226,15 @@ function Glide.CanLockVehicle( ply, vehicle )
     return hook.Run( "Glide_CanLockVehicle", ply, vehicle ) or false
 end
 
+local cvarAlwaysEnterLocked = GetConVar( "glide_always_can_enter_locked_vehicles" )
+
 --- Check if a player can enter a locked vehicle.
 function Glide.CanEnterLockedVehicle( ply, vehicle )
-    return hook.Run( "Glide_CanEnterLockedVehicle", ply, vehicle ) or Glide.CanLockVehicle( ply, vehicle )
+    if hook.Run( "Glide_CanEnterLockedVehicle", ply, vehicle ) == false then
+        return false
+    end
+
+    return cvarAlwaysEnterLocked:GetBool() or Glide.CanLockVehicle( ply, vehicle )
 end
 
 --- Make a player switch to another seat
