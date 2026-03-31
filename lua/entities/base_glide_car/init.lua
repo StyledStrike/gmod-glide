@@ -678,10 +678,10 @@ function ENT:WheelThink( dt, selfTbl )
     end
 
     if groundedCount >= selfTbl.wheelCount * 0.5 and selfTbl.groundedCount < 2 then
-        local vel = phys:GetVelocity():Length()
+        local downSpeed = -selfTbl.localVelocity[3]
 
-        if vel > 100 and selfTbl.SuspensionLandFromFall ~= "" then
-            Glide.PlaySoundSet( selfTbl.SuspensionLandFromFall, self, Clamp( vel / 300, 0, 1 ) )
+        if downSpeed > 100 and selfTbl.SuspensionLandFromFall ~= "" then
+            Glide.PlaySoundSet( selfTbl.SuspensionLandFromFall, self, Clamp( downSpeed / 300, 0, 1 ) )
         end
     end
 
