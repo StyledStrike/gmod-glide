@@ -339,8 +339,8 @@ function EngineStream:Think( dt, eyePos, eyeAng )
         return
     end
 
-    if self.volumeMultiplier < 1 then
-        self.volumeMultiplier = math.min( 1, Glide.ExpDecay( self.volumeMultiplier, 1.01, 4, dt ) )
+    if self.volumeMultiplier < 0.8 then
+        self.volumeMultiplier = math.min( 1, Approach( self.volumeMultiplier, 0.8, dt ) )
     end
 
     baseVol = self.volume * self.volumeMultiplier * GetVolume( "carVolume" )
