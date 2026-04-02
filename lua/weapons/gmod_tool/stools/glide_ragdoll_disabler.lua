@@ -30,6 +30,7 @@ if SERVER then
 
         local enableFall = type( data == "table" ) and data.enableFall == true
         ent.FallOnCollision = enableFall
+        ent.FallWhileUnderWater = enableFall
 
         duplicator.StoreEntityModifier( ent, "glide_ragdoll_disabler", {
             enableFall = enableFall
