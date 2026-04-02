@@ -287,7 +287,7 @@ Glide.DEFAULT_STREAM_PARAMS = DEFAULT_STREAM_PARAMS
 
 local STREAM_KV_LIMITS = {
     pitch = { min = 0.5, max = 2, decimals = 2 },
-    volume = { min = 0.1, max = 2, decimals = 2 },
+    volume = { min = 0.1, max = 1.5, decimals = 2 },
     fadeDist = { min = 500, max = 4000, decimals = 0 },
 
     redlineFrequency = { min = 30, max = 70, decimals = 0 },
