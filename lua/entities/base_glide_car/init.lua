@@ -677,7 +677,7 @@ function ENT:WheelThink( dt, selfTbl )
         end
     end
 
-    if groundedCount >= selfTbl.wheelCount * 0.5 and selfTbl.groundedCount < 2 then
+    if groundedCount > 1 and selfTbl.groundedCount < 2 then
         local downSpeed = -selfTbl.localVelocity[3]
 
         if downSpeed > 100 and selfTbl.SuspensionLandFromFall ~= "" then
