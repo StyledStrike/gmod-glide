@@ -45,6 +45,60 @@ Glide.LOCKON_WHITELIST = {
     ["prop_vehicle_prisoner_pod"] = true
 }
 
+-- Do not lock on these entity classes
+Glide.LOCKON_BLACKLIST = {
+    ["glide_wheel"] = true,
+
+    ["hint"] = true,
+    ["env_spark"] = true,
+    ["env_sprite"] = true,
+    ["env_lightglow"] = true,
+    ["env_entity_maker"] = true,
+    ["env_soundscape_proxy"] = true,
+    ["env_soundscape_triggerable"] = true,
+
+    ["func_door"] = true,
+    ["func_brush"] = true,
+    ["func_button"] = true,
+    ["func_occluder"] = true,
+    ["func_rotating"] = true,
+    ["func_areaportal"] = true,
+    ["func_areaportalwindow"] = true,
+    ["func_tracktrain"] = true,
+
+    ["logic_relay"] = true,
+    ["logic_timer"] = true,
+    ["logic_branch"] = true,
+    ["info_target"] = true,
+
+    ["trigger_multiple"] = true,
+    ["trigger_soundscape"] = true,
+    ["trigger_teleport"] = true,
+    ["trigger_hurt"] = true,
+    ["trigger_once"] = true,
+    ["point_teleport"] = true,
+    ["point_template"] = true,
+
+    ["ambient_generic"] = true,
+    ["phys_bone_follower"] = true,
+    ["predicted_viewmodel"] = true,
+    ["info_player_start"] = true,
+    ["info_particle_system"] = true,
+    ["path_track"] = true,
+    ["move_rope"] = true,
+    ["keyframe_rope"] = true,
+    ["filter_activator_name"] = true,
+    ["math_counter"] = true,
+    ["light"] = true,
+
+    ["prop_static"] = true,
+    ["prop_dynamic"] = true,
+    ["prop_physics"] = true,
+    ["prop_door_rotating"] = true,
+    ["prop_physics_multiplayer"] = true,
+    ["prop_vehicle_prisoner_pod"] = true,
+}
+
 -- Mouse flying control modes
 Glide.MOUSE_FLY_MODE = {
     AIM = 0,        -- Point-to-aim
