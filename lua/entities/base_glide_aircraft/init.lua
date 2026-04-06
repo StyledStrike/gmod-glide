@@ -426,7 +426,7 @@ function ENT:SimulateHelicopter( phys, params, effective, outLin, outAng )
     -- Input control forces
     local angles = self:GetAngles()
     local inputPitch = LimitInputWithAngle( self.inputPitch, Abs( angles[1] ), params.maxPitch - 20 )
-    local inputRoll = LimitInputWithAngle( self.inputRoll, Abs( angles[3] ), params.maxRoll - 20 )
+    local inputRoll = self.inputRoll --LimitInputWithAngle( self.inputRoll, Abs( angles[3] ), params.maxRoll - 20 )
 
     outAng[1] = outAng[1] + inputRoll * params.rollForce * inputMult * effectiveness * mass
     outAng[2] = outAng[2] + inputPitch * params.pitchForce * inputMult * effectiveness * mass

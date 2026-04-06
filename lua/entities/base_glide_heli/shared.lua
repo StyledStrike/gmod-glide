@@ -112,7 +112,7 @@ if SERVER then
 
         uprightForce = 1000,    -- Force that tries to keep the helicopter upright
         maxPitch = 70,          -- Don't let the helicopter pitch more than this
-        maxRoll = 85            -- Don't let the helicopter roll more than this
+        --maxRoll = 85          -- (Obsolete) Don't let the helicopter roll more than this
     }
 
     -- You can override these functions on your children classes.
