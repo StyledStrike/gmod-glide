@@ -291,8 +291,6 @@ local WHITELIST = Glide.LOCKON_WHITELIST
 local BLACKLIST = Glide.LOCKON_BLACKLIST
 
 local function IsLockableEntity( ent )
-    if ent == NULL then return false end
-
     local class = GetClass( ent )
 
     if BLACKLIST[class] then
