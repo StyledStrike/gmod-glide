@@ -543,7 +543,7 @@ function Config:OpenFrame()
 
     self.frame = frame
 
-    ----- Go back to last open tab ----- 
+    ----- Go back to last open tab -----
 
     timer.Simple( 0, function()
         if IsValid( self.frame ) then
@@ -1165,7 +1165,7 @@ local glideVolume = 1
 hook.Add( "Tick", "Glide.CheckVoiceActivity", function()
     local isAnyoneTalking = false
 
-    for _, ply in ipairs( player.GetAll() ) do
+    for _, ply in player.Iterator() do
         if ply:IsVoiceAudible() and ply:VoiceVolume() > 0.05 then
             isAnyoneTalking = true
             break
