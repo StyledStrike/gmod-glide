@@ -302,8 +302,12 @@ local function isWhitelisted( ent, skipParentCheck )
         return false -- Don't include pod seats of Glide vehicles, as we want to lock on the whole vehicle instead
     end
 
-    if WHITELIST[class] or BLACKLIST[class] then
+    if WHITELIST[class] then
         return true
+    end
+
+    if BLACKLIST[class] then
+        return false
     end
 
     if ent:IsVehicle() then
