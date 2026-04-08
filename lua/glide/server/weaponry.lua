@@ -289,36 +289,10 @@ end
 
 local WHITELIST = Glide.LOCKON_WHITELIST
 local BLACKLIST = Glide.LOCKON_BLACKLIST
-
-local function IsLockableEntity( ent )
-    local class = GetClass( ent )
-
-    if BLACKLIST[class] then
-        return false
-    end
-
-    if WHITELIST[class] then
-        return true
-    end
-
-    if ent:IsVehicle() then
-        return true
-    end
-
-    if ent.IsVJBaseSNPC_TankChassis then
-        return true
-    end
-
-    if ent.BaseClass and WHITELIST[ent.BaseClass.ClassName] then
-        return true
-    end
-
-    return false
-end
-
 local AllEnts = {}
+
 local function isWhitelisted( ent, skipParentCheck )
-    if ent == NULL then return false end
+    if not IsValid( ent ) then return false end
 
     local class = GetClass( ent )
 
@@ -328,7 +302,7 @@ local function isWhitelisted( ent, skipParentCheck )
         return false -- Don't include pod seats of Glide vehicles, as we want to lock on the whole vehicle instead
     end
 
-    if WHITELIST[class] then
+    if WHITELIST[class] or BLACKLIST[class] then
         return true
     end
 
@@ -367,7 +341,6 @@ hook.Add( "EntityRemoved", "Glide_LockOnWhitelist", function( ent )
 end )
 
 local CanLockOnEntity = Glide.CanLockOnEntity
-
 --- Finds all entities that we can lock on with `Glide.CanLockOnEntity`,
 --- then returns which one has the largest dot product between `normal` and the direction towards it.
 function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacker, traceFilter, entFilter )
