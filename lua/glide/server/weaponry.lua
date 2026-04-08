@@ -357,7 +357,7 @@ function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacke
 
     for i = 1, #AllEnts do
         local e = AllEnts[i]
-        if e ~= attacker then
+        if e ~= attacker and not ignore[e] then
             canLock, dot = CanLockOnEntity( e, origin, normal, threshold, maxDistance, attacker, traceFilter )
 
             if canLock and dot > largestDot then
