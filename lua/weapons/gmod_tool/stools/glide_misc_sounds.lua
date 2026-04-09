@@ -237,8 +237,9 @@ function TOOL.BuildCPanel( panel )
         resetAllButton:SetIcon( "icon16/arrow_undo.png" )
 
         resetAllButton.DoClick = function()
-            for i = 1, #Glide.GetAllMiscSoundKeys() do
-                local key = Glide.GetAllMiscSoundKeys()[i]
+            local miscsound = Glide.GetAllMiscSoundKeys()
+            for i = 1, #miscsound do
+                local key = miscsound[i]
                 SetPresetData( key, nil )
             end
 
