@@ -328,18 +328,17 @@ end
 hook.Add( "OnEntityCreated", "Glide_LockOnWhitelist", function( ent )
     timer.Simple( 0, function()
         if IsValid( ent ) and isWhitelisted( ent ) then
-            table.insert( AllEnts, ent )
+            local index = table.insert( AllEnts, ent )
+            ent.GlideLockOnIndex = index
         end
     end )
 end )
 
 hook.Add( "EntityRemoved", "Glide_LockOnWhitelist", function( ent )
     if isWhitelisted( ent ) then
-        for i = 1, #AllEnts do
-            if AllEnts[i] == ent then
-                table.remove( AllEnts, i )
-                break
-            end
+        local index = ent.GlideLockOnIndex
+        if index then
+            table.remove( AllEnts, index )
         end
     end
 end )
