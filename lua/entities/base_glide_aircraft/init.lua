@@ -72,7 +72,8 @@ function ENT:Repair()
     local validRotors = {}
     local validCount = 0
 
-    for _, rotor in ipairs( self.rotors ) do
+    for i = 1, #self.rotors do
+        local rotor = self.rotors[i]
         if IsValid( rotor ) then
             rotor:Repair()
 
@@ -276,7 +277,8 @@ function ENT:RotorsThink()
     local power = self:GetPower()
 
     -- Spin the rotors
-    for _, rotor in ipairs( self.rotors ) do
+    for i = 1, #self.rotors do
+        local rotor = self.rotors[i]
         if IsValid( rotor ) then
             rotor.spinMultiplier = power
         end
@@ -289,7 +291,8 @@ function ENT:RotorsThink()
     if self.areRotorsSpinningFast ~= areRotorsSpinningFast then
         self.areRotorsSpinningFast = areRotorsSpinningFast
 
-        for _, rotor in ipairs( self.rotors ) do
+        for i = 1, #self.rotors do
+            local rotor = self.rotors[i]
             if IsValid( rotor ) then
                 if areRotorsSpinningFast then
                     self:RotorStartSpinningFast( rotor )

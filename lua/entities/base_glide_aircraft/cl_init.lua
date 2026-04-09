@@ -31,7 +31,8 @@ function ENT:OnUpdateParticles()
 
     health = Clamp( health * 255, 0, 255 )
 
-    for _, pos in ipairs( self.ExhaustPositions ) do
+    for i = 1, #self.ExhaustPositions do
+        local pos = self.ExhaustPositions[i]
         local eff = EffectData()
         eff:SetOrigin( self:LocalToWorld( pos ) )
         eff:SetNormal( normal )
@@ -64,7 +65,8 @@ function ENT:OnUpdateMisc()
 
     t = t % 1
 
-    for i, v in ipairs( selfTbl.StrobeLights ) do
+    for i = 1, #selfTbl.StrobeLights do
+        local v = selfTbl.StrobeLights[i]
         on = t > v.blinkTime and t < v.blinkTime + ( v.blinkDuration or 0.05 )
 
         if on then

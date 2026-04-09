@@ -32,7 +32,8 @@ local function StringToGearList( str )
     local parts = string.Explode( ",", str, false )
     local gears = {}
 
-    for _, part in ipairs( parts ) do
+    for i = 1, #parts do
+        local part = parts[i]
         local sides = string.Explode( "=", part, false )
         local gear = tonumber( sides[1] )
         local ratio = tonumber( sides[2] )

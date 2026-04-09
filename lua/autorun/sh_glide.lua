@@ -366,7 +366,8 @@ function Glide.IncludeDir( dirPath, doInclude, doTransfer )
     local files = file.Find( dirPath .. "*.lua", "LUA" )
     local path
 
-    for _, fileName in ipairs( files ) do
+    for i = 1, #files do
+        local fileName = files[i]
         path = dirPath .. fileName
 
         if doInclude then

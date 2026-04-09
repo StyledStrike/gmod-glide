@@ -208,7 +208,8 @@ function ENT:Initialize()
         -- Separate input names, types and descriptions
         local inNames, inTypes, inDescr = {}, {}, {}
 
-        for i, v in ipairs( inputs ) do
+        for i = 1, #inputs do
+            local v = inputs[i]
             inNames[i] = v[1]
             inTypes[i] = v[2]
             inDescr[i] = v[3]
@@ -219,7 +220,8 @@ function ENT:Initialize()
         -- Separate output names, types and descriptions
         local outNames, outTypes, outDescr = {}, {}, {}
 
-        for i, v in ipairs( outputs ) do
+        for i = 1, #outputs do
+            local v = outputs[i]
             outNames[i] = v[1]
             outTypes[i] = v[2]
             outDescr[i] = v[3]
@@ -401,7 +403,8 @@ do
         traceData.filter = {}
 
         -- Ignore everything that is parented to this vehicle
-        for i, ent in ipairs( self:GetChildren() ) do
+        for i = 1, #self:GetChildren() do
+            local ent = self:GetChildren()[i]
             traceData.filter[i] = ent
         end
 

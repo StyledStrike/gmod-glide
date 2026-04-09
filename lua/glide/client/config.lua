@@ -834,7 +834,8 @@ function Config:OpenFrame()
     local binds = self.binds
     local CreateBinderButton = Config.CreateBinderButton
 
-    for _, listData in ipairs( groupList ) do
+    for i = 1, #groupList do
+        local listData = groupList[i]
         local groupId = listData.id
         local groupBinds = binds[groupId]
         local actions = Glide.InputGroups[groupId]
@@ -1094,7 +1095,8 @@ function Config:OpenFrame()
             { name = "glide_projectile_launcher_max_damage", decimals = 0, min = 0, max = 1000 },
         }
 
-        for _, data in ipairs( cvarList ) do
+        for i = 1, #cvarList do
+            local data = cvarList[i]
             if data.category then
                 CreateHeader( panelCVars, L( "settings.cvars" ) .. ": " ..  language.GetPhrase( data.category ) )
             else

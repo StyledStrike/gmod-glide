@@ -12,7 +12,9 @@ function Glide.StoreSpawnInfo( ply )
     -- Store inventory
     data.weapons = {}
 
-    for _, weapon in ipairs( ply:GetWeapons() ) do
+    local Weapons = ply:GetWeapons()
+    for i = 1, #Weapons do
+        local weapon = Weapons[i]
         data.weapons[weapon:GetClass()] = {
             clip1 = weapon:Clip1(),
             clip2 = weapon:Clip2(),
@@ -200,7 +202,9 @@ function Glide.RagdollPlayer( ply, velocity, unragdollTime )
     -- Get current player pose
     local bodygroups = {}
 
-    for _, v in ipairs( ply:GetBodyGroups() ) do
+    local PlayerBodyGroups = ply:GetBodyGroups()
+    for i = 1, #PlayerBodyGroups do
+        local v = PlayerBodyGroups[i]
         bodygroups[v.id] = ply:GetBodygroup( v.id )
     end
 
@@ -210,7 +214,8 @@ function Glide.RagdollPlayer( ply, velocity, unragdollTime )
     -- Copy the player's appearance to the ragdoll
     ragdoll:SetSkin( ply:GetSkin() )
 
-    for id, submodel in ipairs( bodygroups ) do
+    for id = 1, #PlayerBodyGroups do
+        local v = PlayerBodyGroups[id]
         ragdoll:SetBodygroup( id, submodel )
     end
 

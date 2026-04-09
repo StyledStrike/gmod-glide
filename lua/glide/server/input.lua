@@ -117,7 +117,8 @@ do
         -- Add button actions that apply for this vehicle
         local inputGroups = vehicle:GetInputGroups( seatIndex )
 
-        for _, groupId in ipairs( inputGroups ) do
+        for i = 1, #inputGroups do
+            local groupId = inputGroups[i]
             AddActions( settings.binds, groupId, buttons )
         end
 
@@ -211,7 +212,8 @@ local function HandleInput( ply, button, active, pressed )
         return
     end
 
-    for _, action in ipairs( actions ) do
+    for i = 1, #actions do
+        local action = actions[i]
         if settings.replaceYawWithRoll and MOUSE_ACTION_OVERRIDE[action] then
             action = MOUSE_ACTION_OVERRIDE[action]
         end

@@ -132,7 +132,8 @@ function Glide.InitializeVSWEPS()
     -- Include all lua files inside lua/glide/vsweps/
     local files = file.Find( "glide/vsweps/*.lua", "LUA" )
 
-    for _, fileName in ipairs( files ) do
+    for i = 1, #files do
+        local fileName = files[i]
         Glide.ReloadWeaponScript( string.StripExtension( fileName ) )
     end
 
@@ -190,7 +191,8 @@ local function AutoCompleteCmdReloadWeaponScript( cmd, _, args )
     local files = file.Find( "glide/vsweps/*.lua", "LUA" )
     local filtered = {}
 
-    for _, fileName in ipairs( files ) do
+    for i = 1, #files do
+        local fileName = files[i]
         if not partialClass or string.StartsWith( fileName, partialClass ) then
             filtered[#filtered + 1] = cmd .. " " .. string.StripExtension( fileName )
         end

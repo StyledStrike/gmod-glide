@@ -76,7 +76,8 @@ function PANEL:Init()
     if #webAudioParams > 0 and Glide.WebAudio.isReady then
         StyledTheme.CreateFormHeader( scrollParams, "WebAudio" )
 
-        for _, v in ipairs( webAudioParams ) do
+        for i = 1, #webAudioParams do
+            local v = webAudioParams[i]
             CreateStreamParam( v )
         end
     end

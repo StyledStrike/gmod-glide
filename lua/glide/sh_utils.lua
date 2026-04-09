@@ -369,7 +369,8 @@ function Glide.ValidateStreamData( data )
             return false, "Preset does not have valid controller data!"
         end
 
-        for _, ctr in ipairs( c ) do
+        for i = 1, #c do
+            local ctr = c[i]
             if not STREAM_VALID_CONTROLLER_IN[ctr[1]] or not STREAM_VALID_CONTROLLER_OUT[ctr[4]] then
                 return false, "Preset does not have valid controller data!"
             end
@@ -438,8 +439,10 @@ Glide.MISC_SOUND_CATEGORIES = {
 function Glide.GetAllMiscSoundKeys()
     local keys, i = {}, 0
 
-    for _, category in ipairs( Glide.MISC_SOUND_CATEGORIES ) do
-        for _, key in ipairs( category.keys ) do
+    for k = 1, #Glide.MISC_SOUND_CATEGORIES do
+        local category = Glide.MISC_SOUND_CATEGORIES[k]
+        for j = 1, #category.keys do
+            local key = category.keys[j]
             i = i + 1
             keys[i] = key
         end
@@ -454,9 +457,10 @@ function Glide.ValidateMiscSoundData( data )
     end
 
     local validKeys = {}
-
-    for _, category in ipairs( Glide.MISC_SOUND_CATEGORIES ) do
-        for _, key in ipairs( category.keys ) do
+    for i = 1, #Glide.MISC_SOUND_CATEGORIES do
+        local category = Glide.MISC_SOUND_CATEGORIES[i]
+        for j = 1, #category.keys do
+            local key = category.keys[j]
             validKeys[key] = true
         end
     end

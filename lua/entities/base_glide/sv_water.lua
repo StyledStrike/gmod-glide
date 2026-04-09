@@ -4,7 +4,8 @@ function ENT:WaterInit()
     local offsets = self:GetBuoyancyOffsets()
     local points = {}
 
-    for i, offset in ipairs( offsets ) do
+    for i = 1, #offsets do
+        local offset = offsets[i]
         points[i] = {
             offset = offset,
             isUnderWater = false
@@ -47,7 +48,8 @@ function ENT:WaterThink( selfTbl )
     -- Update buoyancy points
     local underWaterPoints = 0
 
-    for _, point in ipairs( selfTbl.buoyancyPoints ) do
+    for i = 1, #selfTbl.buoyancyPoints do
+        local point = selfTbl.buoyancyPoints[i]
         point.isUnderWater = IsUnderWater( self:LocalToWorld( point.offset ) )
 
         if point.isUnderWater then
@@ -80,7 +82,8 @@ function ENT:WaterThink( selfTbl )
 
     -- Draw buoyancy debug overlays, if `developer` cvar is active
     if GetDevMode() then
-        for _, point in ipairs( selfTbl.buoyancyPoints ) do
+        for i = 1, #selfTbl.buoyancyPoints do
+            local point = selfTbl.buoyancyPoints[i]
             debugoverlay.Cross( self:LocalToWorld( point.offset ), 4, 0.1, Color( 50, point.isUnderWater and 255 or 150, 255 ), true )
         end
     end
@@ -150,7 +153,8 @@ function ENT:SimulateBoat( phys, dt, outLin, outAng, throttle, steer )
     local upDepth = params.buoyancyDepth
     local pointVel, upVel, offset, buoyancyForce
 
-    for _, point in ipairs( self.buoyancyPoints ) do
+    for i = 1, #self.buoyancyPoints do
+        local point = self.buoyancyPoints[i]
         if point.isUnderWater then
             offset = self:LocalToWorld( point.offset )
             pointVel = phys:GetVelocityAtPoint( offset )

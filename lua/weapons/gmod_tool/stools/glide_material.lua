@@ -46,15 +46,18 @@ local function SetPaintMaterial( _ply, ent, data )
 
     -- Find the "body paint" submaterial slot(s)
     local slots = {}
-
-    for i, path in ipairs( ent:GetMaterials() ) do
+    local materials = ent:GetMaterials()
+    
+    for i = 1, #materials do
+        local path = materials[i]
         if OVERRIDE_MATS[path] then
             slots[#slots + 1] = i - 1
         end
     end
 
     -- Replace the "body paint" submaterials
-    for _, slot in ipairs( slots ) do
+    for i = 1, #slots do
+        local slot = slots[i]
         ent:SetSubMaterial( slot, data.MaterialOverride )
     end
 
@@ -86,8 +89,10 @@ function TOOL:RightClick( trace )
     if SERVER then
         -- Find the first "body paint" submaterial slot
         local slot
+        local materials = veh:GetMaterials()
 
-        for i, path in ipairs( veh:GetMaterials() ) do
+        for i = 1, #materials do
+            local path = materials[i]
             if OVERRIDE_MATS[path] then
                 slot = i - 1
                 break
@@ -125,7 +130,10 @@ function TOOL.BuildCPanel( panel )
     local materials = {}
     local existing = {}
 
-    for _, path in ipairs( list.Get( "OverrideMaterials" ) ) do
+    local mats = list.Get( "OverrideMaterials" ) or {}
+    for i = 1, #mats do
+        local path = mats[i]
+
         if not existing[path] then
             existing[path] = true
             materials[#materials + 1] = path
@@ -135,7 +143,8 @@ function TOOL.BuildCPanel( panel )
     local matList = panel:MatSelect( "glide_material_override", materials, true, 0.25, 0.25 )
 
     filter.OnValueChange = function( _, txt )
-        for _, p in ipairs( matList.Controls ) do
+        for i = 1, #matList.Controls do
+            local p = matList.Controls[i]
             p:SetVisible( p.Value:lower():find( txt:lower(), nil, true ) )
         end
 

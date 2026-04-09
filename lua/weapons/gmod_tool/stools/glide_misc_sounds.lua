@@ -27,7 +27,9 @@ end
 do
     local GetString = cookie.GetString
 
-    for _, key in ipairs( Glide.GetAllMiscSoundKeys() ) do
+    local keys = Glide.GetAllMiscSoundKeys()
+    for i = 1, #keys do
+        local key = keys[i]
         presetData[key] = GetString( "tool.glide_misc_sounds." .. key )
     end
 end
@@ -98,7 +100,9 @@ function TOOL:RightClick( trace )
     if CLIENT then
         if not game.SinglePlayer() and not IsFirstTimePredicted() then return end
 
-        for _, key in ipairs( Glide.GetAllMiscSoundKeys() ) do
+        local keys = Glide.GetAllMiscSoundKeys()
+        for i = 1, #keys do
+            local key = keys[i]
             SetPresetData( key, veh[key] )
         end
 
@@ -209,7 +213,8 @@ function TOOL.BuildCPanel( panel )
         panel:Clear()
         panel:Help( "#tool.glide_misc_sounds.desc" )
 
-        for _, category in ipairs( Glide.MISC_SOUND_CATEGORIES ) do
+        for i = 1, #Glide.MISC_SOUND_CATEGORIES do
+            local category = Glide.MISC_SOUND_CATEGORIES[i]
             local categoryPanel = vgui.Create( "DPanel" )
             categoryPanel:DockPadding( 4, HEADER_HEIGHT + 4, 4, 4 )
             categoryPanel.Paint = CategoryPaint
@@ -217,7 +222,8 @@ function TOOL.BuildCPanel( panel )
 
             local totalHeight = HEADER_HEIGHT + 4
 
-            for _, key in ipairs( category.keys ) do
+            for i = 1, #category.keys do
+                local key = category.keys[i]
                 CreateItem( key, categoryPanel )
                 totalHeight = totalHeight + 34
             end
@@ -231,7 +237,8 @@ function TOOL.BuildCPanel( panel )
         resetAllButton:SetIcon( "icon16/arrow_undo.png" )
 
         resetAllButton.DoClick = function()
-            for _, key in ipairs( Glide.GetAllMiscSoundKeys() ) do
+            for i = 1, #Glide.GetAllMiscSoundKeys() do
+                local key = Glide.GetAllMiscSoundKeys()[i]
                 SetPresetData( key, nil )
             end
 

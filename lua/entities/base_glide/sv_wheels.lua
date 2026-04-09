@@ -202,7 +202,8 @@ function ENT:SimulateHovercraft( strength, flightStrength, hoverPoints, phys, dt
 
     traceData.filter = self
 
-    for _, point in ipairs( hoverPoints ) do
+    for i = 1, #hoverPoints do
+        local point = hoverPoints[i]
         point = self:LocalToWorld( point )
 
         -- Check how far from a surface this point is

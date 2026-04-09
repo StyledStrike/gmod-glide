@@ -317,7 +317,8 @@ function ENT:OnUpdateMisc()
         end
 
         -- Set bodygroups to default
-        for _, v in ipairs( self.SirenLights ) do
+        for i = 1, #self.SirenLights do
+            local v = self.SirenLights[i]
             if v.bodygroup then
                 self:SetBodygroup( v.bodygroup, 0 )
             end
@@ -332,7 +333,8 @@ function ENT:OnUpdateMisc()
 
     local bodygroupState = {}
 
-    for _, v in ipairs( self.SirenLights ) do
+    for i = 1, #self.SirenLights do
+        local v = self.SirenLights[i]
         on = t > v.time and t < v.time + ( v.duration or 0.125 )
 
         -- Check for optional bodygroup requirement
@@ -381,7 +383,8 @@ function ENT:DoExhaustPop()
 
     local emit
 
-    for _, v in ipairs( self.ExhaustOffsets ) do
+    for i = 1, #self.ExhaustOffsets do
+        local v = self.ExhaustOffsets[i]
         emit = true
 
         -- Check for optional bodygroup requirement
@@ -418,7 +421,8 @@ function ENT:OnUpdateParticles()
 
         local emit
 
-        for _, v in ipairs( self.ExhaustOffsets ) do
+        for i = 1, #self.ExhaustOffsets do
+            local v = self.ExhaustOffsets[i]
             emit = true
 
             -- Check for optional bodygroup requirement
@@ -450,7 +454,8 @@ function ENT:OnUpdateParticles()
     local color = Clamp( health * 255, 0, 255 )
     local scale = 2 - health * 2
 
-    for _, v in ipairs( self.EngineSmokeStrips ) do
+    for i = 1, #self.EngineSmokeStrips do
+        local v = self.EngineSmokeStrips[i]
         local eff = EffectData()
         eff:SetOrigin( self:LocalToWorld( v.offset ) )
         eff:SetAngles( self:LocalToWorldAngles( v.angle or DEFAULT_EXHAUST_ANG ) )

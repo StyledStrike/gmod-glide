@@ -43,7 +43,8 @@ local function GetFileSource( path )
 
     local games = engine.GetGames()
 
-    for _, v in ipairs( games ) do
+    for i = 1, #games do
+        local v = games[i]
         if v.mounted and file.Exists( path, v.folder ) then
             return "mounted", v.title, v.folder
         end
@@ -51,7 +52,8 @@ local function GetFileSource( path )
 
     local _, legacyAddons = file.Find( "garrysmod/addons/*", "BASE_PATH" )
 
-    for _, folder in ipairs( legacyAddons ) do
+    for i = 1, #legacyAddons do
+        local folder = legacyAddons[i]
         if file.Exists( "garrysmod/addons/" .. folder .. "/" .. path, "BASE_PATH" ) then
             return "legacy", "addons/" .. folder
         end
@@ -59,7 +61,8 @@ local function GetFileSource( path )
 
     local addons = engine.GetAddons()
 
-    for _, v in ipairs( addons ) do
+    for i = 1, #addons do
+        local v = addons[i]
         if v.mounted and file.Exists( path, v.title ) then
             return "addon", v.title
         end
@@ -124,7 +127,9 @@ function PANEL:Init()
     self.panelBody:Dock( FILL )
 
     self.panelBody.PerformLayout = function( s, w, h )
-        for _, panel in ipairs( s:GetChildren() ) do
+        local children = s:GetChildren()
+        for i = 1, #children do
+            local panel = children[i]
             panel:SetPos( 0, 0 )
             panel:SetSize( w, h )
         end
@@ -486,7 +491,8 @@ function PANEL:AddTab( name, icon )
 end
 
 function PANEL:SetActiveByIndex( index )
-    for i, item in ipairs( self.tabs ) do
+    for i = 1, #self.tabs do
+        local item = self.tabs[i]
         item.panel:SetVisible( index == i )
         item.button._tabIsSelected = index == i
         item.button:DockMargin( 0, index == i and 0 or ScaleSize( 3 ), 0, 0 )

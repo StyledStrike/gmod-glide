@@ -12,7 +12,8 @@ Glide.activeSyncedModifiers = Glide.activeSyncedModifiers or {}
 local activeSyncedModifiers = Glide.activeSyncedModifiers
 
 hook.Add( "PlayerDisconnected", "Glide.CleanupSynchronizeModifierPlayers", function( ply )
-    for _, mod in ipairs( activeSyncedModifiers ) do
+    for i = 1, #activeSyncedModifiers do
+        local mod = activeSyncedModifiers[i]
         mod.synced[ply] = nil
     end
 end )
@@ -150,7 +151,8 @@ function Glide.RegisterSyncedModifier( name, onPreApply )
 
         -- Check if the entity has this modifier already.
         -- If so, override the entry on the `activeSyncedModifiers` list.
-        for i, mod in ipairs( activeSyncedModifiers ) do
+        for i = 1, #activeSyncedModifiers do
+            local mod = activeSyncedModifiers[i]
             if mod.ent == ent and mod.name == name then
                 index = i
                 break
@@ -175,7 +177,8 @@ function Glide.RegisterSyncedModifier( name, onPreApply )
 
         -- Check if the entity has this modifier on our
         -- `activeSyncedModifiers` list. If so, remove it.
-        for i, mod in ipairs( activeSyncedModifiers ) do
+        for i = 1, #activeSyncedModifiers do
+            local mod = activeSyncedModifiers[i]
             if mod.ent == ent and mod.name == name then
                 table.remove( activeSyncedModifiers, i )
                 BroadcastModifierRemoval( mod )

@@ -28,7 +28,9 @@ function ENT:Explode( attacker, inflictor )
     Glide.CreateExplosion( inflictor, attacker, self:GetPos(), self.ExplosionRadius, 200, Vector( 0, 0, 1 ), Glide.EXPLOSION_TYPE.VEHICLE )
 
     -- Damage passengers
-    for _, ply in ipairs( self:GetAllPlayers() ) do
+    local players = self:GetAllPlayers()
+    for i = 1, #players do
+        local ply = players[i]
         ply:TakeDamage( 999, attacker, inflictor )
     end
 
@@ -73,12 +75,15 @@ function ENT:Explode( attacker, inflictor )
 
         SetEntityCreator( gib, creator )
 
-        for _, v in ipairs( gib:GetBodyGroups() ) do
+        local bodyGroups = self:GetBodyGroups()
+        for i = 1, #bodyGroups do
+            local v = bodyGroups[i]
             gib:SetBodygroup( v.id, 1 )
         end
     else
         -- Spawn gibs given by the `ExplosionGibs` table
-        for k, v in ipairs( self.ExplosionGibs ) do
+        for k = 1, #self.ExplosionGibs do
+            local v = self.ExplosionGibs[k]
             local gib = ents.Create( "glide_gib" )
             gib:SetPos( self:GetPos() )
             gib:SetAngles( self:GetAngles() )

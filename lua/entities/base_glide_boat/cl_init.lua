@@ -141,7 +141,8 @@ function ENT:OnUpdateParticles()
 
     eff = EffectData()
 
-    for _, v in ipairs( self.EngineSmokeStrips ) do
+    for i = 1, #self.EngineSmokeStrips do
+        local v = self.EngineSmokeStrips[i]
         eff:SetOrigin( self:LocalToWorld( v.offset ) )
         eff:SetAngles( self:LocalToWorldAngles( v.angle or DEFAULT_ANG ) )
         eff:SetStart( velocity )

@@ -224,7 +224,8 @@ do
             return
         end
 
-        for i, c in ipairs( controllers ) do
+        for i = 1, #controllers do
+            local c = controllers[i]
             local valid, msg = Validate( c, i, id, self )
 
             if not valid then
@@ -388,7 +389,8 @@ function EngineStream:Think( dt, eyePos, eyeAng )
         if IsValid( channel ) then
             outputs.volume, outputs.pitch = 1, 1
 
-            for _, c in ipairs( layer.controllers ) do
+            for i = 1, #layer.controllers do
+                local c = layer.controllers[i]
                 value = Clamp( inputs[c[1]], c[2], c[3] )
                 value = Remap( value, c[2], c[3], c[5], c[6] )
 

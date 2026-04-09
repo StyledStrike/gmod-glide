@@ -171,7 +171,8 @@ local function PaintController( s, w, h )
 end
 
 function PANEL:SetControllers( controllers )
-    for _, panel in ipairs( self.controllerPanels ) do
+    for i = 1, #self.controllerPanels do
+        local panel = self.controllerPanels[i]
         if IsValid( panel ) then panel:Remove() end
     end
 
@@ -186,7 +187,8 @@ function PANEL:SetControllers( controllers )
     local separator = ScaleSize( 4 )
     local iconSize = ScaleSize( 18 )
 
-    for i, params in ipairs( controllers ) do
+    for i = 1, #controllers do
+        local params = controllers[i]
         local panel = vgui.Create( "Panel", self )
         panel:SetTall( controllerHeight )
         panel:Dock( TOP )
@@ -361,8 +363,10 @@ function PANEL:PerformLayout( w )
 
     self.columns = columns
 
-    for _, row in ipairs( self.controllerPanels ) do
-        for i, col in ipairs( row:GetChildren() ) do
+    for _ = 1, #self.controllerPanels do
+        local row = self.controllerPanels[_]
+        for i = 1, #row:GetChildren() do
+            local col = row:GetChildren()[i]
             if columns[i] then
                 col:SetWide( columns[i].width )
             end
@@ -402,7 +406,8 @@ function PANEL:Paint( w, h )
         return
     end
 
-    for _, col in ipairs( self.columns ) do
+    for i = 1, #self.columns do
+        local col = self.columns[i]
         SimpleText( col.label, "StyledTheme_Tiny", x + col.width * 0.5, y + listHeaderHeight * 0.5, colors.buttonText, 1, 1 )
         x = x + col.width
     end

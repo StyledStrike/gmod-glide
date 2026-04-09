@@ -60,7 +60,8 @@ function ENT:UpdateLightBodygroups()
     local lastBodygroups = self.lastBodygroups
     local enable, targetSubModel
 
-    for _, l in ipairs( self.LightBodygroups ) do
+    for i = 1, #self.LightBodygroups do
+        local l = self.LightBodygroups[i]
         enable = lightState[l.type]
 
         -- Blink "signal_*" light types

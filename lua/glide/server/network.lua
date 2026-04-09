@@ -121,7 +121,8 @@ local type = type
 
 local function ValidateTarget( target )
     if type( target ) == "table" then
-        for _, ent in ipairs( target ) do
+        for i = 1, #target do
+            local ent = target[i]
             if not IsValid( ent ) or not ent:IsPlayer() then
                 return false
             end

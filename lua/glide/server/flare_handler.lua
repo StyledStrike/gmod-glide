@@ -14,7 +14,8 @@ function Glide.GetClosestFlare( pos, dir, radius )
     closestDist = radius * radius
     closestEnt = nil
 
-    for _, ent in ipairs( flares ) do
+    for i = 1, #flares do
+        local ent = flares[i]
         if IsValid( ent ) then
             flarePos = ent:GetPos()
             flareDir = flarePos - pos

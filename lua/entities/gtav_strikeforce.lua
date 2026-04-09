@@ -243,7 +243,8 @@ if SERVER then
 
         self:ChangeWheelRadius( 12 )
 
-        for _, w in ipairs( self.wheels ) do
+        for i = 1, #self.wheels do
+            local w = self.wheels[i]
             Glide.HideEntity( w, true )
         end
     end

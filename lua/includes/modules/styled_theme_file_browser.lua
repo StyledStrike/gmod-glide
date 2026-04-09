@@ -70,7 +70,9 @@ function BROWSER:Init()
     self.panelHeader.PerformLayout = function( s )
         local extraNavWidth = ScaleSize( 10 )
 
-        for _, child in ipairs( s:GetChildren() ) do
+        local children = s:GetChildren()
+        for i = 1, #children do
+            local child = children[i]
             child:SizeToContentsX( extraNavWidth )
         end
     end
@@ -143,7 +145,8 @@ function BROWSER:SetExtensionFilter( extensionFilter )
     if extensionFilter then
         local filter = {}
 
-        for _, ext in ipairs( extensionFilter ) do
+        for i = 1, #extensionFilter do
+            local ext = extensionFilter[i]
             filter[ext] = true
         end
 
@@ -170,7 +173,9 @@ function BROWSER:NavigateTo( dir )
 
     local nav = { "/" }
 
-    for _, part in ipairs( string.Explode( "/", dir, false ) ) do
+    local explode = string.Explode( "/", dir, false )
+    for i = 1, #explode do
+        local part = explode[i]
         if part ~= "" then
             nav[#nav + 1] = part
         end
@@ -199,7 +204,8 @@ function BROWSER:Think()
     local pathSoFar = ""
     local separator = ScaleSize( 4 )
 
-    for i, piece in ipairs( self.currentNavigation ) do
+    for i = 1, #self.currentNavigation do
+        local piece = self.currentNavigation[i]
         pathSoFar = pathSoFar .. "/" .. piece
 
         if i == 1 then
@@ -238,7 +244,8 @@ function BROWSER:Think()
     end
 
     if dirs then
-        for _, name in ipairs( dirs ) do
+        for i = 1, #dirs do
+            local name = dirs[i]
             local item = self.scrollFiles:Add( "Styled_FileBrowserItem" )
             item:SetItemName( name )
             item:SetTall( 28 )
@@ -265,7 +272,8 @@ function BROWSER:Think()
         local filter = self.extensionFilter
         local itemHeight = ScaleSize( 40 )
 
-        for _, name in ipairs( files ) do
+        for i = 1, #files do
+            local name = files[i]
             local ext = string.GetExtensionFromFilename( name )
 
             if filter == nil or filter[ext] then

@@ -646,7 +646,8 @@ do
         combo:Dock( FILL )
         combo:SetSortItems( false )
 
-        for _, v in ipairs( options ) do
+        for i = 1, #options do
+            local v = options[i]
             combo:AddChoice( v )
         end
 

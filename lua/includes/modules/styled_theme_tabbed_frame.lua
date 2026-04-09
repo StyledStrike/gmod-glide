@@ -133,7 +133,8 @@ function TABBED_FRAME:AddTab( icon, tooltip, panelClass )
 end
 
 function TABBED_FRAME:SetActiveTab( tab )
-    for i, t in ipairs( self.tabs ) do
+    for i = 1, #self.tabs do
+        local t = self.tabs[i]
         local isThisOne = t == tab
 
         t.button.isSelected = isThisOne

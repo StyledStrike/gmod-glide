@@ -332,7 +332,8 @@ function WebAudio:UpdateRoom( dt, eyePos )
             delayTime = 0.03
             delayFeedback = 0.5
         else
-            for _, v in ipairs( ROOM_ECHO_DELAYS ) do
+            for i = 1, #v do
+                local v = ROOM_ECHO_DELAYS[i]
                 if room.hSize < v[1] then
                     delayTime = v[2]
                     break
@@ -347,7 +348,8 @@ function WebAudio:UpdateRoom( dt, eyePos )
 
         local impulseResponseAudio = ROOM_INPULSE_RESPONSES[1][2]
 
-        for _, v in ipairs( ROOM_INPULSE_RESPONSES ) do
+        for i = 1, #ROOM_INPULSE_RESPONSES do
+            local v = ROOM_INPULSE_RESPONSES[i]
             if room.hSize < v[1] then
                 impulseResponseAudio = v[room.vSize < 0.6 and 2 or 3]
                 break

@@ -14,7 +14,8 @@ function ENT:WeaponInit()
 
     -- Backwards compatibility with `ENT.WeaponSlots`
     if self.WeaponSlots then
-        for _, data in ipairs( self.WeaponSlots ) do
+        for i = 1, #self.WeaponSlots do
+            local data = self.WeaponSlots[i]
             self:CreateWeapon( "base", {
                 AmmoType = data.ammoType,
                 MaxAmmo = data.maxAmmo,
@@ -115,7 +116,8 @@ function ENT:SelectWeaponIndex( index )
         local lastAmmoType = lastWeapon.AmmoType
 
         if lastAmmoType ~= "" then
-            for i, otherWeapon in ipairs( self.weapons ) do
+            for i = 1, #self.weapons do
+                local otherWeapon = self.weapons[i]
                 if i ~= lastIndex and lastAmmoType == otherWeapon.AmmoType then
                     -- Share the reload and fire cooldowns to all
                     -- other weapons with the same ammo type.

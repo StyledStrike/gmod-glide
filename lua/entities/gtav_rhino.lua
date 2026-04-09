@@ -100,7 +100,8 @@ if CLIENT then
         self:ManipulateBoneAngles( self.pivotFL, spinAng )
         self:ManipulateBoneAngles( self.pivotRL, spinAng )
 
-        for _, id in ipairs( self.leftWheels ) do
+        for i = 1, #self.leftWheels do
+            local id = self.leftWheels[i]
             self:ManipulateBoneAngles( id, spinAng )
         end
 
@@ -113,7 +114,8 @@ if CLIENT then
         self:ManipulateBoneAngles( self.pivotFR, spinAng )
         self:ManipulateBoneAngles( self.pivotRR, spinAng )
 
-        for _, id in ipairs( self.rightWheels ) do
+        for i = 1, #self.rightWheels do
+            local id = self.rightWheels[i]
             self:ManipulateBoneAngles( id, spinAng )
         end
 
@@ -203,7 +205,8 @@ if SERVER then
 
         -- Since the model already has a visual representation
         -- for the wheels and tracks, hide the actual wheels.
-        for _, w in ipairs( self.wheels ) do
+        for i = 1, #self.wheels do
+            local w = self.wheels[i]
             Glide.HideEntity( w, true )
         end
 

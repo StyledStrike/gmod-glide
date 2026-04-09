@@ -327,7 +327,8 @@ function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacke
     local ignore = {}
 
     if entFilter then
-        for _, ent in ipairs( entFilter ) do
+        for i = 1, #entFilter do
+            local ent = entFilter[i]
             ignore[ent] = true
         end
     end

@@ -93,7 +93,8 @@ function ENT:DoWaterParticles( power, throttle )
 
         throttle = ( throttle * 0.5 ) + Clamp( power * 2, 0, 1 ) * 0.5
 
-        for _, offset in ipairs( self.PropellerPositions ) do
+        for i = 1, #self.PropellerPositions do
+            local offset = self.PropellerPositions[i]
             offset = self:LocalToWorld( offset )
 
             if IsUnderWater( offset ) then

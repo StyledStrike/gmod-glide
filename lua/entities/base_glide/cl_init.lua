@@ -96,7 +96,9 @@ function ENT:InternalActivateFeatures()
     local wheels = {}
     local seats = {}
 
-    for _, ent in ipairs( self:GetChildren() ) do
+    local children = self:GetChildren()
+    for i = 1, #children do
+        local ent = children[i]
         if ent:GetClass() == "glide_wheel" then
             wheels[#wheels + 1] = ent
 
@@ -201,7 +203,8 @@ function ENT:InternalUpdateFeatures()
             local velocity = self:GetVelocity()
             local eff = EffectData()
 
-            for _, v in ipairs( selfTbl.EngineFireOffsets ) do
+            for i = 1, #selfTbl.EngineFireOffsets do
+                local v = selfTbl.EngineFireOffsets[i]
                 eff:SetStart( velocity )
                 eff:SetOrigin( self:LocalToWorld( v.offset ) )
                 eff:SetAngles( self:LocalToWorldAngles( v.angle or DEFAULT_FLAME_ANGLE ) )

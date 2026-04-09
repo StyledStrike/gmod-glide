@@ -61,7 +61,8 @@ do
         closestDist = radius * radius
         closestSocket = nil
 
-        for _, socket in ipairs( tbl ) do
+        for i = 1, #tbl do
+            local socket = tbl[i]
             dist = pos:DistToSqr( socket.pos )
 
             if dist < closestDist and socket.id == idFilter then
@@ -80,6 +81,7 @@ local Remove = table.remove
 local FindClosestSocket = Glide.FindClosestSocket
 local GetDevMode = Glide.GetDevMode
 
+local debugColor = Color( 255, 145, 0 )
 timer.Create( "Glide.UpdateSockets", 0.1, 0, function()
     local vehicleCount = #vehiclesWithSockets
     if vehicleCount == 0 then return end
@@ -92,7 +94,8 @@ timer.Create( "Glide.UpdateSockets", 0.1, 0, function()
         vehicle = vehiclesWithSockets[i]
 
         if IsValid( vehicle ) then
-            for socketIndex, socket in ipairs( vehicle.Sockets ) do
+            for socketIndex = 1, #vehicle.Sockets do
+                local socket = vehicle.Sockets[socketIndex]
 
                 -- Update the socket's current world position
                 socket.pos = vehicle:LocalToWorld( socket.offset )
@@ -118,7 +121,8 @@ timer.Create( "Glide.UpdateSockets", 0.1, 0, function()
     end
 
     -- For each plug...
-    for _, plug in ipairs( plugs ) do
+    for i = 1, #plugs do
+        local plug = plugs[i]
         vehicle = plug.vehicle
 
         -- If this plug is not connected yet...
@@ -137,13 +141,15 @@ timer.Create( "Glide.UpdateSockets", 0.1, 0, function()
     -- Draw debug overlays, if `developer` cvar is active
     if not GetDevMode() then return end
 
-    for _, v in ipairs( receptacles ) do
-        debugoverlay.Cross( v.pos, 8, 0.1, Color( 255, 145, 0 ), true )
+    for i = 1, #receptacles do
+        local v = receptacles[i]
+        debugoverlay.Cross( v.pos, 8, 0.1, debugColor, true )
         debugoverlay.Text( v.pos, v.id .. " | isReceptacle: true", 0.1, false )
     end
 
-    for _, v in ipairs( plugs ) do
-        debugoverlay.Cross( v.pos, 8, 0.1, Color( 255, 145, 0 ), true )
+    for i = 1, #plugs do
+        local v = plugs[i]
+        debugoverlay.Cross( v.pos, 8, 0.1, debugColor, true )
         debugoverlay.Text( v.pos, v.id .. " | isReceptacle: false", 0.1, false )
     end
 end )

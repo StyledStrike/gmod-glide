@@ -283,7 +283,8 @@ local function ResetVehicle( vehicle )
 
     -- Reset weapon timings
     if vehicle.weaponCount > 0 then
-        for _, weapon in ipairs( vehicle.weapons ) do
+        for i = 1, vehicle.weaponCount do
+            local weapon = vehicle.weapons[i]
             -- Reassign the VSWEP metatable
             local class = Glide.WeaponRegistry[weapon.ClassName]
 
@@ -299,7 +300,10 @@ end
 
 local function ResetAll()
     -- Reset solid state for all Glide seats
-    for _, seat in ipairs( ents.FindByClass( "prop_vehicle_prisoner_pod" ) ) do
+    local FindByClass = ents.FindByClass( "prop_vehicle_prisoner_pod" )
+    for i = 1, #FindByClass do
+        local seat = FindByClass[i]
+
         local seatIndex = seat.GlideSeatIndex
 
         if seatIndex then

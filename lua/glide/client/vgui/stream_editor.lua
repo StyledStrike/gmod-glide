@@ -240,7 +240,8 @@ function PANEL:LoadTabs()
     local data = Glide.FromJSON( Glide.LoadDataFile( "glide_stream_editor_tabs.json" ) )
     if type( data.tabs ) ~= "table" then return end
 
-    for _, path in ipairs( data.tabs ) do
+    for i = 1, #data.tabs do
+        local path = data.tabs[i]
         if file.Exists( path, "GAME" ) then
             local panel, id = self:AddTab()
             panel:LoadPath( path )
@@ -416,7 +417,8 @@ function PANEL:OnClickExportCode()
     for id, layer in pairs( layers ) do
         Add( [[    stream:AddLayer( "%s", "%s", {]], id, layer.path )
 
-        for _, c in ipairs( layer.controllers ) do
+        for i = 1, #layer.controllers do
+            local c = layer.controllers[i]
             Add( [[        { "%s", %s, %s, "%s", %s, %s },]], c[1], c[2], c[3], c[4], c[5], c[6] )
         end
 

@@ -83,7 +83,8 @@ function ENT:UpdateLights( selfTbl )
 
         local enable
 
-        for index, v in ipairs( selfTbl.Headlights ) do
+        for index = 1, #selfTbl.Headlights do
+            local v = selfTbl.Headlights[index]
             enable = true
 
             -- Check for optional bodygroup requirement
@@ -101,7 +102,8 @@ function ENT:UpdateLights( selfTbl )
     if headlightState > 0 and selfTbl.shouldThinkNow then
         local l, hasLight
 
-        for index, data in ipairs( selfTbl.Headlights ) do
+        for index = 1, #selfTbl.Headlights do
+            local data = selfTbl.Headlights[index]
             l = selfTbl.activeHeadlights[index]
             hasLight = IsValid( l )
 
@@ -135,7 +137,8 @@ function ENT:UpdateLights( selfTbl )
     local myPos = self:GetPos()
     local pos, dir, ltype, enable
 
-    for _, l in ipairs( selfTbl.LightSprites ) do
+    for index = 1, #selfTbl.LightSprites do
+        local l = selfTbl.LightSprites[index]
         pos = self:LocalToWorld( l.offset )
         dir = self:LocalToWorld( l.dir ) - myPos
         ltype = l.type

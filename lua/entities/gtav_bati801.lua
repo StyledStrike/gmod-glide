@@ -169,7 +169,8 @@ if SERVER then
 
         -- Since the model already has a visual representation
         -- for the wheels, hide the actual wheels.
-        for _, w in ipairs( self.wheels ) do
+        for i = 1, #self.wheels do
+            local w = self.wheels[i]
             Glide.HideEntity( w, true )
         end
 

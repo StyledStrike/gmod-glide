@@ -52,7 +52,8 @@ function ENT:SocketThink( dt, time )
     local phys = self:GetPhysicsObject()
     if not IsValid( phys ) then return end
 
-    for _, socket in ipairs( self.Sockets ) do
+    for i = 1, #self.Sockets do
+        local socket = self.Sockets[i]
 
         -- If this is a plug socket that has a nearby receptacle...
         if
@@ -81,7 +82,8 @@ function ENT:SocketThink( dt, time )
 end
 
 function ENT:DisconnectAllSockets()
-    for _, socket in ipairs( self.Sockets ) do
+    for i = 1, #self.Sockets do
+        local socket = self.Sockets[i]
         if IsValid( socket.constraint ) then
             socket.constraint:Remove()
         end
@@ -91,7 +93,8 @@ end
 function ENT:UpdateSocketCount()
     local connectedReceptacles = 0
 
-    for _, socket in ipairs( self.Sockets ) do
+    for i = 1, #self.Sockets do
+        local socket = self.Sockets[i]
         if socket.isReceptacle and IsValid( socket.constraint ) then
             connectedReceptacles = connectedReceptacles + 1
         end

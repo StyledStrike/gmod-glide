@@ -96,7 +96,8 @@ end
 function Glide.EnableSkyboxIndicator()
     Glide.DisableSkyboxIndicator()
 
-    for _, plane in ipairs( skyboxPlanes ) do
+    for i = 1, #skyboxPlanes do
+        local plane = skyboxPlanes[i]
         plane.alpha = 0
     end
 
