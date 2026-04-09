@@ -47,7 +47,7 @@ local function SetPaintMaterial( _ply, ent, data )
     -- Find the "body paint" submaterial slot(s)
     local slots = {}
     local materials = ent:GetMaterials()
-    
+
     for i = 1, #materials do
         local path = materials[i]
         if OVERRIDE_MATS[path] then

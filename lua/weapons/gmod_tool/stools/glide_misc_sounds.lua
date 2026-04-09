@@ -222,8 +222,8 @@ function TOOL.BuildCPanel( panel )
 
             local totalHeight = HEADER_HEIGHT + 4
 
-            for i = 1, #category.keys do
-                local key = category.keys[i]
+            for j = 1, #category.keys do
+                local key = category.keys[j]
                 CreateItem( key, categoryPanel )
                 totalHeight = totalHeight + 34
             end

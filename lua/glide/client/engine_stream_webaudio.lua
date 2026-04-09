@@ -332,7 +332,7 @@ function WebAudio:UpdateRoom( dt, eyePos )
             delayTime = 0.03
             delayFeedback = 0.5
         else
-            for i = 1, #v do
+            for i = 1, #ROOM_ECHO_DELAYS  do
                 local v = ROOM_ECHO_DELAYS[i]
                 if room.hSize < v[1] then
                     delayTime = v[2]

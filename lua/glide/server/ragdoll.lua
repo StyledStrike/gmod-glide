@@ -202,9 +202,9 @@ function Glide.RagdollPlayer( ply, velocity, unragdollTime )
     -- Get current player pose
     local bodygroups = {}
 
-    local PlayerBodyGroups = ply:GetBodyGroups()
-    for i = 1, #PlayerBodyGroups do
-        local v = PlayerBodyGroups[i]
+    local playerbodygroups = ply:GetBodyGroups()
+    for i = 1, #playerbodygroups do
+        local v = playerbodygroups[i]
         bodygroups[v.id] = ply:GetBodygroup( v.id )
     end
 
@@ -214,8 +214,8 @@ function Glide.RagdollPlayer( ply, velocity, unragdollTime )
     -- Copy the player's appearance to the ragdoll
     ragdoll:SetSkin( ply:GetSkin() )
 
-    for id = 1, #PlayerBodyGroups do
-        local v = PlayerBodyGroups[id]
+    for id = 1, #bodygroups do
+        local submodel = bodygroups[id]
         ragdoll:SetBodygroup( id, submodel )
     end
 
