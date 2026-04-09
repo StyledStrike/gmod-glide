@@ -403,8 +403,9 @@ do
         traceData.filter = {}
 
         -- Ignore everything that is parented to this vehicle
-        for i = 1, #self:GetChildren() do
-            local ent = self:GetChildren()[i]
+        local children = self:GetChildren()
+        for i = 1, #children do
+            local ent = children[i]
             traceData.filter[i] = ent
         end
 
