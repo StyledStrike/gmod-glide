@@ -254,9 +254,7 @@ if SERVER then
 
         -- Since the model already has a visual representation
         -- for the wheels, hide the actual wheels.
-        for _, w in ipairs( self.wheels ) do
-            Glide.HideEntity( w, true )
-        end
+        Glide.HideWheels( self, true )
     end
 
     function ENT:OnWeaponFire()
