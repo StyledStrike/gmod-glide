@@ -207,6 +207,14 @@ end
 --- Check if a player can lock the vehicle by either
 --- being it's creator or being a CPPI friend of the creator.
 function Glide.CanLockVehicle( ply, vehicle )
+    if DarkRP then
+        if IsValid( ply.switchingSeats ) and ply.switchingSeats == vehicle then
+            return true
+        end
+
+        return false
+    end
+
     local creator = vehicle:GetCreator()
 
     if creator == ply then
@@ -258,11 +266,14 @@ function Glide.SwitchSeat( ply, seatIndex )
         return
     end
 
+    ply.switchingSeats = vehicle
     ply:ExitVehicle()
     ply:SetAllowWeaponsInVehicle( false )
     ply:EnterVehicle( seat )
 
     hook.Run( "Glide_PostSwitchSeat", ply, seatIndex )
+
+    ply.switchingSeats = nil
 end
 
 --- Finds and returns all human players near a certain position.
