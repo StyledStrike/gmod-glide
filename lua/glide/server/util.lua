@@ -265,6 +265,19 @@ function Glide.SwitchSeat( ply, seatIndex )
     hook.Run( "Glide_PostSwitchSeat", ply, seatIndex )
 end
 
+-- Eject the player from the vehicle
+function Glide.EjectPlayer( vehicle, seatIndex )
+    local seat = vehicle.seats[seatIndex]
+    if not IsValid( seat ) then return end
+
+    local driver = seat:GetDriver()
+    if not IsValid( driver ) then return end
+
+    driver:ExitVehicle()
+    driver:SetAllowWeaponsInVehicle( false )
+end
+
+
 --- Finds and returns all human players near a certain position.
 function Glide.GetNearbyPlayers( pos, radius )
     radius = radius * radius
