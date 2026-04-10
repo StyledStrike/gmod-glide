@@ -8,6 +8,7 @@ Glide.activeInputData = activeData
 
 local EntityMeta = FindMetaTable( "Entity" )
 local getTable = EntityMeta.GetTable
+local getInternalVariable = EntityMeta.GetInternalVariable
 
 do
     local SetNumber = Glide.SetNumber
@@ -179,19 +180,10 @@ local function HandleInput( ply, button, active, pressed )
     -- Is this a "switch seat" button?
     if pressed and SEAT_SWITCH_BUTTONS[button] then
         -- Let the driver lock the vehicle
-        if ply:KeyDown( IN_WALK ) then
+        if ply:KeyDown( IN_WALK ) and not getInternalVariable( vehicle, "m_bLocked" ) and button ~= KEY_1 then
             if ply ~= vehicle:GetDriver() then return end
 
-            if Glide.CanLockVehicle( ply, vehicle ) then
-                vehicle:SetLocked( not vehicle:GetIsLocked() )
-            else
-                Glide.SendNotification( ply, {
-                    text = "#glide.notify.lock_denied",
-                    icon = "materials/icon16/cancel.png",
-                    sound = "glide/ui/radar_alert.wav",
-                    immediate = true
-                } )
-            end
+            Glide.EjectPlayer( vehicle, SEAT_SWITCH_BUTTONS[button] )
         else
             Glide.SwitchSeat( ply, SEAT_SWITCH_BUTTONS[button] )
         end
