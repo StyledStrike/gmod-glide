@@ -224,7 +224,6 @@ do
     end
 end
 
-local GetClass = FindMetaTable( "Entity" ).GetClass
 local GetParent = FindMetaTable( "Entity" ).GetParent
 
 do
@@ -289,28 +288,22 @@ end
 
 local WHITELIST = Glide.LOCKON_WHITELIST
 local BLACKLIST = Glide.LOCKON_BLACKLIST
-local AllEnts = {}
 
-local function isWhitelisted( ent, skipParentCheck )
-    if not IsValid( ent ) then return false end
+local GetClass = FindMetaTable( "Entity" ).GetClass
+local IsVehicle = FindMetaTable( "Entity" ).IsVehicle
 
+local function CanAddToLockableEnts( ent )
     local class = GetClass( ent )
-
-    -- Checks for parent vehicles, like for example glide
-    local parent = GetParent( ent )
-    if ( not skipParentCheck and class == "prop_vehicle_prisoner_pod" and IsValid( parent ) and isWhitelisted( parent, true ) ) then
-        return false -- Don't include pod seats of Glide vehicles, as we want to lock on the whole vehicle instead
-    end
-
-    if WHITELIST[class] then
-        return true
-    end
 
     if BLACKLIST[class] then
         return false
     end
 
-    if ent:IsVehicle() then
+    if WHITELIST[class] or ( ent.BaseClass and WHITELIST[ent.BaseClass.ClassName] ) then
+        return true
+    end
+
+    if IsVehicle( ent ) then
         return true
     end
 
@@ -318,32 +311,56 @@ local function isWhitelisted( ent, skipParentCheck )
         return true
     end
 
-    if ent.BaseClass and WHITELIST[ent.BaseClass.ClassName] then
-        return true
-    end
-
     return false
 end
 
-hook.Add( "OnEntityCreated", "Glide_LockOnWhitelist", function( ent )
-    timer.Simple( 0, function()
-        if IsValid( ent ) and isWhitelisted( ent ) then
-            local index = table.insert( AllEnts, ent )
-            ent.GlideLockOnIndex = index
-        end
-    end )
+local lockableEnts = {}
+
+local function TrackLockableEnt( ent )
+    ent.GlideIsLockable = true
+    lockableEnts[#lockableEnts + 1] = ent
+end
+
+hook.Add( "OnEntityCreated", "Glide.UpdateLockOnWhitelist", function( ent )
+    if not CanAddToLockableEnts( ent ) then return end
+
+    local class = GetClass( ent )
+
+    -- For seat pods, we need an extra check
+    if class == "prop_vehicle_prisoner_pod" then
+        -- To reliably get the parent, we have to defer to the next tick
+        timer.Simple( 0, function()
+            if IsValid( ent ) then
+                local parent = GetParent( ent )
+
+                -- Only include pod seats if they aren't parented to a vehicle,
+                -- as we want to lock on the whole vehicle instead.
+                if IsValid( parent ) and CanAddToLockableEnts( parent ) then
+                    return
+                end
+
+                TrackLockableEnt( ent )
+            end
+        end )
+    else
+        -- Everything else gets added to the list right away
+        TrackLockableEnt( ent )
+    end
 end )
 
-hook.Add( "EntityRemoved", "Glide_LockOnWhitelist", function( ent )
-    if isWhitelisted( ent ) then
-        local index = ent.GlideLockOnIndex
-        if index then
-            table.remove( AllEnts, index )
+hook.Add( "EntityRemoved", "Glide.UpdateLockOnWhitelist", function( ent )
+    if ent.GlideIsLockable then
+        for i = 1, #lockableEnts do
+            if ent == lockableEnts[i] then
+                table.remove( lockableEnts, i )
+                break
+            end
         end
     end
 end )
 
 local CanLockOnEntity = Glide.CanLockOnEntity
+
 --- Finds all entities that we can lock on with `Glide.CanLockOnEntity`,
 --- then returns which one has the largest dot product between `normal` and the direction towards it.
 function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacker, traceFilter, entFilter )
@@ -353,12 +370,11 @@ function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacke
 
     if entFilter then
         for i = 1, #entFilter do
-            local ent = entFilter[i]
-            ignore[ent] = true
+            ignore[entFilter[i]] = true
         end
     end
 
-    for _, e in ipairs( AllEnts ) do
+    for _, e in ipairs( lockableEnts ) do
         if e ~= attacker and not ignore[e] then
             canLock, dot = CanLockOnEntity( e, origin, normal, threshold, maxDistance, attacker, traceFilter )
 
