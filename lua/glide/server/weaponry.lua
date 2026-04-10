@@ -289,16 +289,25 @@ end
 
 local WHITELIST = Glide.LOCKON_WHITELIST
 local BLACKLIST = Glide.LOCKON_BLACKLIST
+local AllEnts = {}
 
-local function IsLockableEntity( ent )
+local function isWhitelisted( ent, skipParentCheck )
+    if not IsValid( ent ) then return false end
+
     local class = GetClass( ent )
 
-    if BLACKLIST[class] then
-        return false
+    -- Checks for parent vehicles, like for example glide
+    local parent = GetParent( ent )
+    if ( not skipParentCheck and class == "prop_vehicle_prisoner_pod" and IsValid( parent ) and isWhitelisted( parent, true ) ) then
+        return false -- Don't include pod seats of Glide vehicles, as we want to lock on the whole vehicle instead
     end
 
     if WHITELIST[class] then
         return true
+    end
+
+    if BLACKLIST[class] then
+        return false
     end
 
     if ent:IsVehicle() then
@@ -316,9 +325,25 @@ local function IsLockableEntity( ent )
     return false
 end
 
-local AllEnts = ents.Iterator
-local CanLockOnEntity = Glide.CanLockOnEntity
+hook.Add( "OnEntityCreated", "Glide_LockOnWhitelist", function( ent )
+    timer.Simple( 0, function()
+        if IsValid( ent ) and isWhitelisted( ent ) then
+            local index = table.insert( AllEnts, ent )
+            ent.GlideLockOnIndex = index
+        end
+    end )
+end )
 
+hook.Add( "EntityRemoved", "Glide_LockOnWhitelist", function( ent )
+    if isWhitelisted( ent ) then
+        local index = ent.GlideLockOnIndex
+        if index then
+            table.remove( AllEnts, index )
+        end
+    end
+end )
+
+local CanLockOnEntity = Glide.CanLockOnEntity
 --- Finds all entities that we can lock on with `Glide.CanLockOnEntity`,
 --- then returns which one has the largest dot product between `normal` and the direction towards it.
 function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacker, traceFilter, entFilter )
@@ -327,13 +352,14 @@ function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacke
     local ignore = {}
 
     if entFilter then
-        for _, ent in ipairs( entFilter ) do
+        for i = 1, #entFilter do
+            local ent = entFilter[i]
             ignore[ent] = true
         end
     end
 
-    for _, e in AllEnts() do
-        if e ~= attacker and not ignore[e] and IsLockableEntity( e ) then
+    for _, e in ipairs( AllEnts ) do
+        if e ~= attacker and not ignore[e] then
             canLock, dot = CanLockOnEntity( e, origin, normal, threshold, maxDistance, attacker, traceFilter )
 
             if canLock and dot > largestDot then
