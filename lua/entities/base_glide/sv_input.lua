@@ -137,6 +137,9 @@ function ENT:SetInputBool( seatIndex, action, pressed )
 
     if not pressed or seatIndex > 1 then return end
 
+    local blockAction = hook.Run( "Glide_VehicleInput", self, seatIndex, action )
+    if blockAction == false then return end
+
     if action == "switch_weapon" then
         self:SelectWeaponIndex( self:GetWeaponIndex() + 1 )
 
