@@ -137,7 +137,20 @@ function ENT:SetInputBool( seatIndex, action, pressed )
 
     if not pressed or seatIndex > 1 then return end
 
-    if action == "switch_weapon" then
+    local ply = self:GetDriver()
+    if ply:KeyDown( IN_WALK ) and action == "lock_vehicle" then
+        if Glide.CanLockVehicle( ply, self ) then
+            self:SetLocked( not self:GetIsLocked() )
+        else
+            Glide.SendNotification( ply, {
+                text = "#glide.notify.lock_denied",
+                icon = "materials/icon16/cancel.png",
+                sound = "glide/ui/radar_alert.wav",
+                immediate = true
+            } )
+        end
+
+    elseif action == "switch_weapon" then
         self:SelectWeaponIndex( self:GetWeaponIndex() + 1 )
 
     elseif action == "headlights" then
