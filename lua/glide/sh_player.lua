@@ -104,22 +104,26 @@ if SERVER then
         return IsValid( vehicle )
     end
 
-    hook.Add( "PhysgunPickup", "Glide.PhysgunPickup", function( _, ent )
-        if not CheckInVehicleGlide( ent ) then return end
-
-        return false
-    end, HOOK_HIGH )
-
-    if SAM then
-        Glide._OriginalCanTarget = Glide._OriginalCanTarget or PlayerMeta.CanTarget
-        local CanTarget = Glide._OriginalCanTarget
-
-        function PlayerMeta:CanTarget( target )
-            if CheckInVehicleGlide( target ) then
-                return false
+    if sam then
+        local freeze_player = function( ply )
+            if SERVER then
+                ply:Lock()
             end
-
-            return CanTarget( self, target )
+            ply:SetMoveType( MOVETYPE_NONE )
+            ply:SetCollisionGroup( COLLISION_GROUP_WORLD )
         end
+
+        sam.hook_first( "PhysgunPickup", "SAM.CanPhysgunPlayer", function( ply, target )
+            if sam.type( target ) == "Player" and ply:HasPermission( "can_physgun_players" ) and ply:CanTarget( target ) and not CheckInVehicleGlide( target ) then
+                freeze_player( target )
+                return true
+            end
+        end )
+    else
+        hook.Add( "PhysgunPickup", "Glide.PhysgunPickup", function( _, ent )
+            if not CheckInVehicleGlide( ent ) then return end
+
+            return false
+        end, HOOK_HIGH )
     end
 end
