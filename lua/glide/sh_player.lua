@@ -97,7 +97,7 @@ if SERVER then
         ply.GlideCameraAimPos = EntEyePos( ply ) + angles:Forward() * cmd:GetUpMove()
     end, HOOK_HIGH )
 
-    local function checkInVehicle( ply )
+    local function CheckInVehicleGlide( ply )
         if not IsValid( ply ) or not ply:IsPlayer() then return false end
 
         local vehicle = GetNWEntity( ply, "GlideVehicle", NULL )
@@ -105,7 +105,7 @@ if SERVER then
     end
 
     hook.Add( "PhysgunPickup", "Glide.PhysgunPickup", function( _, ent )
-        if not checkInVehicle( ent ) then return end
+        if not CheckInVehicleGlide( ent ) then return end
 
         return false
     end, HOOK_HIGH )
@@ -115,7 +115,7 @@ if SERVER then
         local CanTarget = Glide._OriginalCanTarget
 
         function PlayerMeta:CanTarget( target )
-            if checkInVehicle( target ) then
+            if CheckInVehicleGlide( target ) then
                 return false
             end
 
