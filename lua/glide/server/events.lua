@@ -272,6 +272,34 @@ hook.Add( "PlayerSpawnedSENT", "Glide.RunVehiclePostSpawnHook", function( ply, e
     return true
 end )
 
+-- VCMOD must have performed some action that breaks the Glide filter. I prefer to overwrite and prevent this hook from executing.
+-- TODO: This is a temporary solution; the goal is to find the exact problem.
+local function isGlideVehicle( ent )
+    if not IsValid( ent ) then return false end
+    if ent.IsGlideVehicle then print( "[Glide] Vehicle is a Glide vehicle." ) return true end
+
+    local parent = ent:GetParent()
+    if IsValid( parent ) and parent.IsGlideVehicle then print( "[Glide] Parent is a Glide vehicle." ) return true end
+
+    return false
+end
+
+local hookGetTable = hook.GetTable
+hook.Add( "VC_postInit", "Glide.CompatibilityVCMOD", function()
+    timer.Simple( 1, function()
+        local allHooks = hookGetTable()
+
+        local fcOld = allHooks["PlayerEnteredVehicle"] and allHooks["PlayerEnteredVehicle"]["VC_VehEnter"] or nil
+        if fcOld then
+            allHooks["PlayerEnteredVehicle"]["VC_VehEnter"] = function( ply, vehicle, role )
+                if isGlideVehicle( vehicle ) then return end
+
+                return fcOld( ply, vehicle, role )
+            end
+        end
+    end )
+end )
+
 if not game.SinglePlayer() then return end
 
 local function ResetVehicle( vehicle )
