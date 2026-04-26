@@ -319,21 +319,30 @@ local function isRotorAndSeatsValid( vehicle )
     return true
 end
 
+local function vehicleHasPlayerFilters( vehicle )
+    if not IsValid( vehicle ) then return false end
+    if not istable( vehicle.selfTraceFilter ) then return false end
+
+    for i = 1, #vehicle.selfTraceFilter do
+        local entFilter = vehicle.selfTraceFilter[i]
+        if IsValid( entFilter ) and entFilter:IsPlayer() then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function removeFilter( filter, ent, vehicleMain )
-    local foundPlayer = nil
     for i = 1, #filter do
         local entFilter = filter[i]
         if entFilter == ent then
             table.remove( filter, i )
             break
         end
-
-        if IsValid( vehicleMain ) and foundPlayer == nil and entFilter ~= ent and entFilter:IsPlayer() then
-            foundPlayer = true
-        end 
     end
 
-    if IsValid( vehicleMain ) and not foundPlayer then
+    if IsValid( vehicleMain ) and not vehicleHasPlayerFilters( vehicleMain ) then
         allVehicle[vehicleMain] = nil
         vehicleMain:RemoveCallOnRemove( "Glide_RemoveFromVehicleList" )
     end
