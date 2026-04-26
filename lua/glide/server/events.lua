@@ -272,32 +272,64 @@ hook.Add( "PlayerSpawnedSENT", "Glide.RunVehiclePostSpawnHook", function( ply, e
     return true
 end )
 
--- VCMOD must have performed some action that breaks the Glide filter. I prefer to overwrite and prevent this hook from executing.
--- TODO: This is a temporary solution; the goal is to find the exact problem.
-local function isGlideVehicle( ent )
-    if not IsValid( ent ) then return false end
-    if ent.IsGlideVehicle then print( "[Glide] Vehicle is a Glide vehicle." ) return true end
+local interactPlayer = CreateConVar( "glide_interact_player", "0", { FCVAR_ARCHIVE, FCVAR_REPLICATED }, "Whether players can interact with entities while inside Glide vehicles." )
+local istable = istable
 
-    local parent = ent:GetParent()
-    if IsValid( parent ) and parent.IsGlideVehicle then print( "[Glide] Parent is a Glide vehicle." ) return true end
+local function isRotorAndSeatsValid( vehicle )
+    if not IsValid( vehicle ) then return false end
+    if not istable( vehicle.rotors ) then return false end
+    if not istable( vehicle.seats ) or #vehicle.seats == 0 then return false end
 
-    return false
+    return true
 end
 
-local hookGetTable = hook.GetTable
-hook.Add( "VC_postInit", "Glide.CompatibilityVCMOD", function()
-    timer.Simple( 1, function()
-        local allHooks = hookGetTable()
-
-        local fcOld = allHooks["PlayerEnteredVehicle"] and allHooks["PlayerEnteredVehicle"]["VC_VehEnter"] or nil
-        if fcOld then
-            allHooks["PlayerEnteredVehicle"]["VC_VehEnter"] = function( ply, vehicle, role )
-                if isGlideVehicle( vehicle ) then return end
-
-                return fcOld( ply, vehicle, role )
-            end
+local function removeFilter( filter, ent )
+    for i = 1, #filter do
+        if filter[i] == ent then
+            table.remove( filter, i )
+            break
         end
-    end )
+    end
+end
+
+hook.Add( "Glide_OnEnterVehicle", "Glide.UpdateFilter", function( ply, vehicle )
+    if not interactPlayer:GetBool() then return end
+
+    if istable( vehicle.selfTraceFilter ) then
+        table.insert( vehicle.selfTraceFilter, ply )
+    end
+
+    ply:SetCollisionGroup( COLLISION_GROUP_WEAPON )
+
+    if not isRotorAndSeatsValid( vehicle ) then return end
+
+    for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
+        if IsValid( rotor ) and rotor.traceData and rotor.traceData.filter then
+            table.insert( rotor.traceData.filter, ply )
+        end
+    end
+end )
+
+hook.Add( "Glide_OnExitVehicle", "Glide.UpdateFilter", function( ply, vehicle )
+    if not interactPlayer:GetBool() then return end
+    
+    if istable( vehicle.selfTraceFilter ) then
+        removeFilter( vehicle.selfTraceFilter, ply )
+    end
+
+    if not isRotorAndSeatsValid( vehicle ) then return end
+
+    for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
+        if IsValid( rotor ) and rotor.traceData and rotor.traceData.filter then
+            removeFilter( rotor.traceData.filter, ply )
+        end
+    end
+end )
+
+hook.Add( "PhysgunPickup", "Glide.BlockPhysgunPickup", function( _, ent )
+    if not IsValid( ent ) or not ent:IsPlayer() or not ent.IsUsingGlideVehicle then return end
+
+    return false
 end )
 
 if not game.SinglePlayer() then return end
