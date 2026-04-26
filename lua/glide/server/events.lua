@@ -312,7 +312,7 @@ end )
 
 hook.Add( "Glide_OnExitVehicle", "Glide.UpdateFilter", function( ply, vehicle )
     if not interactPlayer:GetBool() then return end
-    
+
     if istable( vehicle.selfTraceFilter ) then
         removeFilter( vehicle.selfTraceFilter, ply )
     end
