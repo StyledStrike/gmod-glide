@@ -99,6 +99,7 @@ function ENT:Initialize()
 
     self.isFiring = false
     self.nextShoot = 0
+    self.lastPos = Vector()
 
     if WireLib then
         WireLib.CreateSpecialInputs( self,
@@ -113,12 +114,13 @@ local FireProjectile = Glide.FireProjectile
 
 function ENT:Think()
     local t = CurTime()
+    local myPos = self:GetPos()
 
     if self.isFiring and t > self.nextShoot then
         self.nextShoot = t + self.reloadDelay
 
         local dir = self:GetUp()
-        local pos = self:GetPos() + dir * 10
+        local pos = myPos + dir * 10
         local ang = dir:Angle()
 
         local parent = self:GetParent()
@@ -127,11 +129,13 @@ function ENT:Think()
             parent = self
         end
 
+        local speed = math.max( 0, dir:Dot( myPos - self.lastPos ) / FrameTime() )
+
         local projectile = FireProjectile( pos, ang, self:GetCreator(), parent )
         projectile.radius = self.explosionRadius
         projectile.damage = self.explosionDamage
         projectile.lifeTime = t + self.projectileLifetime
-        projectile:SetProjectileSpeed( self.projectileSpeed )
+        projectile.velocity = projectile:GetForward() * ( speed + self.projectileSpeed )
         projectile:SetProjectileGravity( self.projectileGravity )
         projectile:SetSmokeColor( self.smokeColor )
 
@@ -139,6 +143,7 @@ function ENT:Think()
         projectile:SetModelScale( self.projectileScale )
     end
 
+    self.lastPos = myPos
     self:NextThink( t )
 
     return true
