@@ -249,6 +249,8 @@ do
     function Glide.CanLockOnEntity( ent, origin, normal, threshold, maxDistance, attacker, traceFilter )
         maxDistance = maxDistance * maxDistance
 
+        if not ent:TestPVS( origin ) then return false end
+
         local entPos = LocalToWorld( ent, ent:OBBCenter() )
 
         VecSet( diff, entPos )
