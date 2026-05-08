@@ -34,6 +34,7 @@ end
 
 local IsString = isstring
 local Clamp = math.Clamp
+local GetVolume = Glide.Config.GetVolume
 
 function ENT:ProcessSound( vehicle, id, surfaceId, soundSet, altSurface, volume, pitch )
     if not self:GetSoundsEnabled() then return end
@@ -132,6 +133,7 @@ function ENT:Think()
 
     local velocity = parent:GetVelocity()
     local speed = Abs( parent:WorldToLocal( parent:GetPos() + velocity )[1] )
+    local baseVolume = GetVolume( "carVolume" )
 
     local up = parent:GetUp()
     local surfaceId = self:GetContactSurface()
@@ -152,13 +154,13 @@ function ENT:Think()
     local fastFactor = speed / 600
 
     self:ProcessSound( parent, "fastRoll", surfaceId, WHEEL_SOUNDS.ROLL, nil,
-        Clamp( fastFactor * 0.75, 0, ROLL_VOLUME[surfaceId] or 0.4 ), 70 + 25 * fastFactor )
+        Clamp( fastFactor * 0.75, 0, ROLL_VOLUME[surfaceId] or 0.4 ) * baseVolume, 70 + 25 * fastFactor )
 
     -- Slow roll sound
     local slowFactor = ( isBlownOnHardSurface or muteRollSound ) and 0 or 1.02 - fastFactor
 
     self:ProcessSound( parent, "slowRoll", surfaceId, WHEEL_SOUNDS.ROLL_SLOW, 88,
-        slowFactor * fastFactor * 2, 110 - 30 * slowFactor )
+        slowFactor * fastFactor * 2 * baseVolume, 110 - 30 * slowFactor )
 
     -- Side slip sound
     local sideSlipFactor = muteRollSound and 0 or Abs( self:GetSideSlip() ) - 0.1
@@ -166,20 +168,20 @@ function ENT:Think()
     sideSlipFactor = Clamp( sideSlipFactor * 1.5, 0, 0.8 )
 
     self:ProcessSound( parent, "sideSlip", surfaceId, WHEEL_SOUNDS.SIDE_SLIP, nil,
-        isBlownOnHardSurface and 0 or sideSlipFactor, 110 - 30 * sideSlipFactor )
+        ( isBlownOnHardSurface and 0 or sideSlipFactor ) * baseVolume, 110 - 30 * sideSlipFactor )
 
     -- Forward slip sound
     local forwardSlip = self:GetForwardSlip() * 0.04
     local forwardSlipFactor = Clamp( Abs( forwardSlip ) - 0.1, 0, 1 )
 
     self:ProcessSound( parent, "forwardSlip", surfaceId, WHEEL_SOUNDS.FORWARD_SLIP, 88,
-        isBlownOnHardSurface and 0 or forwardSlipFactor, 100 - forwardSlipFactor * 10 )
+        ( isBlownOnHardSurface and 0 or forwardSlipFactor )  * baseVolume, 100 - forwardSlipFactor * 10 )
 
     -- Blown tire/rim sound
     local blownTire = isBlownOnHardSurface and Clamp( sideSlipFactor + forwardSlipFactor + ( speed / 1000 ), 0, 1 ) or 0
 
     self:ProcessSound( parent, "blownTire", surfaceId, "glide/wheels/blowout_wheel_rim.wav", 88,
-        blownTire * 0.8, 80 + blownTire * 30 )
+        blownTire * 0.8 * baseVolume, 80 + blownTire * 30 )
 
     if muteRollSound then
         selfTbl.lastSkidId = nil
