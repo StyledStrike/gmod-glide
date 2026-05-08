@@ -480,7 +480,7 @@ function Camera:InputMouseApply( _, x, y )
 
     local angles = self.allowRolling and vehicle:WorldToLocalAngles( self.angles ) or self.angles
 
-    angles[1] = Clamp( angles[1] + lookY, -80, 60 )
+    angles[1] = Clamp( angles[1] + lookY, -80, 89 )
     angles[2] = ( angles[2] - lookX ) % 360
 
     self.angles = self.allowRolling and vehicle:LocalToWorldAngles( angles ) or angles
