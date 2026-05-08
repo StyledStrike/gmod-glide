@@ -85,7 +85,7 @@ function ENT:UpdateTurboSound( sounds, dt )
     local inertia = ExpDecay( lastInertia, self:GetEngineThrottle(), 1, dt )
 
     if inertia < lastInertia and inertia > 0.6 and self.rpmFraction > 0.5 and self.TurboBlowoffSound ~= "" then
-        Glide.PlaySoundSet( self.TurboBlowoffSound, self, self.TurboBlowoffVolume * inertia )
+        Glide.PlaySoundSet( self.TurboBlowoffSound, self, self.TurboBlowoffVolume * inertia * GetVolume( "carVolume" ) )
         inertia = 0
     end
 
