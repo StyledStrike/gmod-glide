@@ -131,6 +131,8 @@ function ENT:Think()
 
         missile:SetModel( self.missileModel )
         missile:SetModelScale( self.missileScale )
+
+        Glide.CopyEntityCreator( self, missile )
     end
 
     self.lastPos = myPos
