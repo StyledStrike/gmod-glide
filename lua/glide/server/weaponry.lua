@@ -61,10 +61,6 @@ do
     local TraceHull = util.TraceHull
     local EffectData = EffectData
 
-    local pos, ang
-    local attacker, inflictor, length
-    local damage, spread, explosionRadius
-
     local ray, rayWater = {}, {}
 
     local traceData = {
@@ -81,12 +77,15 @@ do
     }
 
     function Glide.FireBullet( params, traceFilter )
-        pos = params.pos
-        ang = params.ang
+        local pos = params.pos
+        local ang = params.ang
 
-        attacker = params.attacker
-        inflictor = params.inflictor or attacker
-        spread = params.spread or 0.3
+        local attacker = params.attacker
+        local inflictor = params.inflictor or attacker
+        local spread = params.spread or 0.3
+
+        local length
+        local damage, explosionRadius
 
         if params.isExplosive then
             length = params.length or 8000
@@ -178,7 +177,7 @@ do
         if shellDir then
             eff = EffectData()
             eff:SetAngles( shellDir:Angle() )
-            eff:SetOrigin( pos - dir * 30 )
+            eff:SetOrigin( params.shellOrigin or ( pos - dir * 30 ) )
             eff:SetEntity( inflictor )
             eff:SetMagnitude( 1 )
             eff:SetRadius( 5 )
