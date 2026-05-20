@@ -315,6 +315,7 @@ local function CanAddToLockableEnts( ent )
     return false
 end
 
+local IsValid = IsValid
 local lockableEnts = {}
 
 local function TrackLockableEnt( ent )
@@ -376,7 +377,7 @@ function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacke
     end
 
     for _, e in ipairs( lockableEnts ) do
-        if e ~= attacker and not ignore[e] then
+        if e ~= attacker and not ignore[e] and IsValid( e ) then
             canLock, dot = CanLockOnEntity( e, origin, normal, threshold, maxDistance, attacker, traceFilter )
 
             if canLock and dot > largestDot then
