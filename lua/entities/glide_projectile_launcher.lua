@@ -34,7 +34,8 @@ end
 function ENT:PostEntityPaste( ply, ent, createdEntities )
     Glide.PostEntityPaste( ply, ent, createdEntities )
 
-    -- Update parameters in case the limits/console variables are not set to default
+    -- Update parameters in case the limits/console variables
+    -- are different compared to when this entity was duped.
     self:SetProjectileSpeed( self.projectileSpeed )
     self:SetProjectileGravity( self.projectileGravity )
     self:SetProjectileLifetime( self.projectileLifetime )

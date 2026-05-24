@@ -210,6 +210,7 @@ CreateConVar( "sbox_maxglide_standalone_turrets", "5", FCVAR_ARCHIVE + FCVAR_NOT
 CreateConVar( "sbox_maxglide_missile_launchers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Missile Launchers that one player can have", 0 )
 CreateConVar( "sbox_maxglide_projectile_launchers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Projectile Launchers that one player can have", 0 )
 CreateConVar( "sbox_maxglide_engine_stream_chips", "3", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Engine Stream Chips that one player can have", 0 )
+CreateConVar( "sbox_maxglide_repair_rays", "3", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Repair Rays that one player can have", 0 )
 
 -- Turret tool convars
 CreateConVar( "glide_turret_explosive_allow", "1", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Allows Glide Turrets to use explosive bullets.", 0, 1 )
@@ -227,6 +228,11 @@ CreateConVar( "glide_projectile_launcher_min_delay", "0.5", FCVAR_ARCHIVE + FCVA
 CreateConVar( "glide_projectile_launcher_max_lifetime", "10", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum projectile flight time allowed for Glide Projectile Launchers.", 1 )
 CreateConVar( "glide_projectile_launcher_max_radius", "500", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum radius from explosions created by Glide Projectile Launchers.", 10 )
 CreateConVar( "glide_projectile_launcher_max_damage", "200", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum damage dealt by explosions from Glide Projectile Launchers.", 1 )
+
+-- Repair Ray tool convars
+CreateConVar( "glide_repair_ray_max_capacity", "600", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum amount of HP that Glide Repair Rays can hold.", 1, 10000 )
+CreateConVar( "glide_repair_ray_output_per_second", "50", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "How fast to output HP from the Glide Repair Rays, per second.", 1, 1000 )
+CreateConVar( "glide_repair_ray_refill_per_second", "10", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "How fast to replenish the HP of Glide Repair Rays, per second.", 1, 1000 )
 
 -- Gib convars
 CreateConVar( "glide_gib_lifetime", "8", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Lifetime of Glide Gibs, 0 for no despawning.", 0 )
