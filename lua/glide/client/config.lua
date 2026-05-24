@@ -1092,6 +1092,11 @@ function Config:OpenFrame()
             { name = "glide_projectile_launcher_max_lifetime", decimals = 1, min = 1, max = 30 },
             { name = "glide_projectile_launcher_max_radius", decimals = 0, min = 10, max = 1000 },
             { name = "glide_projectile_launcher_max_damage", decimals = 0, min = 0, max = 1000 },
+
+            { category = "#tool.glide_repair_ray.name" },
+            { name = "glide_repair_ray_max_capacity", decimals = 0, min = 1, max = 10000 },
+            { name = "glide_repair_ray_output_per_second", decimals = 0, min = 1, max = 1000 },
+            { name = "glide_repair_ray_refill_per_second", decimals = 0, min = 1, max = 1000 },
         }
 
         for _, data in ipairs( cvarList ) do
