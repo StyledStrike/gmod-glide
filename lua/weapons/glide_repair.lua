@@ -92,7 +92,7 @@ function SWEP:PrimaryAttack()
     if not ent then return end
 
     local repairMul = repairSpeedMulCvar:GetFloat()
-    local wasHealthIncreased, hasFinished = Glide.PartialRepair( ent, 20 * repairMul, 0.03 * repairMul, user )
+    local wasHealthIncreased, hasFinished = Glide.PartialRepair( ent, 20 * repairMul, 0.03 * repairMul )
 
     if wasHealthIncreased then
         user:EmitSound( ( "glide/train/track_clank_%d.wav" ):format( math.random( 6 ) ), 75, 150, 0.2 )
