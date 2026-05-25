@@ -474,3 +474,18 @@ function Glide.ValidateMiscSoundData( data )
     return true
 end
 
+hook.Add( "InitPostEntity", "Glide.RegisterBaseVehicle", function()
+    for sClass, tEnt in pairs( scripted_ents.GetList() ) do
+        if not tEnt then continue end
+        local tData = tEnt["t"]
+        if not tData or not tData.GlideCategory then continue end
+
+        list.Set( "GlideVehicles", sClass, {
+            Name = tData.PrintName or sClass,
+            Category = tData.GlideCategory or "Default",
+            Model = tData.ChassisModel
+        } )
+    end
+
+    hook.Run( "Glide_VehiclesRegistered" )
+end )

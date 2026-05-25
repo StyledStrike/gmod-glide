@@ -389,3 +389,7 @@ function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacke
 
     return target
 end
+
+function Glide.GetAllVehicles()
+    return lockableEnts
+end
