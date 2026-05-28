@@ -211,12 +211,14 @@ local function HandleInput( ply, button, active, pressed )
         return
     end
 
-    for _, action in ipairs( actions ) do
-        if settings.replaceYawWithRoll and MOUSE_ACTION_OVERRIDE[action] then
-            action = MOUSE_ACTION_OVERRIDE[action]
-        end
+    for _, action in ipairs(actions) do
+        if hook.Run("Glide_CanPlayerVehicleInput", ply, vehicle, action, pressed) ~= false then
+            if settings.replaceYawWithRoll and MOUSE_ACTION_OVERRIDE[action] then
+                action = MOUSE_ACTION_OVERRIDE[action]
+            end
 
-        vehicle:SetInputBool( active.seatIndex, ACTION_ALIASES[action] or action, pressed )
+            vehicle:SetInputBool( active.seatIndex, ACTION_ALIASES[action] or action, pressed)
+        end
     end
 end
 
