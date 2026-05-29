@@ -73,6 +73,26 @@ end
 
 function ENT:PostEntityPaste( ply, ent, createdEntities )
     Glide.PostEntityPaste( ply, ent, createdEntities )
+
+    local editData = ent:GetEditingData()
+    if not editData then return end
+
+    local Clamp = math.Clamp
+    local getter, value
+
+    for name, data in pairs( editData ) do
+        if data.type == "Float" and data.min ~= nil and data.max ~= nil then
+            getter = "Get" .. name
+
+            if ent[getter] then
+                value = ent[getter]()
+
+                if value < data.min or value > data.max then
+                    ent["Set" .. name]( ent, Clamp( value, data.min, data.max ) )
+                end
+            end
+        end
+    end
 end
 
 --- Handle spawning this vehicle from the spawn menu or `gm_spawn` command.
