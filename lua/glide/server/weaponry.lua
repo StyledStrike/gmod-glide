@@ -317,10 +317,19 @@ end
 
 local IsValid = IsValid
 local lockableEnts = {}
+local vehicleEnts = {}
 
-local function TrackLockableEnt( ent )
+function Glide.GetAllVehicleEntities()
+    return vehicleEnts
+end
+
+local function TrackLockableEnt( ent, addToVehicleEnts )
     ent.GlideIsLockable = true
     lockableEnts[#lockableEnts + 1] = ent
+
+    if addToVehicleEnts then
+        vehicleEnts[#vehicleEnts + 1] = ent
+    end
 end
 
 hook.Add( "OnEntityCreated", "Glide.UpdateLockOnWhitelist", function( ent )
@@ -346,7 +355,7 @@ hook.Add( "OnEntityCreated", "Glide.UpdateLockOnWhitelist", function( ent )
         end )
     else
         -- Everything else gets added to the list right away
-        TrackLockableEnt( ent )
+        TrackLockableEnt( ent, true )
     end
 end )
 
@@ -355,6 +364,13 @@ hook.Add( "EntityRemoved", "Glide.UpdateLockOnWhitelist", function( ent )
         for i = 1, #lockableEnts do
             if ent == lockableEnts[i] then
                 table.remove( lockableEnts, i )
+                break
+            end
+        end
+
+        for i = 1, #vehicleEnts do
+            if ent == vehicleEnts[i] then
+                table.remove( vehicleEnts, i )
                 break
             end
         end
