@@ -118,27 +118,6 @@ do
     end
 end
 
--- Find and register all entities that are children of `base_glide`
--- (or any of it's children classes) on the duplicator/entity limit system.
--- Also make them spawnable on Starfall.
-hook.Add( "InitPostEntity", "Glide.RegisterEntityClasses", function()
-    local IsBasedOn = scripted_ents.IsBasedOn
-    local RegisterEntityClass = duplicator.RegisterEntityClass
-
-    local isStarfallAvailable = SF ~= nil
-    local starfallData = { {} }
-
-    for class, _ in pairs( scripted_ents.GetList() ) do
-        if IsBasedOn( class, "base_glide" ) then
-            RegisterEntityClass( class, Glide.VehicleFactory, "Data" )
-
-            if isStarfallAvailable then
-                list.Set( "starfall_creatable_sent", class, starfallData )
-            end
-        end
-    end
-end )
-
 -- Call a hook when a player finishes loading into the server
 -- and is ready to receive network events.
 local Player = Player
