@@ -1,5 +1,3 @@
-local ENT_META = FindMetaTable( "Entity" )
-
 return function( instance )
 
 local ents_methods, unwrap = instance.Types.Entity.Methods, instance.Types.Entity.Unwrap
