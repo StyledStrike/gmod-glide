@@ -166,8 +166,19 @@ end
 function Glide.VehicleFactory( ply, data )
     if not Glide.CanSpawnVehicle( ply, data.Class ) then return end
 
+    local entTable = scripted_ents.GetStored( data.Class )
+    if not entTable then return end
+
+    local vehicleTable = entTable["t"]
+    if not vehicleTable or not isstring( vehicleTable["GlideCategory"] ) then return end
+
+    local bAllow = hook.Run( "PlayerSpawnVehicle", ply, vehicleTable["ChassisModel"], vehicleTable["PrintName"], vehicleTable )
+    if bAllow == false then return end
+
     local ent = ents.Create( data.Class )
     if not IsValid( ent ) then return end
+
+    hook.Run( "PlayerSpawnedVehicle", ply, ent )
 
     ent:SetPos( data.Pos )
     ent:SetAngles( data.Angle )
