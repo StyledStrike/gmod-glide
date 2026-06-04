@@ -53,22 +53,6 @@ commands[Glide.CMD_SHOW_KEY_NOTIFICATION] = function()
     end
 end
 
-commands[Glide.CMD_SET_CURRENT_VEHICLE] = function()
-    local ply = LocalPlayer()
-    local vehicle = net.ReadEntity()
-    local seatIndex = net.ReadUInt( 6 )
-
-    -- BUG: ReadEntity returns `worldspawn` if a NULL entity was sent.
-    -- In that case, using IsValid on `worldspawn` returns false, which
-    -- we can use to detect if it was NULL.
-    if not IsValid( vehicle ) then
-        vehicle = NULL
-    end
-
-    ply:SetNWEntity( "GlideVehicle", vehicle )
-    ply:SetNWInt( "GlideSeatIndex", seatIndex )
-end
-
 commands[Glide.CMD_RELOAD_VSWEP] = function()
     Glide.ReloadWeaponScript( net.ReadString() )
 end
