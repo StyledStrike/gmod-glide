@@ -113,7 +113,8 @@ function ENT:SpawnFunction( ply, tr )
     return Glide.VehicleFactory( ply, {
         Pos = tr.HitPos + pos,
         Angle = Angle( 0, ply:EyeAngles().y, 0 ) + ang,
-        Class = self.ClassName
+        Class = self.ClassName,
+        Ent = self
     } )
 end
 

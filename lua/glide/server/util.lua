@@ -164,7 +164,14 @@ function Glide.CanSpawnVehicle( ply, class )
 end
 
 function Glide.VehicleFactory( ply, data )
-    if not Glide.CanSpawnVehicle( ply, data.Class ) then return end
+    if not Glide.CanSpawnVehicle( ply, data.Class ) then
+
+        if data.Ent and IsValid( data.Ent ) then
+            data.Ent:Remove()
+        end
+
+        return
+    end
 
     local entTable = scripted_ents.GetStored( data.Class )
     if not entTable then return end
