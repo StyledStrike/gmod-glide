@@ -128,11 +128,15 @@ hook.Add( "CanEditVariable", "Glide.ValidateEditVariables", function( ent, _, _,
 
     if value < editor.min then return false end
     if value > editor.max then return false end
+end )
+
+hook.Add( "VariableEdited", "Glide.EditVariables", function( ent, _, _, _, editor )
+    if not ent.IsGlideVehicle then return end
+    if not editor.min or not editor.max then return end
 
     ent.shouldUpdateWheelParams = true
 
     local phys = ent:GetPhysicsObject()
-
     if IsValid( phys ) then
         phys:Wake()
     end
