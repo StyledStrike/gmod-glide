@@ -218,10 +218,8 @@ end )
 
 -- Make sure all Glide vehicles are delete-able on map cleanup.
 hook.Add( "PreCleanupMap", "Glide.ClearEntityPersistFlag", function()
-    local IsBasedOn = scripted_ents.IsBasedOn
-
-    for _, e in ents.Iterator() do
-        if IsValid( e ) and e.GetClass and IsBasedOn( e:GetClass(), "base_glide" ) then
+    for _, e in ipairs( Glide.GetAllVehicleEntities() ) do
+        if IsValid( e ) then
             e:RemoveEFlags( EFL_KEEP_ON_RECREATE_ENTITIES )
         end
     end
@@ -301,7 +299,7 @@ local function ResetAll()
         ["base_glide_plane_vtol"] = true
     }
 
-    for _, e in ents.Iterator() do
+    for _, e in ipairs( Glide.GetAllVehicleEntities() ) do
         if classes[e:GetClass()] or ( e.BaseClass and classes[e.BaseClass.ClassName] ) then
             ResetVehicle( e )
         end
