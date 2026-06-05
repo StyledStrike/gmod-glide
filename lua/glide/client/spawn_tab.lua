@@ -1,11 +1,8 @@
 local function GetCategoryVehicles( category )
     local filtered = {}
-    local i = 0
-
     for class, data in pairs( list.Get( "GlideVehicles" ) or {} ) do
         if data.Category == category then
-            i = i + 1
-            filtered[i] = {
+            filtered[#filtered + 1] = {
                 class = class,
                 name = data.Name,
                 icon = data.IconOverride or "entities/" .. class .. ".png",
