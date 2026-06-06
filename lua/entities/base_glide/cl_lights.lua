@@ -64,7 +64,7 @@ local lightState = {
 local colorHeadlight = Color( 255, 255, 255 )
 
 --- Draw sprites depending on which type of lights are active.
-function ENT:UpdateLights()
+function ENT:UpdateLights( selfTbl )
     local headlightState = self:GetHeadlightState()
 
     if headlightState > 0 then
@@ -75,15 +75,15 @@ function ENT:UpdateLights()
     end
 
     -- Handle projected lights
-    if self.headlightState ~= headlightState then
-        self.headlightState = headlightState
+    if selfTbl.headlightState ~= headlightState then
+        selfTbl.headlightState = headlightState
         self:RemoveHeadlights()
 
         if headlightState == 0 then return end
 
         local enable
 
-        for index, v in ipairs( self.Headlights ) do
+        for index, v in ipairs( selfTbl.Headlights ) do
             enable = true
 
             -- Check for optional bodygroup requirement
@@ -98,11 +98,11 @@ function ENT:UpdateLights()
         end
     end
 
-    if headlightState > 0 and not self.isLazyThink then
+    if headlightState > 0 and selfTbl.shouldThinkNow then
         local l, hasLight
 
-        for index, data in ipairs( self.Headlights ) do
-            l = self.activeHeadlights[index]
+        for index, data in ipairs( selfTbl.Headlights ) do
+            l = selfTbl.activeHeadlights[index]
             hasLight = IsValid( l )
 
             if hasLight then
@@ -113,7 +113,7 @@ function ENT:UpdateLights()
 
             -- Check if this light no longer meets the optional bodygroup requirement.
             if data.ifBodygroupId and hasLight ~= ( self:GetBodygroup( data.ifBodygroupId ) == ( data.ifSubModelId or 0 ) ) then
-                self.headlightState = 0 -- Update all lights
+                selfTbl.headlightState = 0 -- Update all lights
             end
         end
     end
@@ -127,7 +127,7 @@ function ENT:UpdateLights()
     lightState.taillight = headlightState > 0
 
     local signal = self:GetTurnSignalState()
-    local signalBlink = ( CurTime() % self.TurnSignalCycle ) > self.TurnSignalCycle * 0.5
+    local signalBlink = ( CurTime() % selfTbl.TurnSignalCycle ) > selfTbl.TurnSignalCycle * 0.5
 
     lightState.signal_left = signal == 1 or signal == 3
     lightState.signal_right = signal == 2 or signal == 3
@@ -135,7 +135,7 @@ function ENT:UpdateLights()
     local myPos = self:GetPos()
     local pos, dir, ltype, enable
 
-    for _, l in ipairs( self.LightSprites ) do
+    for _, l in ipairs( selfTbl.LightSprites ) do
         pos = self:LocalToWorld( l.offset )
         dir = self:LocalToWorld( l.dir ) - myPos
         ltype = l.type

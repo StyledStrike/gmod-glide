@@ -251,6 +251,10 @@ if SERVER then
     function ENT:OnWeaponFire( _weapon, slotIndex )
         -- The explosive cannon is firing, set this entity
         -- variable to `true` (to play a custom sound clientside)
+        if self:WaterLevel() > 2 then
+            return false
+        end
+
         if slotIndex == 1 then
             self:SetFiringGun( true )
         end

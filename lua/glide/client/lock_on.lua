@@ -1,6 +1,3 @@
--- Optionally allow players to lock on empty vehicles
-CreateConVar( "glide_homing_launcher_lock_on_empty", "0", FCVAR_USERINFO )
-
 -- Handle sound effects for missiles locked on the local player's vehicle.
 local LockOnHandler = Glide.LockOnHandler or {}
 

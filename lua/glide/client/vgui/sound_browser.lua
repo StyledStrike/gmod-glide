@@ -244,7 +244,7 @@ function PANEL:Init()
 
     local scriptsFilter = vgui.Create( "DTextEntry", panelSoundScripts )
     scriptsFilter:SetPlaceholderText( L( "filter" ) .. "..." )
-    scriptsFilter:Dock( TOP )
+    scriptsFilter:Dock( BOTTOM )
 
     StyledTheme.Apply( scriptsFilter )
 
@@ -279,12 +279,12 @@ function PANEL:Init()
 
     local glideFilter = vgui.Create( "DTextEntry", panelGlideSoundScripts )
     glideFilter:SetPlaceholderText( L( "filter" ) .. "..." )
-    glideFilter:Dock( TOP )
+    glideFilter:Dock( BOTTOM )
 
     StyledTheme.Apply( glideFilter )
 
     glideFilter.OnChange = function()
-        scriptsList:SetItems( sounds, string.Trim( glideFilter:GetValue() ) )
+        glideList:SetItems( sounds, string.Trim( glideFilter:GetValue() ) )
     end
 end
 
@@ -571,6 +571,8 @@ function BIGLIST:SetItems( items, filter )
     self.items = items
     self.itemCount = #items
     self.view.scrollY = 0
+    self.hoveredIndex = nil
+    self.selectedIndex = nil
 
     self:InvalidateLayout()
 end

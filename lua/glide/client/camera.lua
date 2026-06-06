@@ -3,6 +3,7 @@ local Camera = Glide.Camera
 Camera.hooks = Camera.hooks or {}
 Camera.isInFirstPerson = Camera.isInFirstPerson == true
 Camera.lastAimPos = Vector()
+Camera.isPlayerUsingCamController = false
 
 function Glide.GetCameraAimPos()
     return Camera.lastAimPos
@@ -56,7 +57,7 @@ function Camera:Initialize( user, vehicle, seatIndex )
     self:SetFirstPerson( self.isInFirstPerson )
 
     AddHook( "Think" )
-    AddHook( "CalcView", HOOK_HIGH )
+    AddHook( "CalcView" )
     AddHook( "CreateMove", HOOK_HIGH )
     AddHook( "PlayerBindPress" )
     AddHook( "InputMouseApply", HOOK_HIGH )
@@ -91,6 +92,10 @@ function Camera:ShouldBeActive()
     end
 
     if self.user:GetViewEntity() ~= self.user then
+        return false
+    end
+
+    if self.isPlayerUsingCamController then
         return false
     end
 
@@ -475,7 +480,7 @@ function Camera:InputMouseApply( _, x, y )
 
     local angles = self.allowRolling and vehicle:WorldToLocalAngles( self.angles ) or self.angles
 
-    angles[1] = Clamp( angles[1] + lookY, -80, 60 )
+    angles[1] = Clamp( angles[1] + lookY, -80, 89 )
     angles[2] = ( angles[2] - lookX ) % 360
 
     self.angles = self.allowRolling and vehicle:LocalToWorldAngles( angles ) or angles

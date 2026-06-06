@@ -42,6 +42,7 @@ if SERVER then
     ENT.FallWhileUnderWater = true
 
     ENT.SuspensionHeavySound = "Glide.Suspension.CompressBike"
+    ENT.SuspensionLandFromFall = "Glide.OnLand.Bike"
 
     ENT.AirControlForce = Vector( 0.8, 3, 1.5 ) -- Roll, pitch, yaw
     ENT.AirMaxAngularVelocity = Vector( 600, 600, 500 ) -- Roll, pitch, yaw

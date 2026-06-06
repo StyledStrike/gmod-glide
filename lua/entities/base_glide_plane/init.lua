@@ -67,6 +67,7 @@ function ENT:CreatePropeller( offset, radius, slowModel, fastModel )
     prop.maxSpinSpeed = 5000
 
     self.rotors[#self.rotors + 1] = prop
+    Glide.CopyEntityCreator( self, prop )
 
     return prop
 end
@@ -74,6 +75,8 @@ end
 --- Override this base class function.
 function ENT:TurnOn()
     BaseClass.TurnOn( self )
+
+    if not self.isEngineEnabled then return end
 
     self:SetEngineState( 2 )
     self:SetExtraPitch( 1 )
@@ -91,14 +94,15 @@ end
 
 --- Implement this base class function.
 function ENT:OnDriverEnter()
-    if self:GetEngineHealth() > 0 then
+    if self:GetEngineHealth() > 0 and self.autoTurnOnEngine then
         self:TurnOn()
     end
 end
 
 --- Implement this base class function.
 function ENT:OnDriverExit()
-    self:TurnOff()
+    BaseClass.OnDriverExit( self )
+
     self.brake = 0.1
 end
 
@@ -124,16 +128,16 @@ function ENT:OnPostThink( dt, selfTbl )
         self:UpdateHealthOutputs()
     end
 
-    selfTbl.inputPitch = ExpDecay( selfTbl.inputPitch, self:GetInputFloat( 1, "pitch" ), 10, dt )
-    selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll" ), 10, dt )
-    selfTbl.inputYaw = ExpDecay( selfTbl.inputYaw, self:GetInputFloat( 1, "yaw" ), 10, dt )
+    selfTbl.inputPitch = ExpDecay( selfTbl.inputPitch, self:GetInputFloat( 1, "pitch", selfTbl ), 10, dt )
+    selfTbl.inputRoll = ExpDecay( selfTbl.inputRoll, self:GetInputFloat( 1, "roll", selfTbl ), 10, dt )
+    selfTbl.inputYaw = ExpDecay( selfTbl.inputYaw, self:GetInputFloat( 1, "yaw", selfTbl ), 10, dt )
 
     self:SetElevator( selfTbl.inputPitch )
     self:SetRudder( selfTbl.inputYaw )
     self:SetAileron( selfTbl.inputRoll )
 
     local power = self:GetPower()
-    local throttle = self:GetInputFloat( 1, "throttle" )
+    local throttle = self:GetInputFloat( 1, "throttle", selfTbl )
 
     -- If the main propeller was destroyed, turn off and disable power
     if not IsValid( selfTbl.mainProp ) and selfTbl.PropModel ~= "" then

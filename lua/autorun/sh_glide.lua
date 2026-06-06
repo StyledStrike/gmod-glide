@@ -21,7 +21,8 @@ Glide.MAX_EXPLOSION_DISTANCE = 15000
 Glide.EXPLOSION_TYPE = {
     MISSILE = 0,
     VEHICLE = 1,
-    TURRET = 2
+    TURRET = 2,
+    FIREWORK = 3
 }
 
 -- Used to notify clients about incoming lock-on/missiles
@@ -42,6 +43,11 @@ Glide.LOCKON_WHITELIST = {
     ["base_glide_motorcycle"] = true,
     ["base_glide_plane_vtol"] = true,
     ["prop_vehicle_prisoner_pod"] = true
+}
+
+-- Do not lock on these entity classes
+Glide.LOCKON_BLACKLIST = {
+    ["glide_wheel"] = true,
 }
 
 -- Mouse flying control modes
@@ -112,7 +118,11 @@ if CLIENT then
         [MAT_METAL] = 1,
         [MAT_GRATE] = 1,
         [MAT_WOOD] = 1,
-        [MAT_SNOW] = 0.7
+        [MAT_SNOW] = 0.5,
+        [MAT_DIRT] = 0.6,
+        [MAT_SAND] = 0.7,
+        [MAT_FOLIAGE] = 0.7,
+        [MAT_GRASS] = 0.7,
     }
 
     Glide.WHEEL_SOUNDS.ROLL = {
@@ -121,10 +131,10 @@ if CLIENT then
         [MAT_SNOW] = "glide/wheels/roll_dirt.wav",
         [MAT_PLASTIC] = "physics/plastic/plastic_barrel_scrape_rough_loop1.wav",
         [MAT_METAL] = "glide/wheels/roll_metal.wav",
-        [MAT_SAND] = "glide/wheels/roll_dirt.wav",
-        [MAT_FOLIAGE] = "glide/wheels/roll_dirt.wav",
+        [MAT_SAND] = "glide/wheels/roll_sand.wav",
+        [MAT_FOLIAGE] = "glide/wheels/roll_foliage.wav",
         [MAT_SLOSH] = "glide/wheels/roll_road_wet.wav",
-        [MAT_GRASS] = "glide/wheels/roll_dirt.wav",
+        [MAT_GRASS] = "glide/wheels/roll_grass.wav",
         [MAT_VENT] = "ambient/machines/wall_ambient_loop1.wav",
         [MAT_WOOD] = "glide/wheels/roll_wood.wav"
     }
@@ -183,19 +193,24 @@ end
 -- Toggles
 CreateConVar( "glide_pacifist_mode", "0", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "When set to 1, disables VSWEPs and vehicle turrets.", 0, 1 )
 CreateConVar( "glide_allow_gravity_gun_punt", "0", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "When set to 1, allows players to push vehicles with the Gravity Gun.", 0, 1 )
-CreateConVar( "glide_enable_damage_player_on_collision", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Whether players inside vehicles can take damage from hard collisions." )
+CreateConVar( "glide_enable_damage_player_on_collision", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Whether players inside vehicles can take damage from hard collisions.", 0, 1 )
+CreateConVar( "glide_always_can_enter_locked_vehicles", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Whether players can enter locked vehicles they don't own.", 0, 1 )
 
 -- Sandbox limits
 cleanup.Register( "glide_vehicles" )
+cleanup.Register( "glide_trailers" )
 cleanup.Register( "glide_standalone_turrets" )
 cleanup.Register( "glide_missile_launchers" )
 cleanup.Register( "glide_projectile_launchers" )
 
 CreateConVar( "sbox_maxglide_vehicles", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide vehicles that one player can have", 0 )
+CreateConVar( "sbox_maxglide_trailers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide trailers that one player can have (separate from sbox_maxglide_vehicles)", 0 )
+
 CreateConVar( "sbox_maxglide_standalone_turrets", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Turrets that one player can have", 0 )
 CreateConVar( "sbox_maxglide_missile_launchers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Missile Launchers that one player can have", 0 )
 CreateConVar( "sbox_maxglide_projectile_launchers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Projectile Launchers that one player can have", 0 )
 CreateConVar( "sbox_maxglide_engine_stream_chips", "3", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Engine Stream Chips that one player can have", 0 )
+CreateConVar( "sbox_maxglide_repair_rays", "3", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Repair Rays that one player can have", 0 )
 
 -- Turret tool convars
 CreateConVar( "glide_turret_explosive_allow", "1", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Allows Glide Turrets to use explosive bullets.", 0, 1 )
@@ -213,6 +228,11 @@ CreateConVar( "glide_projectile_launcher_min_delay", "0.5", FCVAR_ARCHIVE + FCVA
 CreateConVar( "glide_projectile_launcher_max_lifetime", "10", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum projectile flight time allowed for Glide Projectile Launchers.", 1 )
 CreateConVar( "glide_projectile_launcher_max_radius", "500", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum radius from explosions created by Glide Projectile Launchers.", 10 )
 CreateConVar( "glide_projectile_launcher_max_damage", "200", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum damage dealt by explosions from Glide Projectile Launchers.", 1 )
+
+-- Repair Ray tool convars
+CreateConVar( "glide_repair_ray_max_capacity", "600", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum amount of HP that Glide Repair Rays can hold.", 1, 10000 )
+CreateConVar( "glide_repair_ray_output_per_second", "50", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "How fast to output HP from the Glide Repair Rays, per second.", 1, 1000 )
+CreateConVar( "glide_repair_ray_refill_per_second", "10", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "How fast to replenish the HP of Glide Repair Rays, per second.", 1, 1000 )
 
 -- Gib convars
 CreateConVar( "glide_gib_lifetime", "8", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Lifetime of Glide Gibs, 0 for no despawning.", 0 )
@@ -288,12 +308,14 @@ end
 
 do
     local EntityMeta = FindMetaTable( "Entity" )
+    local GetTable = EntityMeta.GetTable
     local IsVehicle = Glide._OriginalEntityIsVehicle or EntityMeta.IsVehicle
     Glide._OriginalEntityIsVehicle = IsVehicle
 
     --- Override `Entity:IsVehicle` to return `true` on Glide vehicles.
     function EntityMeta:IsVehicle()
-        return self.IsGlideVehicle or IsVehicle( self )
+        local tab = GetTable( self )
+        return tab and tab.IsGlideVehicle or IsVehicle( self )
     end
 end
 

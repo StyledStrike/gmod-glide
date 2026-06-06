@@ -85,6 +85,12 @@ if SERVER then
     ENT.PropFastModel = "models/gta5/vehicles/stunt/stunt_prop_fast.mdl"
     ENT.PropRadius = 35
 
+    function ENT:InitializePhysics()
+        self:SetSolid( SOLID_VPHYSICS )
+        self:SetMoveType( MOVETYPE_VPHYSICS )
+        self:PhysicsInit( SOLID_VPHYSICS, Vector( 0, 0, -18 ) )
+    end
+
     function ENT:CreateFeatures()
         self:CreateSeat( Vector( -5, 0, -15 ), Angle( 0, 270, 10 ), Vector( -50, 120, 0 ), true )
 
@@ -92,7 +98,6 @@ if SERVER then
         self:CreateWheel( Vector( 56, 40.7, -40 ), {
             model = "models/gta5/vehicles/stunt/stunt_wheel.mdl",
             modelScale = Vector( 1, 0.4, 1 ),
-            enableAxleForces = true,
             radius = 8
         } )
 
@@ -100,7 +105,6 @@ if SERVER then
         self:CreateWheel( Vector( 56, -40.7, -40 ), {
             model = "models/gta5/vehicles/stunt/stunt_wheel.mdl",
             modelScale = Vector( 1, 0.4, 1 ),
-            enableAxleForces = true,
             radius = 8
         } )
 
@@ -109,7 +113,6 @@ if SERVER then
             model = "models/gta5/vehicles/stunt/stunt_wheel.mdl",
             modelScale = Vector( 1, 0.4, 1 ),
             steerMultiplier = -1,
-            enableAxleForces = true,
             radius = 6
         } )
     end

@@ -12,6 +12,20 @@ function ENT:OnPostInitialize()
     -- Setup variables used on all VTOL planes
     self.vtolState = 0
     self:SetVTOLState( 0 )
+
+    self:RegisterHoldAction( "landing_gear", 1.0, { name = "ToggleVTOLMode" } )
+end
+
+function ENT:OnHoldInputAction( _action, data )
+    if data.name ~= "ToggleVTOLMode" then return end
+
+    local state = self.vtolState
+
+    if state == 0 or state == 3 then
+        self:SetVTOLState( 1 )
+    else
+        self:SetVTOLState( 3 )
+    end
 end
 
 function ENT:SetVTOLState( state )
@@ -77,48 +91,6 @@ function ENT:OnPostThink( dt, selfTbl )
             self:UpdateRotorPositions( value )
         end
     end
-
-    if selfTbl.vtolToggleTimer and RealTime() > selfTbl.vtolToggleTimer then
-        selfTbl.vtolToggleTimer = nil
-
-        if vtolState == 0 or vtolState == 3 then
-            self:SetVTOLState( 1 )
-        else
-            self:SetVTOLState( 3 )
-        end
-    end
-end
-
---- Override this base class function.
-function ENT:OnSeatInput( seatIndex, action, pressed )
-    if seatIndex < 2 and action == "landing_gear" then
-        local t = RealTime()
-
-        if pressed then
-            self.vtolToggleTimer = t + 1
-        else
-            -- If the pilot released the `landing_gear` toggle before
-            -- the VTOL timer expired, then just toggle the landing gear.
-            if self.vtolToggleTimer then
-                self.vtolToggleTimer = nil
-
-                local state = self.landingGearState
-
-                if state == 0 then -- Is it down?
-                    self:SetLandingGearState( 1 ) -- Move up
-
-                elseif state == 2 then -- Is it up?
-                    self:SetLandingGearState( 3 ) -- Move down
-                end
-
-                return true
-            end
-        end
-
-        return true
-    end
-
-    return BaseClass.OnSeatInput( self, seatIndex, action, pressed )
 end
 
 local EntityPairs = Glide.EntityPairs

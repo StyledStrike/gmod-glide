@@ -19,10 +19,12 @@ Glide.CMD_VIEW_PUNCH = 5
 Glide.CMD_SET_HEADLIGHTS = 6
 Glide.CMD_NOTIFY = 7
 Glide.CMD_SHOW_KEY_NOTIFICATION = 8
-Glide.CMD_SET_CURRENT_VEHICLE = 9
+-- Slot 9 is free
 Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET = 10
 Glide.CMD_UPLOAD_MISC_SOUNDS_PRESET = 11
 Glide.CMD_RELOAD_VSWEP = 13
+Glide.CMD_IS_USING_CAM_CONTROLLER = 14
+Glide.CMD_FORCE_THIRDPERSON = 15
 
 function Glide.StartCommand( id, unreliable )
     net.Start( "glide.command", unreliable or false )

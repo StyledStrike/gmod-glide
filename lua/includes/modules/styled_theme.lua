@@ -615,7 +615,13 @@ do
         StyledTheme.Apply( slider )
 
         slider.OnValueChanged = function( _, value )
-            callback( decimals == 0 and math.floor( value ) or math.Round( value, decimals ) )
+            if decimals == 0 then
+                value = value < 0 and math.ceil( value ) or math.floor( value )
+            else
+                value = math.Round( value, decimals )
+            end
+
+            callback( value )            
         end
 
         return slider
@@ -653,6 +659,8 @@ do
         combo.OnSelect = function( _, index )
             callback( index )
         end
+
+        return combo, label, panel
     end
 
     function StyledTheme.CreateFormBinder( parent, text, defaultKey )
@@ -676,6 +684,6 @@ do
 
         StyledTheme.Apply( binder )
 
-        return binder
+        return binder, label, panel
     end
 end

@@ -119,9 +119,23 @@ end )
 
 local type = type
 
+local function ValidateTarget( target )
+    if type( target ) == "table" then
+        for _, ent in ipairs( target ) do
+            if not IsValid( ent ) or not ent:IsPlayer() then
+                return false
+            end
+        end
+
+        return #target > 0
+    end
+
+    return IsValid( target ) and target:IsPlayer()
+end
+
 --- Send a notification message to the target(s).
 function Glide.SendNotification( target, data )
-    if type( target ) == "table" and #target == 0 then return end
+    if not ValidateTarget( target ) then return end
 
     Glide.StartCommand( Glide.CMD_NOTIFY )
     Glide.WriteTable( data )
@@ -130,7 +144,7 @@ end
 
 --- Send a notification about a button action message to the target(s).
 function Glide.SendButtonActionNotification( target, text, icon, inputGroup, inputAction )
-    if type( target ) == "table" and #target == 0 then return end
+    if not ValidateTarget( target ) then return end
 
     Glide.StartCommand( Glide.CMD_SHOW_KEY_NOTIFICATION )
     net.WriteString( text )
@@ -142,7 +156,7 @@ end
 
 --- Let the target client(s) know about a incoming lock-on.
 function Glide.SendLockOnDanger( target )
-    if type( target ) == "table" and #target == 0 then return end
+    if not ValidateTarget( target ) then return end
 
     Glide.StartCommand( Glide.CMD_INCOMING_DANGER, false )
     net.WriteUInt( Glide.DANGER_TYPE.LOCK_ON, 3 )
@@ -151,7 +165,7 @@ end
 
 --- Let the target client(s) know about a incoming missile.
 function Glide.SendMissileDanger( target, missile )
-    if type( target ) == "table" and #target == 0 then return end
+    if not ValidateTarget( target ) then return end
 
     Glide.StartCommand( Glide.CMD_INCOMING_DANGER, false )
     net.WriteUInt( Glide.DANGER_TYPE.MISSILE, 3 )
@@ -161,7 +175,7 @@ end
 
 --- Apply a camera shake to the target's Glide camera.
 function Glide.SendViewPunch( target, force )
-    if type( target ) == "table" and #target == 0 then return end
+    if not ValidateTarget( target ) then return end
 
     Glide.StartCommand( Glide.CMD_VIEW_PUNCH, false )
     net.WriteFloat( force )

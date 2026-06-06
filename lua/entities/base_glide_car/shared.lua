@@ -138,10 +138,6 @@ if CLIENT then
     ENT.CameraOffset = Vector( -230, 0, 50 )
     ENT.CameraAngleOffset = Angle( 4, 0, 0 )
 
-    -- Setup how far away players can hear sounds and update misc. features
-    ENT.MaxSoundDistance = 4000
-    ENT.MaxMiscDistance = 5000
-
     -- Sounds
     ENT.StartSound = "Glide.Engine.CarStart"
     ENT.StartTailSound = "Glide.Engine.CarStartTail"
@@ -168,7 +164,7 @@ if CLIENT then
     ENT.BrakeReleaseSound = ""
     ENT.BrakeSqueakSound = ""
 
-    ENT.BrakeLoopSound = ""
+    ENT.BrakeLoopSound = "Glide.BrakeDisk.Car"
     ENT.BrakeLoopVolume = 0.6
 
     -- Exhaust positions
@@ -222,6 +218,9 @@ if SERVER then
 
     -- How fast can the driver spin the vehicle while airborne?
     ENT.AirMaxAngularVelocity = Vector( 150, 200, 150 ) -- Roll, pitch, yaw
+
+    -- Extra suspension sounds
+    ENT.SuspensionLandFromFall = "Glide.OnLand.Car"
 
     --- Returns which inputs applies air control forces.
     --- Should return a roll, pitch and yaw input.

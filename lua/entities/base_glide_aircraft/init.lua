@@ -38,6 +38,15 @@ function ENT:OnPostInitialize()
     end
 end
 
+--- Implement this base class function.
+function ENT:OnDriverExit()
+    local keepOn = IsValid( self.lastDriver ) and self.lastDriver:KeyDown( IN_WALK )
+
+    if not self.hasTheDriverBeenRagdolled and not keepOn then
+        self:TurnOff()
+    end
+end
+
 --- Override this base class function.
 function ENT:SetupWiremodPorts( inputs, outputs )
     BaseClass.SetupWiremodPorts( self, inputs, outputs )
@@ -83,10 +92,6 @@ function ENT:CreateWheel( offset, params )
     params.forwardTractionMax = params.forwardTractionMax or 50000
     params.sideTractionMultiplier = params.sideTractionMultiplier or 200
     params.brakePower = params.brakePower or 1000
-
-    if params.enableAxleForces == nil then
-        params.enableAxleForces = true
-    end
 
     -- Let the base class create the wheel
     local wheel = BaseClass.CreateWheel( self, offset, params )
@@ -421,7 +426,7 @@ function ENT:SimulateHelicopter( phys, params, effective, outLin, outAng )
     -- Input control forces
     local angles = self:GetAngles()
     local inputPitch = LimitInputWithAngle( self.inputPitch, Abs( angles[1] ), params.maxPitch - 20 )
-    local inputRoll = LimitInputWithAngle( self.inputRoll, Abs( angles[3] ), params.maxRoll - 20 )
+    local inputRoll = self.inputRoll --LimitInputWithAngle( self.inputRoll, Abs( angles[3] ), params.maxRoll - 20 )
 
     outAng[1] = outAng[1] + inputRoll * params.rollForce * inputMult * effectiveness * mass
     outAng[2] = outAng[2] + inputPitch * params.pitchForce * inputMult * effectiveness * mass
@@ -546,7 +551,7 @@ do
     function ENT:PhysicsCollide( data )
         BaseClass.PhysicsCollide( self, data )
 
-        if data.TheirSurfaceProps ~= 76 then -- default_silent
+        if data.TheirSurfaceProps ~= 76 then -- we hit non-skybox! (default_silent) 
             return
         end
 
@@ -559,6 +564,8 @@ do
 
         phys:SetVelocityInstantaneous( newVel )
         phys:SetAngleVelocityInstantaneous( data.OurOldAngularVelocity )
+
+        hook.Run( "Glide_OnAircraftSkyboxCollide", self, data )
     end
 end
 

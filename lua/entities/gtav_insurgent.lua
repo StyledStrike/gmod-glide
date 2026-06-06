@@ -172,9 +172,10 @@ if CLIENT then
         return seatIndex == TURRET_SEAT_INDEX and 1 or 0 -- Glide.CAMERA_TYPE.TURRET or Glide.CAMERA_TYPE.CAR
     end
 
-    -- Don't muffle sounds while sitting on the turret seat
+    -- Don't muffle sounds while sitting on the turret seat,
+    -- or on the rear exterior seats.
     function ENT:AllowFirstPersonMuffledSound( seatIndex )
-        return seatIndex ~= TURRET_SEAT_INDEX
+        return seatIndex < TURRET_SEAT_INDEX
     end
 
     local POSE_DATA = {

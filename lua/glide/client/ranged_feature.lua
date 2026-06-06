@@ -1,10 +1,9 @@
 --[[
     A utility class used to automatically create/destroy
-    sounds/lights/particle emitters depending on:
+    client-side vehicle features depending on:
 
     - The local player's distance from the entity
     - The `Entity:IsDormant` state
-    - The result from the "test" function (if set)
 ]]
 local RangedFeature = Glide.RangedFeature or {}
 
@@ -39,10 +38,6 @@ function RangedFeature:SetUpdateCallback( callback )
     self.onUpdate = callback
 end
 
-function RangedFeature:SetTestCallback( callback )
-    self.testFunc = callback
-end
-
 function RangedFeature:Activate()
     self.isActive = true
 
@@ -70,20 +65,15 @@ function RangedFeature:Think()
     local ent = self.ent
     local dist = ent:GetPos():DistToSqr( GetLocalViewLocation() )
     local isDormant = ent:IsDormant()
-    local passedTest = true
 
     self.lastDistance = dist
 
-    if self.testFunc then
-        passedTest = ent[self.testFunc]( ent )
-    end
-
     if self.isActive then
-        if dist > self.deactivateDist or isDormant or not passedTest then
+        if dist > self.deactivateDist or isDormant then
             self:Deactivate()
         end
 
-    elseif dist < self.activateDist and not isDormant and passedTest then
+    elseif dist < self.activateDist and not isDormant then
         self:Activate()
     end
 

@@ -259,6 +259,14 @@ if SERVER then
         end
     end
 
+    function ENT:OnWeaponFire()
+        if self:WaterLevel() > 2 then
+            return false
+        end
+
+        return true
+    end
+
     function ENT:OnWeaponStart( _, slotIndex )
         if slotIndex == 1 then
             self:SetFiringGun( true )

@@ -51,7 +51,7 @@ end
 
 do
     local Remove = table.remove
-    local GetHumans = player.GetHumans
+    local AllPlayers = player.Iterator
 
     -- We're going to loop through one active modifier at intervals,
     -- so we need this variable to track that loop over time.
@@ -80,7 +80,7 @@ do
 
         synced = mod.synced
 
-        for _, ply in ipairs( GetHumans() ) do
+        for _, ply in AllPlayers() do
             -- If we have not synced this  entry to this player yet...
             if not synced[ply] and ply.GlideLoaded then
                 synced[ply] = true

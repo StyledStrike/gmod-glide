@@ -90,7 +90,8 @@ end
 function ENT:PostEntityPaste( ply, ent, createdEntities )
     Glide.PostEntityPaste( ply, ent, createdEntities )
 
-    -- Update parameters in case the limits/console variables are not set to default
+    -- Update parameters in case the limits/console variables
+    -- are different compared to when this entity was duped.
     self:SetTurretExplosive( self.isExplosive )
     self:SetTurretDamage( self.turretDamage )
     self:SetTurretDelay( self.turretDelay )
@@ -202,7 +203,7 @@ function ENT:SetTurretDamage( damage )
 end
 
 function ENT:SetTurretDelay( delay )
-    self.turretDelay = math.Clamp( delay, cvarMinDelay and cvarMinDelay:GetFloat() or 0.02, 0.5 )
+    self.turretDelay = math.max( delay, cvarMinDelay and cvarMinDelay:GetFloat() or 0.02 )
 end
 
 function ENT:SetTurretSpread( spread )

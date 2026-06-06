@@ -105,11 +105,11 @@ local function OnEnter( vehicle, seatIndex )
     end
 
     -- Simple ThirdPerson compatibility
-    local func = hook.GetTable()["CalcView"]["SimpleTP.CameraView"]
+    local func = hook.GetTable()["CalcView"]["SimpleTP.Camera.View"]
 
     if func then
         Glide.simpleThirdPersonHook = func
-        hook.Remove( "CalcView", "SimpleTP.CameraView" )
+        hook.Remove( "CalcView", "SimpleTP.Camera.View" )
     end
 end
 
@@ -139,7 +139,7 @@ local function OnLeave( ply )
 
     -- Simple ThirdPerson compatibility
     if Glide.simpleThirdPersonHook then
-        hook.Add( "CalcView", "SimpleTP.CameraView", Glide.simpleThirdPersonHook )
+        hook.Add( "CalcView", "SimpleTP.Camera.View", Glide.simpleThirdPersonHook )
     end
 
     timer.Remove( "Glide.CheckMouseVisibility" )

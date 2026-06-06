@@ -6,6 +6,7 @@ ENT.PrintName = "Wheel"
 
 ENT.Spawnable = false
 ENT.AdminOnly = false
+ENT.RenderGroup = RENDERGROUP_OPAQUE
 
 ENT.PhysgunDisabled = true
 ENT.DoNotDuplicate = true

@@ -56,12 +56,12 @@ function Glide.AddInputAction( groupId, action, defaultButton )
     local actions = Glide.InputGroups[groupId]
 
     if not actions then
-        ErrorNoHalt( "Invalid input group: " .. tostring( groupId ) )
+        ErrorNoHalt( "Invalid input group: " .. tostring( groupId ) .. "\n" )
         return
     end
 
     if actions[action] then
-        ErrorNoHalt( "Input action already exists: " .. tostring( action ) )
+        ErrorNoHalt( "Input action already exists: " .. tostring( action ) .. "\n" )
         return
     end
 
@@ -88,6 +88,7 @@ Glide.AddInputAction( "land_controls", "steer_left", KEY_A )
 Glide.AddInputAction( "land_controls", "steer_right", KEY_D )
 Glide.AddInputAction( "land_controls", "accelerate", KEY_W )
 Glide.AddInputAction( "land_controls", "brake", KEY_S )
+
 Glide.AddInputAction( "land_controls", "handbrake", KEY_SPACE )
 Glide.AddInputAction( "land_controls", "throttle_modifier", KEY_LSHIFT )
 

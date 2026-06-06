@@ -76,7 +76,7 @@ local function RefreshInheritance( className )
     local baseClassName = class.Base
 
     if type( baseClassName ) ~= "string" then
-        ErrorNoHalt( className .. ": Invalid base class type! (string expected, got " .. type( baseClassName ) .. ")" )
+        ErrorNoHalt( className .. ": Invalid base class type! (string expected, got " .. type( baseClassName ) .. ")\n" )
         return
     end
 
@@ -84,7 +84,7 @@ local function RefreshInheritance( className )
     local baseClass = Glide.WeaponRegistry[baseClassName]
 
     if baseClass == nil then
-        ErrorNoHalt( className .. ": Invalid base class: " .. baseClassName )
+        ErrorNoHalt( className .. ": Invalid base class: " .. baseClassName .. "\n" )
         return
     end
 

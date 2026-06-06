@@ -2,7 +2,7 @@ local Config = Glide.Config
 
 --- Reset settings to their default values.
 function Config:Reset()
-    self.version = 2
+    self.version = 3
 
     -- Audio settings
     self.carVolume = 1.0
@@ -12,7 +12,7 @@ function Config:Reset()
     self.windVolume = 0.7
     self.warningVolume = 0.8
     self.vcVolume = 0.4
-    self.engineStreamBackend = 1
+    self.engineStreamBackend = 2
 
     -- Camera settings
     self.lookSensitivity = 1.0
@@ -69,6 +69,7 @@ function Config:Reset()
     self.autoHeadlightOn = true
     self.autoHeadlightOff = true
     self.autoTurnOffLights = true
+    self.autoTurnOnEngine = true
     self.enableTips = true
 end
 
@@ -84,6 +85,22 @@ function Config:ResetBinds()
             binds[groupId][action] = button
         end
     end
+
+    -- Use the player's movement keys for these binds, for users with different keyboard layouts
+    local SetButtonFromBinding = function( bind, groupId, action )
+        local keyName = input.LookupBinding( bind )
+        if not keyName then return end
+
+        local buttonCode = input.GetKeyCode( keyName )
+        if not buttonCode then return end
+
+        binds[groupId][action] = buttonCode
+    end
+
+    SetButtonFromBinding( "+forward", "land_controls", "accelerate" )
+    SetButtonFromBinding( "+back", "land_controls", "brake" )
+    SetButtonFromBinding( "+moveleft", "land_controls", "steer_left" )
+    SetButtonFromBinding( "+moveright", "land_controls", "steer_right" )
 
     self.binds = binds
 end
@@ -176,6 +193,7 @@ function Config:Save( immediate )
         autoHeadlightOn = self.autoHeadlightOn,
         autoHeadlightOff = self.autoHeadlightOff,
         autoTurnOffLights = self.autoTurnOffLights,
+        autoTurnOnEngine = self.autoTurnOnEngine,
         enableTips = self.enableTips,
 
         -- Group-to-action-to-button dictionary
@@ -203,6 +221,11 @@ function Config:CheckVersion( data )
             data.binds.land_controls.detach_trailer = nil
         end
 
+        upgraded = true
+
+    elseif data.version == 2 then
+        -- Engine stream backend defaults to WebAudio
+        data.engineStreamBackend = 2
         upgraded = true
     end
 
@@ -293,6 +316,7 @@ function Config:Load()
     LoadBool( "autoHeadlightOn", true )
     LoadBool( "autoHeadlightOff", true )
     LoadBool( "autoTurnOffLights", true )
+    LoadBool( "autoTurnOnEngine", true )
     LoadBool( "enableTips", true )
 
     -- Group-to-action-to-button dictionary
@@ -336,6 +360,7 @@ function Config:TransmitInputSettings( immediate )
 
         -- Misc. settings
         autoTurnOffLights = self.autoTurnOffLights,
+        autoTurnOnEngine = self.autoTurnOnEngine,
 
         -- Action-key dictionary
         binds = self.binds
@@ -518,7 +543,7 @@ function Config:OpenFrame()
 
     self.frame = frame
 
-    ----- Go back to last open tab ----- 
+    ----- Go back to last open tab -----
 
     timer.Simple( 0, function()
         if IsValid( self.frame ) then
@@ -989,6 +1014,12 @@ function Config:OpenFrame()
         self:TransmitInputSettings()
     end )
 
+    CreateToggle( panelMisc, L"misc.turn_on_engine", self.autoTurnOnEngine, function( value )
+        self.autoTurnOnEngine = value
+        self:Save()
+        self:TransmitInputSettings()
+    end )
+
     CreateToggle( panelMisc, L"misc.tips", self.enableTips, function( value )
         self.enableTips = value
         self:Save()
@@ -1033,6 +1064,7 @@ function Config:OpenFrame()
 
         local cvarList = {
             { name = "sbox_maxglide_vehicles", decimals = 0, min = 0, max = 100 },
+            { name = "sbox_maxglide_trailers", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_standalone_turrets", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_missile_launchers", decimals = 0, min = 0, max = 100 },
             { name = "sbox_maxglide_projectile_launchers", decimals = 0, min = 0, max = 100 },
@@ -1060,6 +1092,11 @@ function Config:OpenFrame()
             { name = "glide_projectile_launcher_max_lifetime", decimals = 1, min = 1, max = 30 },
             { name = "glide_projectile_launcher_max_radius", decimals = 0, min = 10, max = 1000 },
             { name = "glide_projectile_launcher_max_damage", decimals = 0, min = 0, max = 1000 },
+
+            { category = "#tool.glide_repair_ray.name" },
+            { name = "glide_repair_ray_max_capacity", decimals = 0, min = 1, max = 10000 },
+            { name = "glide_repair_ray_output_per_second", decimals = 0, min = 1, max = 1000 },
+            { name = "glide_repair_ray_refill_per_second", decimals = 0, min = 1, max = 1000 },
         }
 
         for _, data in ipairs( cvarList ) do
@@ -1133,7 +1170,7 @@ local glideVolume = 1
 hook.Add( "Tick", "Glide.CheckVoiceActivity", function()
     local isAnyoneTalking = false
 
-    for _, ply in ipairs( player.GetAll() ) do
+    for _, ply in player.Iterator() do
         if ply:IsVoiceAudible() and ply:VoiceVolume() > 0.05 then
             isAnyoneTalking = true
             break
@@ -1143,7 +1180,7 @@ hook.Add( "Tick", "Glide.CheckVoiceActivity", function()
     glideVolume = Approach(
         glideVolume,
         isAnyoneTalking and Config.vcVolume or 1,
-        FrameTime() * ( isAnyoneTalking and 10 or 2 )
+        FrameTime() * ( isAnyoneTalking and 10 or 4 )
     )
 end )
 

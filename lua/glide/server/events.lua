@@ -49,15 +49,8 @@ hook.Add( "PlayerEnteredVehicle", "Glide.OnEnterSeat", function( ply, seat )
 
     -- Store some variables on this player
     ply.IsUsingGlideVehicle = true
-    ply:SetNWEntity( "GlideVehicle", parent )
     ply:SetNWInt( "GlideSeatIndex", seatIndex )
     ply:DrawShadow( false )
-
-    -- Make sure the player knows about their current vehicle/seat
-    Glide.StartCommand( Glide.CMD_SET_CURRENT_VEHICLE, false )
-    net.WriteEntity( parent )
-    net.WriteUInt( seatIndex, 6 )
-    net.Send( ply )
 
     -- Enable vehicle input
     Glide.ActivateInput( ply, parent, seatIndex )
@@ -78,15 +71,8 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply )
 
     -- Cleanup variables
     ply.IsUsingGlideVehicle = false
-    ply:SetNWEntity( "GlideVehicle", NULL )
     ply:SetNWInt( "GlideSeatIndex", 0 )
     ply:DrawShadow( true )
-
-    -- Make sure the player knows that they aren't on a vehicle anymore
-    Glide.StartCommand( Glide.CMD_SET_CURRENT_VEHICLE, false )
-    net.WriteEntity( NULL )
-    net.WriteUInt( 0, 6 )
-    net.Send( ply )
 
     if IsValid( vehicle ) then
         ply:SetPos( vehicle:GetSeatExitPos( seatIndex ) )
@@ -106,6 +92,16 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply )
     end
 
     hook.Run( "Glide_OnExitVehicle", ply, vehicle )
+end )
+
+hook.Add( "AcceptInput", "Glide.VehicleAcceptLockInputs", function( ent, inputName )
+    if not IsValid( ent ) or not ent.IsGlideVehicle then return end
+
+    if inputName == "unlock" then
+        ent:SetLocked( false, true )
+    elseif inputName == "lock" then
+        ent:SetLocked( true, true )
+    end
 end )
 
 -- Validate editable float variables and let the vehicle know they have changed.
@@ -200,10 +196,8 @@ hook.Add( "EntityTakeDamage", "Glide.OverrideDamage", function( target, dmginfo 
 end, HOOK_HIGH )
 
 -- Mute the ringing sound effect while inside a Glide vehicle.
-hook.Add( "OnDamagedByExplosion", "Glide.DisableRingingSound", function( _, dmginfo )
-    local inflictor = dmginfo:GetInflictor()
-
-    if IsValid( inflictor ) and ( inflictor.IsGlideVehicle or inflictor:GetClass() == "glide_missile" ) then
+hook.Add( "OnDamagedByExplosion", "Glide.DisableRingingSound", function( ply, _ )
+    if IsValid( ply:GlideGetVehicle() ) then
         return true
     end
 end )

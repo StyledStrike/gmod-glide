@@ -37,7 +37,7 @@ function Glide.CreateEngineStream( parent, doNotUseWebAudio )
         -- Internal parameters
         id = id,
         parent = parent,
-        offset = Vector(),
+        offset = Vector( 0, 0, parent:OBBCenter()[3] ),
         layers = {},
 
         wobbleTime = 0,
@@ -146,6 +146,37 @@ function EngineStream:LoadJSON( data )
     end
 end
 
+--- Builds json for the Web Audio Bridge for streams added via Lua (AddLayer vs LoadJSON).
+--- Called automatically by Play() for streams configured via AddLayer().
+--- Does nothing if not using WebAudio or already finalized via LoadJSON().
+function EngineStream:CheckWebAudioJSON()
+    if not self.isWebAudio then return end
+    if self.updateWebJSON then return end
+
+    local data = {
+        kv = {},
+        layers = {},
+    }
+
+    -- Copy customizable parameters
+    for k, v in pairs( DEFAULT_STREAM_PARAMS ) do
+        if self[k] ~= v then
+            data.kv[k] = self[k]
+        end
+    end
+
+    -- Copy layer data
+    for id, layer in pairs( self.layers ) do
+        data.layers[id] = {
+            path = layer.path,
+            redline = layer.redline,
+            controllers = layer.controllers,
+        }
+    end
+
+    self.updateWebJSON = Glide.ToJSON( data, false )
+end
+
 local outputs = {
     volume = 0,
     pitch = 0
@@ -243,6 +274,9 @@ function EngineStream:Play()
     self.isPlaying = true
     self.volumeMultiplier = 0
 
+    -- Ensure WebAudio bridge has the stream data if layers were added directly
+    self:CheckWebAudioJSON()
+
     for _, layer in pairs( self.layers ) do
         if IsValid( layer.channel ) then
             layer.channel:Play()
@@ -294,7 +328,7 @@ function EngineStream:Think( dt, eyePos, eyeAng )
 
     if self.isWebAudio then
         -- If this stream is handled by the Web Audio Bridge,
-        -- then only update a few variables position - everything
+        -- then only update the position - everything
         -- else is handled by the Web Audio Bridge logic.
         if self.firstPerson then
             self.position = eyePos + eyeAng:Forward() * 10
@@ -305,8 +339,8 @@ function EngineStream:Think( dt, eyePos, eyeAng )
         return
     end
 
-    if self.volumeMultiplier < 1 then
-        self.volumeMultiplier = math.min( 1, Glide.ExpDecay( self.volumeMultiplier, 1.01, 4, dt ) )
+    if self.volumeMultiplier < 0.8 then
+        self.volumeMultiplier = math.min( 1, Approach( self.volumeMultiplier, 0.8, dt ) )
     end
 
     baseVol = self.volume * self.volumeMultiplier * GetVolume( "carVolume" )

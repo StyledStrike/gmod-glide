@@ -18,13 +18,14 @@ do
     end )
 
     local Clamp = math.Clamp
+    local VectorUnpack = FindMetaTable( "Vector" ).Unpack
+    local VectorSetUnpacked = FindMetaTable( "Vector" ).SetUnpacked
 
     --- Ensures that the force is within the range
     --- of a float, to prevent physics engine crashes.
     function Glide.ClampForce( v )
-        v[1] = Clamp( v[1], minForce, maxForce )
-        v[2] = Clamp( v[2], minForce, maxForce )
-        v[3] = Clamp( v[3], minForce, maxForce )
+        local x, y, z = VectorUnpack( v )
+        VectorSetUnpacked( v, Clamp( x, minForce, maxForce ), Clamp( y, minForce, maxForce ), Clamp( z, minForce, maxForce ) )
     end
 end
 
@@ -117,27 +118,6 @@ do
     end
 end
 
--- Find and register all entities that are children of `base_glide`
--- (or any of it's children classes) on the duplicator/entity limit system.
--- Also make them spawnable on Starfall.
-hook.Add( "InitPostEntity", "Glide.RegisterEntityClasses", function()
-    local IsBasedOn = scripted_ents.IsBasedOn
-    local RegisterEntityClass = duplicator.RegisterEntityClass
-
-    local isStarfallAvailable = SF ~= nil
-    local starfallData = { {} }
-
-    for class, _ in pairs( scripted_ents.GetList() ) do
-        if IsBasedOn( class, "base_glide" ) then
-            RegisterEntityClass( class, Glide.VehicleFactory, "Data" )
-
-            if isStarfallAvailable then
-                list.Set( "starfall_creatable_sent", class, starfallData )
-            end
-        end
-    end
-end )
-
 -- Call a hook when a player finishes loading into the server
 -- and is ready to receive network events.
 local Player = Player
@@ -157,22 +137,48 @@ hook.Add( "ClientSignOnStateChanged", "Glide.TriggerOnPlayerLoad", function( use
     end )
 end )
 
+local function IsTrailerClass( class )
+    if class == "base_glide_trailer" then
+        return true
+    end
+
+    return scripted_ents.IsBasedOn( class, "base_glide_trailer" )
+end
+
 local IsValid = IsValid
 
-function Glide.CanSpawnVehicle( ply )
-    if hook.Run( "Glide_CanSpawnVehicle", ply ) == false then return false end
-
+function Glide.CanSpawnVehicle( ply, class )
     if not IsValid( ply ) then return false end
-    if not ply:CheckLimit( "glide_vehicles" ) then return false end
+
+    local limitName = IsTrailerClass( class ) and "glide_trailers" or "glide_vehicles"
+
+    if not ply:CheckLimit( limitName ) then
+        return false
+    end
+
+    if hook.Run( "Glide_CanSpawnVehicle", ply, class ) == false then
+        return false
+    end
 
     return true
 end
 
 function Glide.VehicleFactory( ply, data )
-    if not Glide.CanSpawnVehicle( ply ) then return end
+    if not Glide.CanSpawnVehicle( ply, data.Class ) then return end
+
+    local entTable = scripted_ents.GetStored( data.Class )
+    if not entTable then return end
+
+    local vehicleTable = entTable["t"]
+    if not vehicleTable or not isstring( vehicleTable["GlideCategory"] ) then return end
+
+    local bAllow = hook.Run( "PlayerSpawnVehicle", ply, vehicleTable["ChassisModel"], vehicleTable["PrintName"], vehicleTable )
+    if bAllow == false then return end
 
     local ent = ents.Create( data.Class )
     if not IsValid( ent ) then return end
+
+    hook.Run( "PlayerSpawnedVehicle", ply, ent )
 
     ent:SetPos( data.Pos )
     ent:SetAngles( data.Angle )
@@ -180,8 +186,10 @@ function Glide.VehicleFactory( ply, data )
     ent:Spawn()
     ent:Activate()
 
-    ply:AddCount( "glide_vehicles", ent )
-    cleanup.Add( ply, "glide_vehicles", ent )
+    local limitName = IsTrailerClass( data.Class ) and "glide_trailers" or "glide_vehicles"
+
+    ply:AddCount( limitName, ent )
+    cleanup.Add( ply, limitName, ent )
 
     return ent
 end
@@ -208,9 +216,15 @@ function Glide.CanLockVehicle( ply, vehicle )
     return hook.Run( "Glide_CanLockVehicle", ply, vehicle ) or false
 end
 
+local cvarAlwaysEnterLocked = GetConVar( "glide_always_can_enter_locked_vehicles" )
+
 --- Check if a player can enter a locked vehicle.
 function Glide.CanEnterLockedVehicle( ply, vehicle )
-    return hook.Run( "Glide_CanEnterLockedVehicle", ply, vehicle ) or Glide.CanLockVehicle( ply, vehicle )
+    if hook.Run( "Glide_CanEnterLockedVehicle", ply, vehicle ) == false then
+        return false
+    end
+
+    return cvarAlwaysEnterLocked:GetBool() or Glide.CanLockVehicle( ply, vehicle )
 end
 
 --- Make a player switch to another seat
@@ -247,7 +261,7 @@ function Glide.GetNearbyPlayers( pos, radius )
 
     local found, count = {}, 0
 
-    for _, ply in ipairs( player.GetHumans() ) do
+    for _, ply in player.Iterator() do
         local dist = pos:DistToSqr( ply:GetPos() )
 
         if dist < radius then

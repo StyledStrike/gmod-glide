@@ -29,8 +29,6 @@ function ENT:SetupDataTables()
 end
 
 if CLIENT then
-    ENT.MaxSoundDistance = 15000
-
     -- Play this sound at startup
     ENT.StartSound = "glide/aircraft/start_3.wav"
 

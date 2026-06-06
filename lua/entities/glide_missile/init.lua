@@ -127,16 +127,7 @@ function ENT:PhysicsCollide( data )
 end
 
 function ENT:OnTakeDamage( dmginfo )
-    -- Don't explode when other Glide missiles damaged this missile.
-    if dmginfo:IsExplosionDamage() then
-        local inflictor = dmginfo:GetInflictor()
-
-        if IsValid( inflictor ) and inflictor:GetClass() == "glide_missile" then
-            return
-        end
-    end
-
-    if not self.hasExploded then
+    if not self.hasExploded and not dmginfo:IsExplosionDamage() then
         self:Explode()
     end
 end

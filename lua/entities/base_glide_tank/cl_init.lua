@@ -56,8 +56,8 @@ function ENT:OnLocalPlayerExit()
 end
 
 --- Override this base class function.
-function ENT:DeactivateMisc()
-    BaseClass.DeactivateMisc( self )
+function ENT:OnDeactivateMisc()
+    BaseClass.OnDeactivateMisc( self )
 
     if self.trackSound then
         self.trackSound:Stop()
