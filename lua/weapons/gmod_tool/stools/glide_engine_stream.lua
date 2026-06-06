@@ -58,20 +58,19 @@ function TOOL:LeftClick( trace )
             return false
         end
 
-        local size = #data
+        -- local size = #data
 
-        if size > Glide.MAX_JSON_SIZE then
-            Glide.Print( "Tried to write data that was too big! (%d/%d)", size, Glide.MAX_JSON_SIZE )
-            return false
-        end
+        -- if size > Glide.MAX_JSON_SIZE then
+        --     Glide.Print( "Tried to write data that was too big! (%d/%d)", size, Glide.MAX_JSON_SIZE )
+        --     return false
+        -- end
 
-        data = util.Compress( data )
-        size = #data
+        -- data = util.Compress( data )
+        -- size = #data
 
         Glide.StartCommand( Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET, false )
         net.WriteEntity( veh )
-        net.WriteUInt( size, 16 )
-        net.WriteData( data )
+        Glide.WriteTable( data )
         net.SendToServer()
     end
 
