@@ -60,11 +60,15 @@ end )
 
 -- Once a player leaves a Glide vehicle, cleanup network variables
 -- and trigger the `Glide_OnExitVehicle` hook.
-hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply )
+hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
     if not ply.IsUsingGlideVehicle then return end
 
-    local vehicle = ply:GlideGetVehicle()
-    local seatIndex = ply:GlideGetSeatIndex()
+    local seatIndex = seat.GlideSeatIndex
+    if not seatIndex then return end
+    
+    local vehicle = seat:GetParent()
+    if not IsValid( vehicle ) then return end
+    if not vehicle.IsGlideVehicle then return end
 
     -- Disable vehicle input
     Glide.DeactivateInput( ply )
