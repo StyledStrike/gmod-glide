@@ -334,7 +334,7 @@ if CLIENT then
 
         if user:KeyDown( IN_ATTACK2 ) then
             surface.SetMaterial( AREA_MAT )
-            surface.SetDrawColor( 255, 255, 255, 255 )
+            surface.SetDrawColor( color_white )
             surface.DrawTexturedRectRotated( ScrW() * 0.5, ScrH() * 0.5, size, size, 0 )
         end
 

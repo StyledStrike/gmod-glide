@@ -176,6 +176,7 @@ local size, x, y
 local power = 0
 
 --- Override this base class function.
+local COLOR_STALL = Color( 255, 100, 100, 200 )
 function ENT:DrawVehicleHUD( screenW, screenH )
     local playerListWidth = BaseClass.DrawVehicleHUD( self, screenW, screenH )
 
@@ -231,7 +232,7 @@ function ENT:DrawVehicleHUD( screenW, screenH )
         x = x + ( size * 0.5 ) - ( w * 0.5 )
         y = y - h - size * 0.1
 
-        surface.SetDrawColor( 255, 100, 100, 200 )
+        surface.SetDrawColor( COLOR_STALL )
         surface.DrawRect( x, y, w, h )
 
         SimpleText( text, "GlideHUD", x + w * 0.5, y + h * 0.5, colors.icon, 1, 1 )
