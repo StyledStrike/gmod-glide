@@ -15,7 +15,7 @@ commands[Glide.CMD_INCOMING_DANGER] = function()
         Glide.LockOnHandler:OnIncomingLockOn()
 
     elseif dangerType == Glide.DANGER_TYPE.MISSILE then
-        Glide.LockOnHandler:OnIncomingMissile( net.ReadUInt( 32 ) )
+        Glide.LockOnHandler:OnIncomingMissile( net.ReadUInt( MAX_EDICT_BITS ) )
 
         if IsValid( Glide.currentVehicle ) and Glide.IsAircraft( Glide.currentVehicle ) then
             Glide.ShowKeyTip(
