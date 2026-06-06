@@ -52,15 +52,12 @@ list.Set( "GlideProjectileModels", "models/props_phx/misc/potato_launcher_explos
 -- (or any of it's children classes) on the duplicator/entity limit system.
 -- Also add them to a separate list, and make them spawnable on Starfall.
 if SERVER then
-    local IsBasedOn = scripted_ents.IsBasedOn
     hook.Add( "InitPostEntity", "Glide.RegisterEntityClasses", function()
         if SF == nil then return end
 
         local starfallData = { {} }
-        for class, _ in pairs( scripted_ents.GetList() ) do
-            if IsBasedOn( class, "base_glide" ) then
-                list.Set( "starfall_creatable_sent", class, starfallData )
-            end
+        for class, _ in pairs( list.Get( "GlideVehicles" ) ) do
+            list.Set( "starfall_creatable_sent", class, starfallData )
         end
     end )
 end
