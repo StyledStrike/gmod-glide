@@ -152,6 +152,7 @@ local traceData = {
     mins = Vector()
 }
 
+local color_red = Color( 255, 0, 0 )
 function ENT:Think()
     local t = CurTime()
 
@@ -193,7 +194,7 @@ function ENT:Think()
     traceData.filter[2] = self:GetOwner()
 
     if GetDevMode() then
-        debugoverlay.Line( traceData.start, traceData.endpos, 0.75, Color( 255, 0, 0 ), true )
+        debugoverlay.Line( traceData.start, traceData.endpos, 0.75, color_red, true )
     end
 
     -- Trace result is stored on `ray`

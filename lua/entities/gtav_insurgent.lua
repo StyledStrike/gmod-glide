@@ -75,12 +75,13 @@ if CLIENT then
         stream:LoadPreset( "insurgent" )
     end
 
+    local color_green = Color( 0, 255, 0 )
     function ENT:OnLocalPlayerEnter( seatIndex )
         self:DisableCrosshair()
 
         -- Enable the crosshair when a player enters the turret seat
         if seatIndex == TURRET_SEAT_INDEX then
-            self:EnableCrosshair( { iconType = "dot", color = Color( 0, 255, 0 ) } )
+            self:EnableCrosshair( { iconType = "dot", color = color_green } )
         else
             -- Let the base class handle it
             BaseClass.OnLocalPlayerEnter( self, seatIndex )
