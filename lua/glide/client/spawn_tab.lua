@@ -1,27 +1,12 @@
 local function GetCategoryVehicles( category )
-    local type = type
-
-    local function Validate( t )
-        if type( t ) ~= "table" then return false end
-        if type( t.ClassName ) ~= "string" then return false end
-        if type( t.GlideCategory ) ~= "string" then return false end
-
-        return true
-    end
-
     local filtered = {}
-    local i = 0
-
-    for class, data in pairs( scripted_ents.GetList() ) do
-        local t = data.t
-
-        if Validate( t ) and t.GlideCategory == category then
-            i = i + 1
-            filtered[i] = {
+    for class, data in pairs( list.Get( "GlideVehicles" ) or {} ) do
+        if data.Category == category then
+            filtered[#filtered + 1] = {
                 class = class,
-                name = t.PrintName,
-                icon = t.IconOverride or "entities/" .. class .. ".png",
-                adminOnly = t.AdminOnly
+                name = data.Name,
+                icon = data.IconOverride or "entities/" .. class .. ".png",
+                adminOnly = data.AdminOnly
             }
         end
     end
