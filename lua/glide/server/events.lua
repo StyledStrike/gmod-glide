@@ -65,7 +65,7 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
 
     local seatIndex = seat.GlideSeatIndex
     if not seatIndex then return end
-    
+
     local vehicle = seat:GetParent()
     if not IsValid( vehicle ) then return end
     if not vehicle.IsGlideVehicle then return end
