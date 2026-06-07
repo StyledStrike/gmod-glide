@@ -65,13 +65,9 @@ function TOOL:LeftClick( trace )
             return false
         end
 
-        data = util.Compress( data )
-        size = #data
-
         Glide.StartCommand( Glide.CMD_UPLOAD_ENGINE_STREAM_PRESET, false )
         net.WriteEntity( veh )
-        net.WriteUInt( size, 16 )
-        net.WriteData( data )
+        Glide.WriteTable( data )
         net.SendToServer()
     end
 
