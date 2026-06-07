@@ -1,5 +1,6 @@
 local function GetCategoryVehicles( category )
     local filtered = {}
+
     for class, data in pairs( list.Get( "GlideVehicles" ) or {} ) do
         if data.Category == category then
             filtered[#filtered + 1] = {
