@@ -58,10 +58,10 @@ function TOOL:LeftClick( trace )
             return false
         end
 
-        local size = #data
+        data = Glide.FromJSON( Glide.lastStreamPresetData )
 
-        if size > Glide.MAX_JSON_SIZE then
-            Glide.Print( "Tried to write data that was too big! (%d/%d)", size, Glide.MAX_JSON_SIZE )
+        if table.IsEmpty( data ) then
+            Glide.Print( "The Engine Stream data is empty!" )
             return false
         end
 
