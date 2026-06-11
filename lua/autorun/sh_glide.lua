@@ -266,9 +266,15 @@ do
     local cvarDeveloper = GetConVar( "developer" )
     isDeveloperActive = cvarDeveloper:GetBool()
 
-    timer.Create( "Glide.CheckDeveloperConvar", 1, 0, function()
-        isDeveloperActive = cvarDeveloper:GetBool()
-    end )
+    if CLIENT then
+        cvars.AddChangeCallback( "developer", function( _, _, newValue )
+            isDeveloperActive = tobool( newValue )
+        end )
+    else
+        timer.Create( "Glide.CheckDeveloperConvar", 1, 0, function()
+            isDeveloperActive = cvarDeveloper:GetBool()
+        end )
+    end
 end
 
 function Glide.PrintDev( str, ... )
