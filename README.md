@@ -113,6 +113,14 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | `glide_projectile_launcher_max_radius` `<number>` | Maximum radius from explosions created by Glide Projectile Launchers
 | `glide_projectile_launcher_max_damage` `<number>` | Maximum damage dealt by explosions from Glide Projectile Launchers
 
+### Flare Launcher tool limits
+
+| Command | Description |
+| ------- | ----------- |
+| `glide_flare_launcher_min_delay` `<number>` | Minimum delay allowed for Glide Flare Launchers |
+| `glide_flare_launcher_max_force` `<number>` | Maximum launch force allowed for Glide Flare Launchers |
+
+
 ### Repair Ray tool limits
 
 | Command | Description
