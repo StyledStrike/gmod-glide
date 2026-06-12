@@ -510,3 +510,11 @@ Glide.AddSoundSet( "Glide.Plane.ControlSurface", 80, 95, 105, {
     "glide/aircraft/rudder_move_2.wav",
     "glide/aircraft/rudder_move_3.wav"
 } )
+
+----- Alarm sounds
+Glide.AddSoundSet( "Glide.Alarm.Car", 90, 95, 105, {
+    "glide/alarms/car_alarm_1.wav",
+    "glide/alarms/car_alarm_2.wav",
+    "glide/alarms/car_alarm_3.wav",
+    "glide/alarms/car_alarm_4.wav"
+} )

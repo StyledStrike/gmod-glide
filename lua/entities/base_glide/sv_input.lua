@@ -140,10 +140,10 @@ function ENT:SetInputBool( seatIndex, action, pressed )
     if action == "switch_weapon" then
         self:SelectWeaponIndex( self:GetWeaponIndex() + 1 )
 
-    elseif action == "headlights" then
+    elseif action == "headlights" and not self:GetIsAlarmed() then
         self:ChangeHeadlightState( self:GetHeadlightState() + 1 )
 
-    elseif action == "signal_left" then
+    elseif action == "signal_left" and not self:GetIsAlarmed() then
         -- If the driver is also holding "signal_right"
         if self:GetInputBool( 1, "signal_right" ) then
             -- Toggle hazard lights
@@ -153,7 +153,7 @@ function ENT:SetInputBool( seatIndex, action, pressed )
             self:ChangeTurnSignalState( self:GetTurnSignalState() == 1 and 0 or 1 )
         end
 
-    elseif action == "signal_right" then
+    elseif action == "signal_right" and not self:GetIsAlarmed() then
         -- If the driver is also holding "signal_left"
         if self:GetInputBool( 1, "signal_left" ) then
             -- Toggle hazard lights

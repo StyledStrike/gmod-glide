@@ -210,6 +210,19 @@ hook.Add( "OnDamagedByExplosion", "Glide.DisableRingingSound", function( ply, _ 
     end
 end )
 
+-- Universal hook for lockpicks
+hook.Add( "lockpickStarted", "Glide.LockpickStarted", function( _, ent )
+    if IsValid( ent ) and ent.IsGlideVehicle and math.Rand( 0, 1 ) < 0.2 and not ent:GetIsAlarmed() then
+        ent:SetAlarm( true )
+    end
+end )
+
+hook.Add( "onLockpickCompleted", "Glide.LockpickCompleted", function( _, _, ent )
+    if IsValid( ent ) and ent.IsGlideVehicle and not ent:GetIsAlarmed() then
+        ent:SetAlarm( true )
+    end
+end )
+
 -- Make sure all Glide vehicles are delete-able on map cleanup.
 hook.Add( "PreCleanupMap", "Glide.ClearEntityPersistFlag", function()
     local IsBasedOn = scripted_ents.IsBasedOn
