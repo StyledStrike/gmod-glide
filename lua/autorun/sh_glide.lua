@@ -202,6 +202,7 @@ cleanup.Register( "glide_trailers" )
 cleanup.Register( "glide_standalone_turrets" )
 cleanup.Register( "glide_missile_launchers" )
 cleanup.Register( "glide_projectile_launchers" )
+cleanup.Register( "glide_flare_launchers" )
 
 CreateConVar( "sbox_maxglide_vehicles", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide vehicles that one player can have", 0 )
 CreateConVar( "sbox_maxglide_trailers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide trailers that one player can have (separate from sbox_maxglide_vehicles)", 0 )
@@ -228,6 +229,11 @@ CreateConVar( "glide_projectile_launcher_min_delay", "0.5", FCVAR_ARCHIVE + FCVA
 CreateConVar( "glide_projectile_launcher_max_lifetime", "10", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum projectile flight time allowed for Glide Projectile Launchers.", 1 )
 CreateConVar( "glide_projectile_launcher_max_radius", "500", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum radius from explosions created by Glide Projectile Launchers.", 10 )
 CreateConVar( "glide_projectile_launcher_max_damage", "200", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum damage dealt by explosions from Glide Projectile Launchers.", 1 )
+
+-- Flare launcher tool convars
+CreateConVar( "sbox_maxglide_flare_launchers", "5", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Flare Launchers that one player can have", 0 )
+CreateConVar( "glide_flare_launcher_min_delay", "0.1", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Minimum delay allowed for Glide Flare Launchers.", 0.05, 5 )
+CreateConVar( "glide_flare_launcher_max_force", "3000", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum launch force allowed for Glide Flare Launchers.", 100 )
 
 -- Repair Ray tool convars
 CreateConVar( "glide_repair_ray_max_capacity", "600", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum amount of HP that Glide Repair Rays can hold.", 1, 10000 )
