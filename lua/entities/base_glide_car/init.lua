@@ -735,16 +735,6 @@ function ENT:TriggerInput( name, value )
     end
 end
 
--- Override some `Vehicle` metatable functions
-
-function ENT:GetRPM()
-    return self:GetEngineRPM()
-end
-
-function ENT:GetThrottle()
-    return self:GetEngineThrottle()
-end
-
 local DURATION = 30 * 4
 function ENT:SetAlarm( armed )
     if armed then
@@ -771,4 +761,14 @@ function ENT:OnRemove()
     BaseClass.OnRemove( self )
 
     timer.Remove( ( "GlideAlarm::%d" ):format( self:EntIndex() ) )
+end
+
+-- Override some `Vehicle` metatable functions
+
+function ENT:GetRPM()
+    return self:GetEngineRPM()
+end
+
+function ENT:GetThrottle()
+    return self:GetEngineThrottle()
 end
