@@ -749,6 +749,9 @@ local DURATION = 30 * 4
 function ENT:SetAlarm( armed )
     if armed then
         local timerName = ( "GlideAlarm::%d" ):format( self:EntIndex() )
+
+        if timer.Exists( timerName ) then return end
+
         timer.Create( timerName, 0.25, DURATION, function()
             if IsValid( self ) then
                 self:ChangeTurnSignalState( self:GetTurnSignalState() == 3 and 0 or 3 )
