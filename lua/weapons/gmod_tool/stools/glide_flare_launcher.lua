@@ -95,8 +95,8 @@ function TOOL.BuildCPanel( panel )
         Label = "#tool.glide_flare_launcher.delay",
         command = "glide_flare_launcher_delay",
         type = "float",
-        min = cvarMinDelay and cvarMinDelay:GetFloat() or 0.1,
-        max = 5
+        min = cvarMinDelay and cvarMinDelay:GetFloat() or 5.0,
+        max = 20
     } )
 
     panel:AddControl( "slider", {
