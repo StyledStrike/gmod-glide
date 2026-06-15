@@ -13,6 +13,7 @@ ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 function ENT:SetupDataTables()
     self:NetworkVar( "Float", "RepairCapacity" )
     self:NetworkVar( "Float", "RepairDistance" )
+    self:NetworkVar( "Bool", "IsRepairBlocked" )
 end
 
 do
@@ -51,7 +52,7 @@ if CLIENT then
         local ply = LocalPlayer()
         local myPos = self:GetPos()
 
-        if myPos:DistToSqr( ply:GetPos() ) < 500000 then
+        if myPos:DistToSqr( ply:GetPos() ) < 500000 and not self:GetIsRepairBlocked() then
             local ray = self:GetRepairRay()
 
             render.SetMaterial( matBeam )
@@ -121,6 +122,7 @@ function ENT:Initialize()
 
     self.isActive = false
     self.lastThinkT = CurTime()
+    self.lastPos = self:GetPos()
 
     self:SetRepairCapacity( 0 )
     self:SetRepairDistance( 100 )
@@ -153,9 +155,16 @@ function ENT:Think()
         TriggerOutput( self, "Capacity", repairCapacity )
     end
 
+    local myPos = self:GetPos()
+    local moveSpeed = ( ( self.lastPos - myPos ) / dt ):LengthSqr()
+    self.lastPos = myPos
+
+    local isRepairBlocked = moveSpeed > 1000
+    self:SetIsRepairBlocked( isRepairBlocked )
+
     local wasHealthIncreased, hasFinished = false, false
 
-    if self.isActive and repairCapacity > 0 then
+    if self.isActive and not isRepairBlocked and repairCapacity > 0 then
         local ray = self:GetRepairRay()
         local ent = ray.Entity
 
@@ -186,7 +195,7 @@ function ENT:Think()
         end
     end
 
-    if not wasHealthIncreased then
+    if not wasHealthIncreased and not isRepairBlocked then
         self:SetRepairCapacity( math.Clamp( repairCapacity + cvarRefillSpeed:GetInt() * dt, 0, cvarMaxCapacity:GetInt() ) )
     end
 
