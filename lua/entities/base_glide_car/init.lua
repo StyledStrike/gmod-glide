@@ -735,6 +735,34 @@ function ENT:TriggerInput( name, value )
     end
 end
 
+local DURATION = 30 * 4
+function ENT:SetAlarm( armed )
+    if armed then
+        local timerName = ( "GlideAlarm::%d" ):format( self:EntIndex() )
+
+        if timer.Exists( timerName ) then return end
+
+        timer.Create( timerName, 0.25, DURATION, function()
+            if IsValid( self ) then
+                self:ChangeTurnSignalState( self:GetTurnSignalState() == 3 and 0 or 3 )
+                self:ChangeHeadlightState( self:GetHeadlightState() == 1 and 0 or 1 )
+
+                if timer.RepsLeft( timerName ) == 0 then
+                    self:SetIsAlarmed( false )
+                end
+            end
+        end )
+    end
+
+    self:SetIsAlarmed( armed )
+end
+
+function ENT:OnRemove()
+    BaseClass.OnRemove( self )
+
+    timer.Remove( ( "GlideAlarm::%d" ):format( self:EntIndex() ) )
+end
+
 -- Override some `Vehicle` metatable functions
 
 function ENT:GetRPM()
