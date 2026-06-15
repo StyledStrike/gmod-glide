@@ -41,6 +41,7 @@ function Config:Reset()
     self.rollMouseAxis = 1 -- X
     self.mouseDeadzone = 0.15
     self.mouseShow = true
+    self.mouseFlyDecayRate = 0.0
 
     self.mouseSteerMode = Glide.MOUSE_STEER_MODE.DISABLED
     self.mouseSteerSensitivity = 0.5
@@ -160,6 +161,7 @@ function Config:Save( immediate )
         mouseSensitivityY = self.mouseSensitivityY,
         mouseInvertX = self.mouseInvertX,
         mouseInvertY = self.mouseInvertY,
+        mouseFlyDecayRate = self.mouseFlyDecayRate,
 
         mouseSteerMode = self.mouseSteerMode,
         mouseSteerSensitivity = self.mouseSteerSensitivity,
@@ -289,6 +291,7 @@ function Config:Load()
     SetNumber( self, "yawMouseAxis", data.yawMouseAxis, 0, 2, self.yawMouseAxis )
     SetNumber( self, "rollMouseAxis", data.rollMouseAxis, 0, 2, self.rollMouseAxis )
     SetNumber( self, "mouseDeadzone", data.mouseDeadzone, 0, 1, self.mouseDeadzone )
+    SetNumber( self, "mouseFlyDecayRate", data.mouseFlyDecayRate, 0, 3, self.mouseFlyDecayRate )
 
     self.mouseSteerMode = math.Round( Glide.ValidateNumber( data.mouseSteerMode, 0, 2, self.mouseSteerMode ) )
     SetNumber( self, "mouseSteerSensitivity", data.mouseSteerSensitivity, 0.05, 3, self.mouseSteerSensitivity )
@@ -772,6 +775,11 @@ function Config:OpenFrame()
 
         CreateSlider( directMouseFlyPanel, L"mouse.deadzone", self.mouseDeadzone, 0, 0.5, 2, function( value )
             self.mouseDeadzone = value
+            self:Save()
+        end )
+
+        CreateSlider( directMouseFlyPanel, L"mouse.decay_rate", self.mouseFlyDecayRate, 0, 3, 1, function( value )
+            self.mouseFlyDecayRate = value
             self:Save()
         end )
 

@@ -109,6 +109,8 @@ local function ProcessInput( axis, mouse, deadzone )
     return value
 end
 
+local ExpDecay = Glide.ExpDecay
+
 function MouseInput:ApplyFlyingInput( x, y )
     if self.freeLook then return end
 
@@ -121,6 +123,9 @@ function MouseInput:ApplyFlyingInput( x, y )
     mouse[1] = Clamp( mouse[1] + x * Config.mouseSensitivityX * 0.01, -1, 1 )
     mouse[2] = Clamp( mouse[2] - y * Config.mouseSensitivityY * 0.01, -1, 1 )
 
+    mouse[1] = ExpDecay( mouse[1], 0, Config.mouseFlyDecayRate, FrameTime() )
+    mouse[2] = ExpDecay( mouse[2], 0, Config.mouseFlyDecayRate, FrameTime() )
+
     local pitch = ProcessInput( Config.pitchMouseAxis, mouse, deadzone )
     local yaw = ProcessInput( Config.yawMouseAxis, mouse, deadzone )
     local roll = ProcessInput( Config.rollMouseAxis, mouse, deadzone )
@@ -129,8 +134,6 @@ function MouseInput:ApplyFlyingInput( x, y )
     self.cvarYaw:SetFloat( yaw )
     self.cvarRoll:SetFloat( roll )
 end
-
-local ExpDecay = Glide.ExpDecay
 
 function MouseInput:ApplySteeringInput( x )
     if self.freeLook then return end
