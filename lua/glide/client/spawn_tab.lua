@@ -59,3 +59,55 @@ hook.Add( "PopulateVehicles", "Glide.PopulateVehicles", function( panel, tree )
         Glide.Config:OpenFrame()
     end
 end )
+
+-- Overwrite search Vehicles (https://github.com/Facepunch/garrysmod/blob/6d0b1b8937ae743147ddbb9744082dbdb1c35b17/garrysmod/gamemodes/sandbox/gamemode/cl_search_models.lua#L109-L168)
+local sbox_search_maxresults = GetConVar( "sbox_search_maxresults" )
+local isstring = isstring
+local istable = istable
+local function SearchVehicles( tResult, sType, sClass, tVehicle, sSearch )
+    local sName = tVehicle.PrintName or tVehicle.Name
+    if not isstring( sName ) and not isstring( sClass ) then return end
+
+    if ( ( isstring( sName ) and sName:lower():find( sSearch, nil, true ) ) or ( isstring( sClass ) and sClass:lower():find( sSearch, nil, true ) ) ) then
+
+        local sNiceName = sName or sClass
+        local contentIconData = {
+            nicename = sType == "entity" and ( "[Glide] %s" ):format( sNiceName ) or sNiceName,
+            spawnname = sClass,
+            material = "entities/" .. sClass .. ".png",
+            admin = tVehicle.AdminOnly
+        }
+
+        table.insert( tResult, {
+            text = sName or sClass,
+            icon = spawnmenu.CreateContentIcon( sType, nil, contentIconData ),
+            words = { tVehicle }
+        } )
+    end
+end
+
+local function ModifySearchProvider()
+    search.AddProvider( function( str )
+        local results = {}
+        for sClass, tVehicle in pairs( list.Get( "Vehicles" ) ) do
+            if not istable( tVehicle ) then continue end
+
+            SearchVehicles( results, "vehicle", sClass, tVehicle, str )
+
+            if ( #results >= sbox_search_maxresults:GetInt() / 4 ) then break end
+        end
+
+        for sClass, v in pairs( list.Get( "GlideVehicles" ) ) do
+            if not istable( v ) then continue end
+
+            SearchVehicles( results, "entity", sClass, v, str )
+
+            if ( #results >= sbox_search_maxresults:GetInt() / 4 ) then break end
+        end
+
+        table.SortByMember( results, "text", true )
+        return results
+    end, "vehicles" )
+end
+
+ModifySearchProvider()
