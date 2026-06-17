@@ -86,28 +86,24 @@ local function SearchVehicles( tResult, sType, sClass, tVehicle, sSearch )
     end
 end
 
-local function ModifySearchProvider()
-    search.AddProvider( function( str )
-        local results = {}
-        for sClass, tVehicle in pairs( list.Get( "Vehicles" ) ) do
-            if not istable( tVehicle ) then continue end
+search.AddProvider( function( str )
+    local results = {}
+    for sClass, tVehicle in pairs( list.Get( "Vehicles" ) ) do
+        if not istable( tVehicle ) then continue end
 
-            SearchVehicles( results, "vehicle", sClass, tVehicle, str )
+        SearchVehicles( results, "vehicle", sClass, tVehicle, str )
 
-            if ( #results >= sbox_search_maxresults:GetInt() / 4 ) then break end
-        end
+        if ( #results >= sbox_search_maxresults:GetInt() / 4 ) then break end
+    end
 
-        for sClass, v in pairs( list.Get( "GlideVehicles" ) ) do
-            if not istable( v ) then continue end
+    for sClass, v in pairs( list.Get( "GlideVehicles" ) ) do
+        if not istable( v ) then continue end
 
-            SearchVehicles( results, "entity", sClass, v, str )
+        SearchVehicles( results, "entity", sClass, v, str )
 
-            if ( #results >= sbox_search_maxresults:GetInt() / 4 ) then break end
-        end
+        if ( #results >= sbox_search_maxresults:GetInt() / 4 ) then break end
+    end
 
-        table.SortByMember( results, "text", true )
-        return results
-    end, "vehicles" )
-end
-
-ModifySearchProvider()
+    table.SortByMember( results, "text", true )
+    return results
+end, "vehicles" )
