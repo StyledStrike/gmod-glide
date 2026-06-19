@@ -33,6 +33,15 @@ function Glide.HideEntity( ent, hide )
     end
 end
 
+function Glide.HideWheels( vehicle, hide )
+    if not vehicle.wheels then return end
+
+    for i = 1, #vehicle.wheels do
+        local wheel = vehicle.wheels[i]
+        Glide.HideEntity( wheel, hide )
+    end
+end
+
 function Glide.IsAircraft( vehicle )
     return vehicle.VehicleType == Glide.VEHICLE_TYPE.HELICOPTER or vehicle.VehicleType == Glide.VEHICLE_TYPE.PLANE
 end
