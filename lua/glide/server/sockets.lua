@@ -80,6 +80,7 @@ local Remove = table.remove
 local FindClosestSocket = Glide.FindClosestSocket
 local GetDevMode = Glide.GetDevMode
 
+local color_orange = Color( 255, 145, 0 )
 timer.Create( "Glide.UpdateSockets", 0.1, 0, function()
     local vehicleCount = #vehiclesWithSockets
     if vehicleCount == 0 then return end
@@ -138,12 +139,12 @@ timer.Create( "Glide.UpdateSockets", 0.1, 0, function()
     if not GetDevMode() then return end
 
     for _, v in ipairs( receptacles ) do
-        debugoverlay.Cross( v.pos, 8, 0.1, Color( 255, 145, 0 ), true )
+        debugoverlay.Cross( v.pos, 8, 0.1, color_orange, true )
         debugoverlay.Text( v.pos, v.id .. " | isReceptacle: true", 0.1, false )
     end
 
     for _, v in ipairs( plugs ) do
-        debugoverlay.Cross( v.pos, 8, 0.1, Color( 255, 145, 0 ), true )
+        debugoverlay.Cross( v.pos, 8, 0.1, color_orange, true )
         debugoverlay.Text( v.pos, v.id .. " | isReceptacle: false", 0.1, false )
     end
 end )

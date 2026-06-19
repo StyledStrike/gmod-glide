@@ -480,6 +480,7 @@ end
 
 local IsKeyDown = input.IsKeyDown
 
+local color_red = Color( 255, 0, 0 )
 function PANEL:Think()
     if not self.isEngineOn then return end
 
@@ -520,7 +521,7 @@ function PANEL:Think()
 
     if self.isRedlining ~= isRedlining then
         self.isRedlining = isRedlining
-        self.rpmLabel:SetColor( isRedlining and Color( 255, 0, 0 ) or color_white )
+        self.rpmLabel:SetColor( isRedlining and color_red or color_white )
     end
 
     local rpmFraction = ( rpm - self.minRPM ) / ( self.maxRPM - self.minRPM )

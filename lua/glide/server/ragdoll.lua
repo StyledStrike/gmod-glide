@@ -248,6 +248,10 @@ do
     local ray = {}
 
     --- Check if a vehicle exit position/ragdoll respawn point is unobstructed.
+    local color_red = Color( 255, 0, 0 )
+    local color_orange = Color( 255, 100, 0 )
+    local color_green = Color( 0, 255, 0 )
+    local color_opacity20 = Color( 255, 255, 255, 20 )
     function Glide.ValidateExitPos( origin, pos, traceData )
         traceData = traceData or {}
 
@@ -263,8 +267,8 @@ do
 
         if ray.Hit then
             if GetDevMode() then
-                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 0, 0 ), true )
-                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<blocked>", 8, Color( 255, 0, 0 ) )
+                debugoverlay.Line( origin, traceData.endpos, 8, color_red, true )
+                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<blocked>", 8, color_red )
             end
 
             return true, pos
@@ -278,16 +282,16 @@ do
 
         if ray.StartSolid then
             if GetDevMode() then
-                debugoverlay.Line( origin, traceData.endpos, 8, Color( 255, 100, 0 ), true )
-                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<too small>", 8, Color( 255, 100, 0 ) )
+                debugoverlay.Line( origin, traceData.endpos, 8, color_orange, true )
+                debugoverlay.EntityTextAtPosition( traceData.endpos, 0, "<too small>", 8, color_orange )
             end
 
             return true, pos
         end
 
         if GetDevMode() then
-            debugoverlay.Line( origin, pos, 8, Color( 0, 255, 0 ), true )
-            debugoverlay.Box( pos, traceData.mins, traceData.maxs, 8, Color( 255, 255, 255, 20 ) )
+            debugoverlay.Line( origin, pos, 8, color_green, true )
+            debugoverlay.Box( pos, traceData.mins, traceData.maxs, 8, color_opacity20 )
         end
 
         return false, pos
