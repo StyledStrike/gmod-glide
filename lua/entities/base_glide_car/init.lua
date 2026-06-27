@@ -6,6 +6,8 @@ DEFINE_BASECLASS( "base_glide" )
 include( "shared.lua" )
 include( "sv_engine.lua" )
 
+duplicator.RegisterEntityClass( "base_glide_car", Glide.VehicleFactory, "Data" )
+
 --- Implement this base class function.
 function ENT:OnPostInitialize()
     -- Setup variables used on all cars

@@ -5,6 +5,8 @@ include( "shared.lua" )
 
 DEFINE_BASECLASS( "base_glide_aircraft" )
 
+duplicator.RegisterEntityClass( "base_glide_heli", Glide.VehicleFactory, "Data" )
+
 --- Override this base class function.
 function ENT:OnPostInitialize()
     BaseClass.OnPostInitialize( self )
