@@ -130,9 +130,13 @@ end, "glide_vehicles" )
 local SearchGetResults = Glide.OriginalSearchGetResults or search.GetResults
 Glide.OriginalSearchGetResults = SearchGetResults
 
+local istable = istable
+local hasValue = table.HasValue
 search.GetResults = function( query, types, maxResults )
     if types == "vehicles" then
         types = { "vehicles", "glide_vehicles" }
+    elseif istable( types ) and hasValue( types, "vehicles" ) then
+        types[#types + 1] = "glide_vehicles"
     end
 
     return SearchGetResults( query, types, maxResults )
