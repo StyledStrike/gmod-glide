@@ -84,8 +84,7 @@ end
 
 search.AddProvider( function( searchString )
     -- Get the search results limit.
-    -- As the convar itself describes it, this value is not a "hard limit" on the
-    -- total amount of results, instead it's used to limit different types of search results.
+    -- As the convar itself describes it, this value is different for certain types of search results.
     -- "Model amount limited to 1/2 of this value, entities are limited to 1/4".
     -- We use the "entities" limit for Glide vehicles.
     local maxSearchResults = GetConVar( "sbox_search_maxresults" ):GetInt() / 4
@@ -120,4 +119,21 @@ search.AddProvider( function( searchString )
     table.SortByMember( results, "text", true )
 
     return results
-end, "glide_vehicles_provider" )
+end, "glide_vehicles" )
+
+--[[
+    On the "Vehicles" tab, the search provider only looks for the
+    provider identified as "vehicles", so we override `search.GetResults`
+    to use the Glide search provider too when that happens.
+]]
+
+local SearchGetResults = Glide.OriginalSearchGetResults or search.GetResults
+Glide.OriginalSearchGetResults = SearchGetResults
+
+search.GetResults = function( query, types, maxResults )
+    if types == "vehicles" then
+        types = { "vehicles", "glide_vehicles" }
+    end
+
+    return SearchGetResults( query, types, maxResults )
+end
