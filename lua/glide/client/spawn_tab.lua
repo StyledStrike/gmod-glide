@@ -28,12 +28,13 @@ local function CreateCategory( parentNode, contentPanel, name, icon, category )
         local items = GetCategoryVehicles( category )
 
         for _, v in SortedPairsByMemberValue( items, "name" ) do
-            spawnmenu.CreateContentIcon( "entity", s.itemsPanel, {
+            local iconSpawnMenu = spawnmenu.CreateContentIcon( "entity", s.itemsPanel, {
                 nicename = v.name or v.class,
                 spawnname = v.class,
                 material = v.icon or icon or "icon16/car.png",
                 admin = v.adminOnly
             } )
+            iconSpawnMenu.bIsGlide = true
         end
     end
 
