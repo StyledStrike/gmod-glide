@@ -7,7 +7,7 @@ TOOL.Information = {
 }
 
 TOOL.ClientConVar = {
-    delay = 0.5,
+    delay = 1.0,
     force = 1000
 }
 
@@ -96,7 +96,7 @@ function TOOL.BuildCPanel( panel )
         command = "glide_flare_launcher_delay",
         type = "float",
         min = cvarMinDelay and cvarMinDelay:GetFloat() or 5.0,
-        max = 20
+        max = 30
     } )
 
     panel:AddControl( "slider", {

@@ -31,6 +31,8 @@ function ENT:PostEntityPaste( ply, ent, createdEntities )
     -- are different compared to when this entity was duped.
     self:SetReloadDelay( self.reloadDelay )
     self:SetLaunchForce( self.launchForce )
+
+    self.nextShoot = CurTime() + self.reloadDelay
 end
 
 local function MakeSpawner( ply, data )
@@ -75,11 +77,11 @@ function ENT:Initialize()
     self:SetCollisionGroup( COLLISION_GROUP_WEAPON )
     self:DrawShadow( false )
 
-    self.reloadDelay = 0.5
+    self.reloadDelay = 1
     self.launchForce = 1000
 
     self.isFiring = false
-    self.nextShoot = 0
+    self.nextShoot = CurTime() + self.reloadDelay
 
     if WireLib then
         WireLib.CreateSpecialInputs( self,
@@ -125,7 +127,7 @@ local cvarMinDelay = GetConVar( "glide_flare_launcher_min_delay" )
 local cvarMaxForce = GetConVar( "glide_flare_launcher_max_force" )
 
 function ENT:SetReloadDelay( delay )
-    self.reloadDelay = math.Clamp( delay, cvarMinDelay and cvarMinDelay:GetFloat() or 0.1, 5 )
+    self.reloadDelay = math.Clamp( delay, cvarMinDelay and cvarMinDelay:GetFloat() or 0.1, 30 )
 end
 
 function ENT:SetLaunchForce( force )
