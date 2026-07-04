@@ -225,7 +225,7 @@ do
     -- Make sure some physics performance settings are
     -- at least equal to or higher than these values.
     local minimumValues = {
-        MaxVelocity = 2000,
+        MaxVelocity = 4000,
         MaxAngularVelocity = 3636,
         MinFrictionMass = 10,
         MaxFrictionMass = 2500
