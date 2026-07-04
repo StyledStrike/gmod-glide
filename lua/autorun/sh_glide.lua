@@ -232,7 +232,7 @@ CreateConVar( "glide_projectile_launcher_max_damage", "200", FCVAR_ARCHIVE + FCV
 
 -- Flare launcher tool convars
 CreateConVar( "sbox_maxglide_flare_launchers", "3", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Max. number of Glide Flare Launchers that one player can have", 0 )
-CreateConVar( "glide_flare_launcher_min_delay", "5.0", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Minimum delay allowed for Glide Flare Launchers.", 0.05, 30 )
+CreateConVar( "glide_flare_launcher_min_delay", "5.0", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Minimum delay allowed for Glide Flare Launchers.", 0.05, 60 )
 CreateConVar( "glide_flare_launcher_max_force", "3000", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Maximum launch force allowed for Glide Flare Launchers.", 100000 )
 
 -- Repair Ray tool convars
