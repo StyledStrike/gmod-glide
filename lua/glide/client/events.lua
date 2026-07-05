@@ -79,6 +79,9 @@ local function DrawVehicleHUD()
     end
 end
 
+local sndFixed = GetConVar( "snd_fixed_rate" )
+local bSetSNDFixed = false
+local vguiCursorVisible = vgui.CursorVisible
 function Glide.OnEnter( vehicle, seatIndex )
     vehicle:OnLocalPlayerEnter( seatIndex )
     vehicle.isLocalPlayerInVehicle = true
@@ -95,12 +98,13 @@ function Glide.OnEnter( vehicle, seatIndex )
     hook.Run( "Glide_OnLocalEnterVehicle", vehicle, seatIndex )
 
     timer.Create( "Glide.CheckMouseVisibility", 0.25, 0, function()
-        cvarIsMouseVisible:SetInt( vgui.CursorVisible() and 1 or 0 )
+        cvarIsMouseVisible:SetInt( vguiCursorVisible() and 1 or 0 )
     end )
 
-    if vehicle.VehicleType == Glide.VEHICLE_TYPE.HELICOPTER and system.IsLinux() then
+    if vehicle.VehicleType == Glide.VEHICLE_TYPE.HELICOPTER and system.IsLinux() and sndFixed:GetInt() ~= 1 then
         Glide.Print( "Linux system detected, setting snd_fixed_rate to 1" )
         RunConsoleCommand( "snd_fixed_rate", "1" )
+        bSetSNDFixed = true
     end
 
     -- Simple ThirdPerson compatibility
@@ -130,9 +134,10 @@ function Glide.OnLeave( ply )
     hook.Remove( "HUDPaint", "Glide.DrawVehicleHUD" )
     hook.Run( "Glide_OnLocalExitVehicle" )
 
-    if system.IsLinux() then
+    if system.IsLinux() and sndFixed:GetInt() == 1 and bSetSNDFixed then
         Glide.Print( "Linux system detected, setting snd_fixed_rate to 0" )
         RunConsoleCommand( "snd_fixed_rate", "0" )
+        bSetSNDFixed = false
     end
 
     -- Simple ThirdPerson compatibility
