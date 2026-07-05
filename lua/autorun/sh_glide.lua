@@ -178,6 +178,11 @@ if CLIENT then
         [MAT_WOOD] = "glide/wheels/side_skid_wood.wav",
         [MAT_GLASS] = "physics/metal/metal_grenade_scrape_rough_loop1.wav"
     }
+
+    Glide.CAMERA_CALC_VIEW_HOOKS = {
+        ["SimpleTP.Camera.View"] = true, -- https://steamcommunity.com/sharedfiles/filedetails/?id=207948202
+        ["THIRDPERSON.viewThirdperson"] = true -- https://www.gmodstore.com/market/view/thirdperson-an-advanced-third-person-suite
+    }
 end
 
 if SERVER then
