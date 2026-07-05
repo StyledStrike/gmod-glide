@@ -24,6 +24,7 @@ end
 
 hook.Add( "Glide_OnLocalEnterVehicle", "Glide.AutoToggleHeadlights", function( vehicle, seatIndex )
     if seatIndex > 1 then return end
+    if not Glide.Config.autoHeadlightOn and not Glide.Config.autoHeadlightOff then return end
     if not vehicle.GetHeadlightState then return end
 
     areHeadlightsOn = vehicle:GetHeadlightState() > 0
