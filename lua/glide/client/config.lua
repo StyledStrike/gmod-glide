@@ -1174,22 +1174,38 @@ local FrameTime = FrameTime
 local Approach = math.Approach
 
 local glideVolume = 1
+local tPlayersTalking = {}
 
-hook.Add( "Tick", "Glide.CheckVoiceActivity", function()
-    local isAnyoneTalking = false
+local function AniamtionVoice( bSpeak )
+    timer.Create( "Glide.VoiceChatAnimation", 0.001, 0, function()
+        glideVolume = Approach(
+            glideVolume,
+            bSpeak and Config.vcVolume or 1,
+            FrameTime() * ( bSpeak and 10 or 4 )
+        )
 
-    for _, ply in player.Iterator() do
-        if ply:IsVoiceAudible() and ply:VoiceVolume() > 0.05 then
-            isAnyoneTalking = true
-            break
+        if bSpeak and glideVolume <= Config.vcVolume or not bSpeak and glideVolume >= 1 then
+            timer.Remove( "Glide.VoiceChatAnimation" )
         end
-    end
+    end )
+end
 
-    glideVolume = Approach(
-        glideVolume,
-        isAnyoneTalking and Config.vcVolume or 1,
-        FrameTime() * ( isAnyoneTalking and 10 or 4 )
-    )
+hook.Add( "PlayerStartVoice", "Glide.PlayerStartVoice", function( ply )
+    if ply == LocalPlayer() then return end
+
+    tPlayersTalking[ply] = true
+
+    AniamtionVoice( true )
+end )
+
+hook.Add( "PlayerEndVoice", "Glide.PlayerEndVoice", function( ply )
+    if ply == LocalPlayer() then return end
+
+    tPlayersTalking[ply] = nil
+
+    if table.Count( tPlayersTalking ) == 0 then
+        AniamtionVoice( false )
+    end
 end )
 
 -- Calculate the volume multiplier for a specific audio type,
