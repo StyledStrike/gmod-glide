@@ -5,6 +5,8 @@ local areHeadlightsOn = false
 local function AutoToggleHeadlights()
     local vehicle = Glide.currentVehicle
     if not IsValid( vehicle ) then return end
+    local bAutoLightsOn, bAutoLightsOff = Glide.Config.autoHeadlightOn, Glide.Config.autoHeadlightOff
+    if not bAutoLightsOn and not bAutoLightsOff then return end
 
     local c = render.ComputeLighting( vehicle:GetPos(), Vector( 0, 0, 1 ) )
     local avg = ( c[1] * 0.2126 ) + ( c[2] * 0.7152 ) + ( c[3] * 0.0722 ) -- Luminosity method
@@ -13,8 +15,8 @@ local function AutoToggleHeadlights()
     if areHeadlightsOn ~= shouldBeOn then
         areHeadlightsOn = shouldBeOn
 
-        if shouldBeOn and not Glide.Config.autoHeadlightOn then return end
-        if not shouldBeOn and not Glide.Config.autoHeadlightOff then return end
+        if shouldBeOn and not bAutoLightsOn then return end
+        if not shouldBeOn and not bAutoLightsOff then return end
 
         Glide.StartCommand( Glide.CMD_SET_HEADLIGHTS )
         net.WriteBool( shouldBeOn )
@@ -24,7 +26,6 @@ end
 
 hook.Add( "Glide_OnLocalEnterVehicle", "Glide.AutoToggleHeadlights", function( vehicle, seatIndex )
     if seatIndex > 1 then return end
-    if not Glide.Config.autoHeadlightOn and not Glide.Config.autoHeadlightOff then return end
     if not vehicle.GetHeadlightState then return end
 
     areHeadlightsOn = vehicle:GetHeadlightState() > 0
