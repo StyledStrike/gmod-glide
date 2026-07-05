@@ -1194,7 +1194,7 @@ local IsVoiceAudible = FindMetaTable( "Player" ).IsVoiceAudible
 local IsValid = IsValid
 
 local playerIndex = 0
-local talkingCount = 0
+local isAnyoneTalking = false
 local shouldReduceVolume = false
 
 hook.Add( "Think", "Glide.DetectVoiceActivity", function()
@@ -1202,19 +1202,20 @@ hook.Add( "Think", "Glide.DetectVoiceActivity", function()
     local iterator, allPlayers = PlayerIterator()
     local i, ply = iterator( allPlayers, playerIndex )
 
-    if i then
-        if IsValid( ply ) and IsVoiceAudible( ply ) and VoiceVolume( ply ) > 0.01 then
-            talkingCount = talkingCount + 1
-        end
+    playerIndex = playerIndex + 1
 
-        playerIndex = playerIndex + 1
-    else
-        -- Check if any of the players were talking
-        shouldReduceVolume = talkingCount > 0
+    if i and IsValid( ply ) and IsVoiceAudible( ply ) and VoiceVolume( ply ) > 0.01 then
+        isAnyoneTalking = true
+        i = nil -- Break out of the iteration early
+    end
+
+    -- When we reach the end of the iteration...
+    if not i then
+        shouldReduceVolume = isAnyoneTalking
 
         -- Begin a new iteration
         playerIndex = 0
-        talkingCount = 0
+        isAnyoneTalking = false
     end
 
     volumeMultiplier = Approach(
