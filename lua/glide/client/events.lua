@@ -147,7 +147,9 @@ local function OnLeave( ply )
 
     -- Simple ThirdPerson compatibility
     for hookName, func in pairs( tHooks ) do
-        hook.Add( "CalcView", hookName, func )
+        if isfunction( func ) then
+            hook.Add( "CalcView", hookName, func )
+        end
     end
 
     timer.Remove( "Glide.CheckMouseVisibility" )
