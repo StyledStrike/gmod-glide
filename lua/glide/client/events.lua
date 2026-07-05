@@ -79,7 +79,7 @@ local function DrawVehicleHUD()
     end
 end
 
-local function OnEnter( vehicle, seatIndex )
+function Glide.OnEnter( vehicle, seatIndex )
     vehicle:OnLocalPlayerEnter( seatIndex )
     vehicle.isLocalPlayerInVehicle = true
     vehicle.headlightState = 0
@@ -113,7 +113,7 @@ local function OnEnter( vehicle, seatIndex )
     end
 end
 
-local function OnLeave( ply )
+function Glide.OnLeave( ply )
     if IsValid( activeVehicle ) then
         activeVehicle:OnLocalPlayerExit()
         activeVehicle.isLocalPlayerInVehicle = false
@@ -145,45 +145,3 @@ local function OnLeave( ply )
     timer.Remove( "Glide.CheckMouseVisibility" )
     cvarIsMouseVisible:SetInt( 0 )
 end
-
-local IsValid = IsValid
-local LocalPlayer = LocalPlayer
-
-hook.Add( "Tick", "Glide.CheckCurrentVehicle", function()
-    local ply = LocalPlayer()
-    if not IsValid( ply ) then return end
-
-    local seat = ply:GetVehicle()
-
-    if not IsValid( seat ) then
-        if activeSeatIndex > 0 then
-            OnLeave( ply )
-        end
-
-        return
-    end
-
-    local parent = seat:GetParent()
-
-    if not IsValid( parent ) or not parent.IsGlideVehicle then
-        if activeSeatIndex > 0 then
-            OnLeave( ply )
-        end
-
-        return
-    end
-
-    local seatIndex = ply:GlideGetSeatIndex()
-
-    if activeSeatIndex ~= seatIndex then
-        if activeSeatIndex > 0 then
-            OnLeave( ply )
-        end
-
-        activeSeatIndex = seatIndex
-
-        if seatIndex > 0 then
-            OnEnter( parent, seatIndex )
-        end
-    end
-end )
