@@ -79,6 +79,13 @@ local function DrawVehicleHUD()
     end
 end
 
+local tHooks = {
+    ["SimpleTP.Camera.View"] = true, -- https://steamcommunity.com/sharedfiles/filedetails/?l=french&id=207948202
+    ["THIRDPERSON.viewThirdperson"] = true -- https://www.gmodstore.com/market/view/thirdperson-an-advanced-third-person-suite
+}
+
+local isfunction = isfunction
+
 local sndFixed = GetConVar( "snd_fixed_rate" )
 local bSetSNDFixed = false
 local vguiCursorVisible = vgui.CursorVisible
@@ -108,11 +115,13 @@ function Glide.OnEnter( vehicle, seatIndex )
     end
 
     -- Simple ThirdPerson compatibility
-    local func = hook.GetTable()["CalcView"]["SimpleTP.Camera.View"]
-
-    if func then
-        Glide.simpleThirdPersonHook = func
-        hook.Remove( "CalcView", "SimpleTP.Camera.View" )
+    local tHookCalcView = hook.GetTable()["CalcView"]
+    for hookName, _ in pairs( tHooks ) do
+        local fc = tHookCalcView and tHookCalcView[hookName]
+        if isfunction( fc ) then
+            tHooks[hookName] = fc
+            hook.Remove( "CalcView", hookName )
+        end
     end
 end
 
@@ -141,8 +150,10 @@ function Glide.OnLeave( ply )
     end
 
     -- Simple ThirdPerson compatibility
-    if Glide.simpleThirdPersonHook then
-        hook.Add( "CalcView", "SimpleTP.Camera.View", Glide.simpleThirdPersonHook )
+    for hookName, func in pairs( tHooks ) do
+        if isfunction( func ) then
+            hook.Add( "CalcView", hookName, func )
+        end
     end
 
     timer.Remove( "Glide.CheckMouseVisibility" )
