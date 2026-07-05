@@ -1198,7 +1198,8 @@ local isAnyoneTalking = false
 local shouldReduceVolume = false
 
 hook.Add( "Think", "Glide.DetectVoiceActivity", function()
-    -- Iterate over the list of players, one at the time each frame
+    -- Iterate over the list of players, checking for
+    -- voice activity on one player per frame.
     local iterator, allPlayers = PlayerIterator()
     local i, ply = iterator( allPlayers, playerIndex )
 
