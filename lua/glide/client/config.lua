@@ -1170,27 +1170,7 @@ function Config:OpenFrame()
     end
 end
 
-local FrameTime = FrameTime
-local Approach = math.Approach
-
-local glideVolume = 1
-
-hook.Add( "Tick", "Glide.CheckVoiceActivity", function()
-    local isAnyoneTalking = false
-
-    for _, ply in player.Iterator() do
-        if ply:IsVoiceAudible() and ply:VoiceVolume() > 0.05 then
-            isAnyoneTalking = true
-            break
-        end
-    end
-
-    glideVolume = Approach(
-        glideVolume,
-        isAnyoneTalking and Config.vcVolume or 1,
-        FrameTime() * ( isAnyoneTalking and 10 or 4 )
-    )
-end )
+local volumeMultiplier = 1.0
 
 -- Calculate the volume multiplier for a specific audio type,
 -- depending on settings and how loud the voice chat is.
@@ -1198,5 +1178,38 @@ end )
 -- audioType must be one of these:
 -- "carVolume", "aircraftVolume", "explosionVolume", "hornVolume", "windVolume", "warningVolume"
 function Config.GetVolume( audioType )
-    return Config[audioType] * glideVolume
+    return Config[audioType] * volumeMultiplier
 end
+
+-- Run the voice activity check 30 times per second
+local RealTime = RealTime
+local Approach = math.Approach
+
+local IsVoiceAudible = FindMetaTable( "Player" ).IsVoiceAudible
+local VoiceVolume = FindMetaTable( "Player" ).VoiceVolume
+
+local updateInterval = 1 / 30
+local lastUpdateTime = RealTime()
+
+hook.Add( "Think", "Glide.DetectVoiceActivity", function()
+    local t = RealTime()
+    if t < lastUpdateTime + updateInterval then return end
+
+    local dt = t - lastUpdateTime
+    lastUpdateTime = t
+
+    local isAnyoneTalking = false
+
+    for _, ply in player.Iterator() do
+        if IsVoiceAudible( ply ) and VoiceVolume( ply ) > 0.01 then
+            isAnyoneTalking = true
+            break
+        end
+    end
+
+    volumeMultiplier = Approach(
+        volumeMultiplier,
+        isAnyoneTalking and Config.vcVolume or 1,
+        dt * ( isAnyoneTalking and 4 or 1 )
+    )
+end )
