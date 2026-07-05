@@ -56,6 +56,11 @@ hook.Add( "PlayerEnteredVehicle", "Glide.OnEnterSeat", function( ply, seat )
     Glide.ActivateInput( ply, parent, seatIndex )
 
     hook.Run( "Glide_OnEnterVehicle", ply, parent, seatIndex )
+
+    Glide.StartCommand( Glide.CMD_ENTER_VEHICLE )
+        net.WriteEntity( parent )
+        net.WriteUInt( seatIndex, 5 )
+    net.Send( ply )
 end )
 
 -- Once a player leaves a Glide vehicle, cleanup network variables
@@ -96,6 +101,10 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
     end
 
     hook.Run( "Glide_OnExitVehicle", ply, vehicle )
+
+    Glide.StartCommand( Glide.CMD_EXIT_VEHICLE )
+    net.Send( ply )
+
 end )
 
 hook.Add( "AcceptInput", "Glide.VehicleAcceptLockInputs", function( ent, inputName )
