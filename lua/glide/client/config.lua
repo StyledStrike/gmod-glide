@@ -1181,35 +1181,45 @@ function Config.GetVolume( audioType )
     return Config[audioType] * volumeMultiplier
 end
 
--- Run the voice activity check 30 times per second
-local RealTime = RealTime
+-- Run the voice activity.
+-- Please note that any changes in the logic here require restarting
+-- the game to test, since many scripts localize `Config.GetVolume`.
+
+local FrameTime = FrameTime
 local Approach = math.Approach
+local PlayerIterator = player.Iterator
 
-local IsVoiceAudible = FindMetaTable( "Player" ).IsVoiceAudible
 local VoiceVolume = FindMetaTable( "Player" ).VoiceVolume
+local IsVoiceAudible = FindMetaTable( "Player" ).IsVoiceAudible
+local IsValid = IsValid
 
-local updateInterval = 1 / 30
-local lastUpdateTime = RealTime()
+local playerIndex = 0
+local talkingCount = 0
+local shouldReduceVolume = false
 
 hook.Add( "Think", "Glide.DetectVoiceActivity", function()
-    local t = RealTime()
-    if t < lastUpdateTime + updateInterval then return end
+    -- Iterate over the list of players, one at the time each frame
+    local iterator, allPlayers = PlayerIterator()
+    local i, ply = iterator( allPlayers, playerIndex )
 
-    local dt = t - lastUpdateTime
-    lastUpdateTime = t
-
-    local isAnyoneTalking = false
-
-    for _, ply in player.Iterator() do
-        if IsVoiceAudible( ply ) and VoiceVolume( ply ) > 0.01 then
-            isAnyoneTalking = true
-            break
+    if i then
+        if IsValid( ply ) and IsVoiceAudible( ply ) and VoiceVolume( ply ) > 0.01 then
+            talkingCount = talkingCount + 1
         end
+
+        playerIndex = playerIndex + 1
+    else
+        -- Check if any of the players were talking
+        shouldReduceVolume = talkingCount > 0
+
+        -- Begin a new iteration
+        playerIndex = 0
+        talkingCount = 0
     end
 
     volumeMultiplier = Approach(
         volumeMultiplier,
-        isAnyoneTalking and Config.vcVolume or 1,
-        dt * ( isAnyoneTalking and 4 or 1 )
+        shouldReduceVolume and Config.vcVolume or 1,
+        FrameTime() * ( shouldReduceVolume and 4 or 1 )
     )
 end )
