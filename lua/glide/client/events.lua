@@ -79,12 +79,8 @@ local function DrawVehicleHUD()
     end
 end
 
-local tHooks = {
-    ["SimpleTP.Camera.View"] = true, -- https://steamcommunity.com/sharedfiles/filedetails/?l=french&id=207948202
-    ["THIRDPERSON.viewThirdperson"] = true -- https://www.gmodstore.com/market/view/thirdperson-an-advanced-third-person-suite
-}
+local calcViewFunctions = {}
 
-local isfunction = isfunction
 local function OnEnter( vehicle, seatIndex )
     vehicle:OnLocalPlayerEnter( seatIndex )
     vehicle.isLocalPlayerInVehicle = true
@@ -110,13 +106,17 @@ local function OnEnter( vehicle, seatIndex )
         RunConsoleCommand( "snd_fixed_rate", "1" )
     end
 
-    -- Simple ThirdPerson compatibility
-    local tHookCalcView = hook.GetTable()["CalcView"]
-    for hookName, _ in pairs( tHooks ) do
-        local fc = tHookCalcView and tHookCalcView[hookName]
-        if isfunction( fc ) then
-            tHooks[hookName] = fc
-            hook.Remove( "CalcView", hookName )
+    -- Forcibly disable hooks from camera addons defined on Glide.CAMERA_CALC_VIEW_HOOKS
+    local calcViewHookTable = hook.GetTable()["CalcView"]
+
+    if calcViewHookTable then
+        for hookId, _ in pairs( Glide.CAMERA_CALC_VIEW_HOOKS ) do
+            local func = calcViewHookTable[hookId]
+
+            if func then
+                calcViewFunctions[hookId] = func
+                hook.Remove( "CalcView", hookId )
+            end
         end
     end
 end
@@ -145,15 +145,13 @@ local function OnLeave( ply )
         RunConsoleCommand( "snd_fixed_rate", "0" )
     end
 
-    -- Simple ThirdPerson compatibility
-    for hookName, func in pairs( tHooks ) do
-        if isfunction( func ) then
-            hook.Add( "CalcView", hookName, func )
-        end
-    end
-
     timer.Remove( "Glide.CheckMouseVisibility" )
     cvarIsMouseVisible:SetInt( 0 )
+
+    -- Restore disabled hooks from camera addons defined on Glide.CAMERA_CALC_VIEW_HOOKS
+    for hookId, func in pairs( calcViewFunctions ) do
+        hook.Add( "CalcView", hookId, func )
+    end
 end
 
 local IsValid = IsValid
