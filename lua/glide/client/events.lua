@@ -66,7 +66,7 @@ local function BlockBinds( _, bind, _, code )
 end
 
 local ScrW, ScrH = ScrW, ScrH
-local activeVehicle, activeSeatIndex = NULL, 0
+local activeVehicle = NULL
 local cvarDrawHud = GetConVar( "cl_drawhud" )
 
 local function DrawVehicleHUD()
@@ -85,7 +85,6 @@ function Glide.OnEnter( vehicle, seatIndex )
     vehicle.headlightState = 0
 
     activeVehicle = vehicle
-    activeSeatIndex = seatIndex
 
     Glide.currentVehicle = vehicle
     Glide.currentSeatIndex = seatIndex
@@ -121,7 +120,6 @@ function Glide.OnLeave( ply )
     end
 
     activeVehicle = nil
-    activeSeatIndex = 0
 
     Glide.currentVehicle = nil
     Glide.currentSeatIndex = nil
