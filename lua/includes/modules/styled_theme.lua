@@ -614,7 +614,7 @@ do
                 value = math.Round( value, decimals )
             end
 
-            callback( value )            
+            callback( value )
         end
 
         return slider
