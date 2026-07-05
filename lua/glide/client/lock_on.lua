@@ -153,22 +153,23 @@ function LockOnHandler:Think()
     end
 end
 
-local isInVehicle = false
+local glideVehicle = nil
+hook.Add( "Glide_OnLocalEnterVehicle", "Glide.LockOnHandlerSetup", function( vehicle )
+    if glideVehicle == vehicle then return end
 
-timer.Create( "Glide.LockOnEnableCheck", 0.5, 0, function()
-    local user = LocalPlayer()
-    if not IsValid( user ) then return end
+    LockOnHandler:Setup( vehicle )
+    glideVehicle = vehicle
+end )
 
-    local veh = user:GetVehicle()
+hook.Add( "Glide_OnLocalExitVehicle", "Glide.LockOnHandlerCleanup", function()
+    timer.Simple( 0.5, function()
+        local ply = LocalPlayer()
+        if not IsValid( ply ) then return end
 
-    if IsValid( veh ) then
-        if not isInVehicle then
-            isInVehicle = true
-            LockOnHandler:Setup( veh )
-        end
+        local vehicle = ply:GlideGetVehicle()
+        if IsValid( vehicle ) and glideVehicle == vehicle then return end
 
-    elseif isInVehicle then
-        isInVehicle = false
         LockOnHandler:Cleanup()
-    end
+        glideVehicle = nil
+    end )
 end )
