@@ -85,10 +85,10 @@ local tHooks = {
 }
 
 local isfunction = isfunction
-
 local sndFixed = GetConVar( "snd_fixed_rate" )
 local bSetSNDFixed = false
 local vguiCursorVisible = vgui.CursorVisible
+
 function Glide.OnEnter( vehicle, seatIndex )
     vehicle:OnLocalPlayerEnter( seatIndex )
     vehicle.isLocalPlayerInVehicle = true
