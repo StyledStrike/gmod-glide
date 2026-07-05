@@ -105,7 +105,6 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
     Glide.StartCommand( Glide.CMD_EXIT_VEHICLE )
     net.Send( ply )
 
-    print("CMD_EXIT_VEHICLE sent for player: " .. ply:Nick() .. ", seatIndex: " .. seatIndex)
 end )
 
 hook.Add( "AcceptInput", "Glide.VehicleAcceptLockInputs", function( ent, inputName )
