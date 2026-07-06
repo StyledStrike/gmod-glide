@@ -66,6 +66,7 @@ end )
     Watch for changes in screen resolution
 ]]
 local UpdateResolution
+
 do
     local screenW, screenH = ScrW(), ScrH()
     local Floor = math.floor
@@ -100,7 +101,10 @@ function StyledTheme.RegisterFont( name, screenSize, data )
     data.extended = true
 
     StyledTheme.fonts[name] = data
-    UpdateResolution()
+
+    -- Use a one-time identified timer, to avoid spamming `UpdateResolution`
+    -- when `RegisterFont` is called repeatedly during Lua initialization.
+    timer.Create( "StyledTheme.ScheduleUpdateResolution", 1, 1, UpdateResolution )
 end
 
 StyledTheme.RegisterFont( "StyledTheme_Small", 0.018, {
