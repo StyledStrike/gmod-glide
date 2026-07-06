@@ -257,6 +257,18 @@ function ENT:Initialize()
     -- Let child classes create things like seats, turrets, etc.
     self:CreateFeatures()
 
+    local sockets = self.Sockets
+    if sockets then
+        for i, socket in ipairs( sockets ) do
+            print( "Creating socket " .. i .. " with id " .. socket.id .. " and isReceptacle = " .. tostring( socket.isReceptacle ) )
+            local ent = ents.Create( "glide_socket" )
+            ent:SetPos( self:LocalToWorld( socket.offset ) )
+            ent:SetAngles( self:LocalToWorldAngles( Angle() ) )
+            ent:InitializeSockets( socket.id, socket.isReceptacle, socket.radius )
+            ent:Spawn()
+        end
+    end
+
     -- Allow players to shoot fast-moving vehicles when their ping is high
     self:SetLagCompensated( true )
 end

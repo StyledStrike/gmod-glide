@@ -4,14 +4,14 @@ ENT.Type = "anim"
 ENT.Base = "base_anim"
 ENT.PrintName = "Socket"
 
-ENT.Spawnable = false
-ENT.AdminOnly = false
+ENT.Spawnable = true
+ENT.AdminOnly = true
 
-ENT.PhysgunDisabled = true
+--ENT.PhysgunDisabled = true
 ENT.DoNotDuplicate = true
 ENT.DisableDuplicator = true
 
+-- TODO: Remove the radius NetworkVar and use the radius property instead
 function ENT:SetupDataTables()
-    self:NetworkVar( "Bool", "HasTarget" )
-    self:NetworkVar( "Float", "Effectiveness" )
+    self:NetworkVar( "Float", 0, "RadiusDev" )
 end
