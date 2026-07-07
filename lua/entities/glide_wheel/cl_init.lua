@@ -1,7 +1,7 @@
 include( "shared.lua" )
 
 local EntityMeta = FindMetaTable( "Entity" )
-local getTable = EntityMeta.GetTable
+local GetTable = EntityMeta.GetTable
 
 function ENT:Initialize()
     self.isActive = false
@@ -109,7 +109,7 @@ local HARD_SURFACES = {
 function ENT:Think()
     local t = CurTime()
 
-    local selfTbl = getTable( self )
+    local selfTbl = GetTable( self )
     self:SetNextClientThink( t + 0.01 )
 
     -- Periodically rotate and resize the wheel model
@@ -124,7 +124,7 @@ function ENT:Think()
     local parent = self:GetParent()
     if not IsValid( parent ) then return true end
 
-    local parentTbl = getTable( parent )
+    local parentTbl = GetTable( parent )
     if not parentTbl.rfMisc then return true end
 
     -- Stop processing when the "rfMisc" RangedFeature

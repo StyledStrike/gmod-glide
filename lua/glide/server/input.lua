@@ -7,7 +7,7 @@ local activeData = Glide.activeInputData or {}
 Glide.activeInputData = activeData
 
 local EntityMeta = FindMetaTable( "Entity" )
-local getTable = EntityMeta.GetTable
+local GetTable = EntityMeta.GetTable
 
 do
     local SetNumber = Glide.SetNumber
@@ -238,7 +238,7 @@ local function HandleMouseInput( ply, active, dt )
     local settings = playerSettings[ply]
     if not settings then return end
 
-    local vehTbl = getTable( vehicle )
+    local vehTbl = GetTable( vehicle )
     local vehType = vehTbl.VehicleType
     local seatIndex = active.seatIndex
 
