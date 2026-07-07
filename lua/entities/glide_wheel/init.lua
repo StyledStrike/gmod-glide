@@ -375,7 +375,7 @@ local EntSetLocalPos = FindMetaTable( "Entity" ).SetLocalPos
 local tractionCycle = Vector()
 local contactPos = Vector()
 
-function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfaceGrip, vehSurfaceResistance, vehPos, vehVel, vehAngVel, vehTbl )
+function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfaceGrip, vehSurfaceResistance, vehPos, vehTbl )
     local selfTbl = GetTable( self )
     local state, params = selfTbl.state, selfTbl.params
 
@@ -430,12 +430,6 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Get the velocity at the wheel position
     local vel = PhysGetVelocityAtPoint( phys, pos )
 
-    -- If the binary module is installed, use it to run the math.
-    --[[if Accelerate then
-        -- TODO
-        return
-    end]]
-
     -- Store some directions, perpendicular to the surface normal
     local upAlign = VectorDot( up, ray.HitNormal )
 
@@ -454,25 +448,23 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     local offset = maxLen - ( state.fraction * maxLen )
     local springForce = ( offset * params.springStrength )
     local damperForce = ( state.lastSpringOffset - offset ) * params.springDamper
+
     state.lastSpringOffset = offset
 
     -- If the suspension spring is going to be fully compressed on the next frame...
-    local didBottomOut = false
+    local hasChangedPos = false
 
     if upAlign > 0.5 and velU < 0 and offset + Abs( velU * dt ) > params.suspensionLength then
-        -- Completely negate the downwards velocity at the local position
-        local linearImp, angularImp = phys:CalculateVelocityOffset( ( -velU / dt ) * up, pos )
-
-        VectorAdd( vehVel, linearImp )
-        VectorAdd( vehAngVel, angularImp )
-
-        -- Teleport back up, using phys:SetPos to prevent going through stuff.
-        linearImp = phys:CalculateVelocityOffset( ray.HitPos - ( contactPos + up * velU * dt ), pos )
-        VectorAdd( vehPos, linearImp / dt )
-
         -- Remove the damping force, to prevent a excessive bounce.
         damperForce = 0
-        didBottomOut = true
+        hasChangedPos = true
+
+        -- Completely negate the downwards velocity
+        springForce = -velU / dt
+
+        -- Teleport back up, using phys:SetPos to prevent going through stuff.
+        local linearImp = phys:CalculateVelocityOffset( ray.HitPos - ( contactPos + up * velU * dt ), pos )
+        VectorAdd( vehPos, linearImp / dt )
     end
 
     local force = ( springForce - damperForce ) * upAlign * up
@@ -549,5 +541,5 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     outAng[2] = outAng[2] + angularImp[2] / dt
     outAng[3] = outAng[3] + angularImp[3] / dt
 
-    return didBottomOut
+    return hasChangedPos
 end

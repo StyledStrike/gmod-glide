@@ -102,12 +102,10 @@ function ENT:PhysicsSimulate( phys, dt )
         local surfaceResistance = selfTbl.surfaceResistance
 
         local vehPos = phys:GetPos()
-        local vehVel = phys:GetVelocity()
-        local vehAngVel = phys:GetAngleVelocity()
         local changedPosCount = 0
 
         for _, w in EntityPairs( selfTbl.wheels ) do
-            if w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, vehVel, vehAngVel, selfTbl ) then
+            if w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, selfTbl ) then
                 changedPosCount = changedPosCount + 1
             end
 
@@ -117,6 +115,9 @@ function ENT:PhysicsSimulate( phys, dt )
         end
 
         if changedPosCount > 0 then
+            local vehVel = phys:GetVelocity()
+            local vehAngVel = phys:GetAngleVelocity()
+
             phys:SetPos( vehPos )
             phys:SetVelocityInstantaneous( vehVel )
             phys:SetAngleVelocityInstantaneous( vehAngVel )
