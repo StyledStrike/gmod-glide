@@ -89,7 +89,7 @@ if SERVER then
     }
 
     ENT.Sockets = {
-        { offset = Vector( -60, 0, 0 ), id = "TruckSocket", isReceptacle = true }
+        { offset = Vector( -60, 0, 0 ), id = "TruckSocket", isReceptacle = true, radius = 25 }
     }
 
     function ENT:GetGears()
