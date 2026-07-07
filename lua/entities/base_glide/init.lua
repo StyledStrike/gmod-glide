@@ -733,11 +733,6 @@ function ENT:Think()
         self:WheelThink( dt, selfTbl )
     end
 
-    -- Update trailer sockets
-    if selfTbl.socketCount > 0 then
-        self:SocketThink( dt, time )
-    end
-
     -- Handle hold input actions
     for action, data in pairs( selfTbl.holdInputActions ) do
         -- If this action has been held for long enough...

@@ -48,38 +48,6 @@ local function AttemptConnection( plug, phys, dt )
     phys:ApplyForceOffset( force * distFactor * phys:GetMass() * dt, plugPos )
 end
 
-function ENT:SocketThink( dt, time )
-    local phys = self:GetPhysicsObject()
-    if not IsValid( phys ) then return end
-
-    for _, socket in ipairs( self.Sockets ) do
-
-        -- If this is a plug socket that has a nearby receptacle...
-        if
-            not socket.isReceptacle and
-            socket.attemptReceptacle and
-            time > ( socket.nextAttemptTime or 0 )
-        then
-            -- Try to connect to it
-            AttemptConnection( socket, phys, dt )
-        end
-
-        -- Check if the socket constrain has been broken
-        if socket.constraint == NULL then
-            socket.constraint = nil
-
-            -- Prevent reconnecting right away
-            if not socket.isReceptacle then
-                socket.nextAttemptTime = time + 3
-            end
-
-            self:UpdateSocketCount()
-            self:OnSocketDisconnect( socket )
-        end
-
-    end
-end
-
 function ENT:DisconnectAllSockets()
     for _, socket in ipairs( self.Sockets ) do
         if IsValid( socket.constraint ) then
