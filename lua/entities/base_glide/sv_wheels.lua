@@ -106,7 +106,7 @@ function ENT:PhysicsSimulate( phys, dt )
         local vehAngVel = phys:GetAngleVelocity()
 
         for _, w in EntityPairs( selfTbl.wheels ) do
-            w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, vehVel, vehAngVel )
+            w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, vehVel, vehAngVel, selfTbl )
 
             if w.state.isOnGround then
                 groundedCount = groundedCount + 1
