@@ -74,6 +74,21 @@ function Glide.TrackVehicleSockets( vehicle )
     end
 end
 
+local IsValid = IsValid
+local IsVehicle = FindMetaTable( "Entity" ).IsVehicle
+local Remove = table.remove
+hook.Add( "EntityRemoved", "Glide.UntrackVehicleSockets", function( vehicle )
+    if not IsValid( vehicle ) or not IsVehicle( vehicle ) then return end
+    if vehicle.socketCount == 0 then return end
+
+    for i = #vehiclesWithSockets, 1, -1 do
+        if vehiclesWithSockets[i] == vehicle then
+            Remove( vehiclesWithSockets, i )
+            break
+        end
+    end
+end )
+
 -- Utility function to find the closest socket to `pos` from a table.
 do
     local dist, closestDist, closestSocket
