@@ -19,12 +19,6 @@ function ENT:OnPostInitialize()
     if IsValid( phys ) then
         phys:SetMaterial( "glass" )
     end
-
-    -- Trigger wire outputs
-    if WireLib then
-        WireLib.TriggerOutput( self, "EngineThrottle", 0 )
-        WireLib.TriggerOutput( self, "EnginePower", 0 )
-    end
 end
 
 --- Implement this base class function.
@@ -86,7 +80,6 @@ local Clamp = math.Clamp
 local WORLD_UP = Vector( 0, 0, 1 )
 
 local ExpDecay = Glide.ExpDecay
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
 
 --- Implement this base class function.
 function ENT:OnPostThink( dt, selfTbl )
@@ -141,9 +134,13 @@ function ENT:OnPostThink( dt, selfTbl )
         end
     end
 
-    if TriggerOutput then
-        TriggerOutput( self, "EngineThrottle", self:GetEngineThrottle() )
-        TriggerOutput( self, "EnginePower", self:GetEnginePower() )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        local wiremodCache = selfTbl.wiremodCache
+
+        TriggerOutputIfChanged( self, wiremodCache, "EngineThrottle", self:GetEngineThrottle() )
+        TriggerOutputIfChanged( self, wiremodCache, "EnginePower", self:GetEnginePower() )
 
         if selfTbl.wireSetEngineOn ~= nil then
             if selfTbl.wireSetEngineOn then

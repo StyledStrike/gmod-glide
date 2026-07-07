@@ -32,7 +32,7 @@ function ENT:OnPostInitialize()
     -- Countermeasure system
     self.countermeasureCD = 0
 
-    -- Trigger wire outputs
+    -- Reset wire outputs
     if WireLib then
         WireLib.TriggerOutput( self, "Power", 0 )
         WireLib.TriggerOutput( self, "Altitude", 0 )
@@ -261,7 +261,7 @@ end
 --- Implement this base class function.
 function ENT:OnPostThink( dt, selfTbl )
     -- Find the altitude
-    self:UpdateAltitude()
+    self:UpdateAltitude( selfTbl )
 
     -- Update landing gear
     if selfTbl.HasLandingGear then
@@ -352,9 +352,8 @@ end
 
 local WORLD_UP = Vector( 0, 0, 1 )
 local TraceLine = util.TraceLine
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
 
-function ENT:UpdateAltitude()
+function ENT:UpdateAltitude( selfTbl )
     local mins = self:OBBMins()
     mins[1] = 0
     mins[2] = 0
@@ -362,10 +361,12 @@ function ENT:UpdateAltitude()
     local traceStart = self:GetPos() + mins * 0.9
     local tr = TraceLine( self:GetTraceData( traceStart, traceStart - WORLD_UP * 10000 ) )
 
-    self.altitude = tr.Hit and tr.Fraction * 10000 or 10000
+    selfTbl.altitude = tr.Hit and tr.Fraction * 10000 or 10000
 
-    if TriggerOutput then
-        TriggerOutput( self, "Altitude", self.altitude )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        TriggerOutputIfChanged( self, selfTbl.wiremodCache, "Altitude", selfTbl.altitude )
     end
 end
 

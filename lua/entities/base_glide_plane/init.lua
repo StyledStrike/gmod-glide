@@ -115,8 +115,6 @@ local ExpDecay = Glide.ExpDecay
 local EntityPairs = Glide.EntityPairs
 
 local IsValid = IsValid
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
-
 local WORLD_DOWN = Vector( 0, 0, -1 )
 
 --- Override this base class function.
@@ -202,8 +200,10 @@ function ENT:OnPostThink( dt, selfTbl )
         end
     end
 
-    if TriggerOutput then
-        TriggerOutput( self, "Power", power )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        TriggerOutputIfChanged( self, selfTbl.wiremodCache, "Power", power )
     end
 
     self:UpdatePlaneWheels( selfTbl )

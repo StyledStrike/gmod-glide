@@ -18,7 +18,7 @@ include( "sh_vehicle_compat.lua" )
 duplicator.RegisterEntityClass( "base_glide", Glide.VehicleFactory, "Data" )
 
 local EntityMeta = FindMetaTable( "Entity" )
-local getTable = EntityMeta.GetTable
+local GetTable = EntityMeta.GetTable
 
 local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
 
@@ -168,6 +168,11 @@ function ENT:Initialize()
     self.surfaceGrip = table.Copy( Glide.SURFACE_GRIP )
     self.surfaceResistance = table.Copy( Glide.SURFACE_RESISTANCE )
 
+    -- Wiremod output cache
+    if TriggerOutput then
+        self.wiremodCache = {}
+    end
+
     -- Setup the chassis model and physics
     self:SetModel( self.ChassisModel )
     self:InitializePhysics()
@@ -297,6 +302,17 @@ function ENT:Use( activator )
     end
 end
 
+if TriggerOutput then
+    -- Utility to trigger Wiremod outputs, but only if the value
+    -- has changed since the last time you called this function.
+    function ENT.TriggerOutputIfChanged( self, cache, name, value )
+        if cache[name] ~= value then
+            cache[name] = value
+            TriggerOutput( self, name, value )
+        end
+    end
+end
+
 function ENT:OnEngineStateChange( _, lastState, state )
     if lastState == 1 and state == 2 then
         self:OnTurnOn()
@@ -305,8 +321,8 @@ function ENT:OnEngineStateChange( _, lastState, state )
         self:OnTurnOff()
     end
 
-    if WireLib then
-        WireLib.TriggerOutput( self, "EngineState", state )
+    if TriggerOutput then
+        TriggerOutput( self, "EngineState", state )
     end
 end
 
@@ -642,7 +658,7 @@ local GetDevMode = Glide.GetDevMode
 
 function ENT:Think()
     local dt = TickInterval()
-    local selfTbl = getTable( self )
+    local selfTbl = GetTable( self )
 
     -- Run again next tick
     local time = CurTime()
