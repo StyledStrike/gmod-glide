@@ -264,7 +264,8 @@ function ENT:Initialize()
             local ent = ents.Create( "glide_socket" )
             ent:SetPos( self:LocalToWorld( socket.offset ) )
             ent:SetAngles( self:LocalToWorldAngles( Angle() ) )
-            ent:InitializeSockets( socket.id, socket.isReceptacle, socket.radius )
+            ent:InitializeSockets( socket )
+            ent:SetParent( self )
             ent:Spawn()
         end
     end
