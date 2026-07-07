@@ -422,7 +422,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     end
 
     if not ray.Hit then
-        return
+        return false
     end
 
     pos = contactPos
@@ -457,6 +457,8 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     state.lastSpringOffset = offset
 
     -- If the suspension spring is going to be fully compressed on the next frame...
+    local didBottomOut = false
+
     if upAlign > 0.5 and velU < 0 and offset + Abs( velU * dt ) > params.suspensionLength then
         -- Completely negate the downwards velocity at the local position
         local linearImp, angularImp = phys:CalculateVelocityOffset( ( -velU / dt ) * up, pos )
@@ -470,6 +472,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
 
         -- Remove the damping force, to prevent a excessive bounce.
         damperForce = 0
+        didBottomOut = true
     end
 
     local force = ( springForce - damperForce ) * upAlign * up
@@ -545,4 +548,6 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     outAng[1] = outAng[1] + angularImp[1] / dt
     outAng[2] = outAng[2] + angularImp[2] / dt
     outAng[3] = outAng[3] + angularImp[3] / dt
+
+    return didBottomOut
 end
