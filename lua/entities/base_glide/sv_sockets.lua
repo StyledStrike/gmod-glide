@@ -5,49 +5,6 @@ function ENT:SocketInit()
     Glide.TrackVehicleSockets( self )
 end
 
-local function AttemptConnection( plug, phys, dt )
-    local receptacle = plug.attemptReceptacle
-    local plugVeh = plug.vehicle
-    local receptacleVeh = receptacle.vehicle
-
-    -- Make sure the the other vehicle is still valid,
-    -- otherwise stop the attempt.
-    if not IsValid( receptacleVeh ) then
-        plug.attemptReceptacle = nil
-        return
-    end
-
-    -- Make sure the plug is still in range of the receptacle,
-    -- otherwise stop the attempt.
-    local plugPos = plugVeh:LocalToWorld( plug.offset )
-    local receptaclePos = receptacleVeh:LocalToWorld( receptacle.offset )
-    local distFactor = receptaclePos:Distance( plugPos ) / 80
-
-    if distFactor > 1 then
-        plug.attemptReceptacle = nil
-        return
-    end
-
-    -- If we're close enough, connect now
-    if distFactor < 0.02 then
-        plug.attemptReceptacle = nil
-        Glide.SocketConnect( plug, receptacle, receptacle.forceLimit or 80000 )
-
-        return
-    end
-
-    -- Try to push the plug towards the receptacle
-    local dir = receptaclePos - plugPos
-    dir:Normalize()
-
-    local force = dir * ( plug.connectForce or 700 )
-
-    force = force - phys:GetVelocityAtPoint( plugPos ) * ( plug.connectDrag or 15 )
-    distFactor = 1 - distFactor
-
-    phys:ApplyForceOffset( force * distFactor * phys:GetMass() * dt, plugPos )
-end
-
 function ENT:DisconnectAllSockets()
     for _, socket in ipairs( self.Sockets ) do
         if IsValid( socket.constraint ) then
