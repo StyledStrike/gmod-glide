@@ -7,7 +7,7 @@ ENT.PrintName = "Socket"
 ENT.Spawnable = true
 ENT.AdminOnly = true
 
---ENT.PhysgunDisabled = true
+ENT.PhysgunDisabled = true
 ENT.DoNotDuplicate = true
 ENT.DisableDuplicator = true
 
