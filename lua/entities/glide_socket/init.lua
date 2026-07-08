@@ -8,7 +8,7 @@ function ENT:Initialize()
     self:SetSolid( SOLID_BBOX )
     self:SetSolidFlags( bit.bor( FSOLID_TRIGGER, FSOLID_TRIGGER_TOUCH_DEBRIS, FSOLID_USE_TRIGGER_BOUNDS ) )
     self:SetCollisionGroup( COLLISION_GROUP_WORLD )
-    --self:SetNoDraw( true )
+    self:SetNoDraw( true )
 
     self.radius = self.radius or 80
     local vecRadius = Vector( self.radius, self.radius, self.radius )
