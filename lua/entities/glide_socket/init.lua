@@ -101,3 +101,13 @@ function ENT:Touch( ent )
 
     AttemptConnection( socketPlug, socketReceptacle, eVehicleTarget:GetPhysicsObject(), TickInterval() )
 end
+
+local GetDevMode = Glide.GetDevMode
+function ENT:Think()
+    self:NextThink( CurTime() + 0.1 )
+
+    if not GetDevMode() then return end
+
+    debugoverlay.Cross( self:GetPos(), 8, 0.1, Color( 255, 145, 0 ), true )
+    debugoverlay.Text( self:GetPos(), ( "%s | isReceptacle: %s" ):format( self.id, tostring( self.isReceptacle ) ), 0.1, false )
+end
