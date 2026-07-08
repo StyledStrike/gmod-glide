@@ -2,21 +2,18 @@ AddCSLuaFile( "shared.lua" )
 
 include( "shared.lua" )
 
+local SOLID_FLAGS = bit.bor( FSOLID_TRIGGER, FSOLID_TRIGGER_TOUCH_DEBRIS, FSOLID_USE_TRIGGER_BOUNDS )
 function ENT:Initialize()
     self:SetModel( "models/hunter/blocks/cube025x025x025.mdl" )
     self:SetMoveType( MOVETYPE_NONE )
     self:SetSolid( SOLID_BBOX )
-    self:SetSolidFlags( bit.bor( FSOLID_TRIGGER, FSOLID_TRIGGER_TOUCH_DEBRIS, FSOLID_USE_TRIGGER_BOUNDS ) )
+    self:SetSolidFlags( SOLID_FLAGS )
     self:SetCollisionGroup( COLLISION_GROUP_WORLD )
     self:SetNoDraw( true )
 
     self.radius = self.radius or 80
     local vecRadius = Vector( self.radius, self.radius, self.radius )
     self:SetCollisionBounds( -vecRadius, vecRadius )
-end
-
-function ENT:GetID()
-    return self.id
 end
 
 function ENT:InitializeSockets( socket )
