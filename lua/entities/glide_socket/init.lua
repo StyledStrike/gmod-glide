@@ -32,9 +32,6 @@ function ENT:InitializeSockets( socket )
         self.connectForce = socket.connectForce or 700
         self.connectDrag = socket.connectDrag or 15
     end
-
-    -- TODO: Remove the radius NetworkVar
-    self:SetRadiusDev( self.radius )
 end
 
 function ENT:GetIsReceptable()
