@@ -259,8 +259,7 @@ function ENT:Initialize()
 
     local sockets = self.Sockets
     if sockets then
-        for i, socket in ipairs( sockets ) do
-            print( "Creating socket " .. i .. " with id " .. socket.id .. " and isReceptacle = " .. tostring( socket.isReceptacle ) )
+        for _, socket in ipairs( sockets ) do
             local ent = ents.Create( "glide_socket" )
             ent:SetPos( self:LocalToWorld( socket.offset ) )
             ent:SetAngles( self:LocalToWorldAngles( Angle() ) )
