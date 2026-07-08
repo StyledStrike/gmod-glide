@@ -65,6 +65,7 @@ function Glide.SocketConnect( socketPlug, socketReceptacle, forceLimit )
     receptacleVeh:OnSocketConnect( socketReceptacle, plugVeh )
 end
 
+-- Backward compatibility: this might be useful for other add-ons, but it is not necessary for Glide.
 local vehiclesWithSockets = Glide.vehiclesWithSockets or {}
 Glide.vehiclesWithSockets = vehiclesWithSockets
 
