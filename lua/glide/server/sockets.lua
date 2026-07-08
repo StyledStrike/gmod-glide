@@ -7,7 +7,10 @@
 ]]
 
 --- Utility function to connect two vehicle sockets together.
+local IsValid = IsValid
 function Glide.SocketConnect( socketPlug, socketReceptacle, forceLimit )
+    if not IsValid( socketPlug ) or not IsValid( socketReceptacle ) then return end
+
     local plugVeh = socketPlug:GetParent()
     local receptacleVeh = socketReceptacle:GetParent()
 
@@ -16,14 +19,10 @@ function Glide.SocketConnect( socketPlug, socketReceptacle, forceLimit )
     if not IsValid( receptacleVeh ) then return end
 
     -- Remove existing plug constaint
-    if IsValid( socketPlug.constraint ) then
-        socketPlug.constraint:Remove()
-    end
+    socketPlug:Disconnect()
 
     -- Remove existing receptacle constaint
-    if IsValid( socketReceptacle.constraint ) then
-        socketReceptacle.constraint:Remove()
-    end
+    socketReceptacle:Disconnect()
 
     -- Try to create a ballsocket constaint
     local constr = constraint.Ballsocket( plugVeh, receptacleVeh, 0, 0, socketReceptacle.vecOffset, forceLimit, 0, 0 )
@@ -75,11 +74,9 @@ function Glide.TrackVehicleSockets( vehicle )
     end
 end
 
-local IsValid = IsValid
-local IsVehicle = FindMetaTable( "Entity" ).IsVehicle
 local Remove = table.remove
 hook.Add( "EntityRemoved", "Glide.UntrackVehicleSockets", function( vehicle )
-    if not IsValid( vehicle ) or not IsVehicle( vehicle ) then return end
+    if not IsValid( vehicle ) then return end
     if vehicle.socketCount == 0 then return end
 
     for i = #vehiclesWithSockets, 1, -1 do

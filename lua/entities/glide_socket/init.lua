@@ -108,3 +108,15 @@ function ENT:Think()
     debugoverlay.Cross( self:GetPos(), 8, 0.1, Color( 255, 145, 0 ), true )
     debugoverlay.Text( self:GetPos(), ( "%s | isReceptacle: %s" ):format( self.id, tostring( self.isReceptacle ) ), 0.1, false )
 end
+
+function ENT:Disconnect()
+    if IsValid( self.constraint ) then
+        self.constraint:Remove()
+    end
+
+    self.constraint = nil
+end
+
+function ENT:CanTool()
+    return false
+end

@@ -8,8 +8,8 @@ end
 function ENT:DisconnectAllSockets()
     for _, socket in ipairs( self.Sockets ) do
         local eSocket = socket.entity
-        if IsValid( eSocket ) and IsValid( eSocket.constraint ) then
-            eSocket.constraint:Remove()
+        if IsValid( eSocket ) then
+            eSocket:Disconnect()
         end
     end
 end
