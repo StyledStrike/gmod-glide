@@ -267,6 +267,8 @@ function ENT:Initialize()
             ent:InitializeSockets( socket )
             ent:SetParent( self )
             ent:Spawn()
+
+            socket.entity = ent
         end
     end
 

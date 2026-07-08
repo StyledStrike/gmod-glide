@@ -7,8 +7,9 @@ end
 
 function ENT:DisconnectAllSockets()
     for _, socket in ipairs( self.Sockets ) do
-        if IsValid( socket.constraint ) then
-            socket.constraint:Remove()
+        local eSocket = socket.entity
+        if IsValid( eSocket ) and IsValid( eSocket.constraint ) then
+            eSocket.constraint:Remove()
         end
     end
 end
@@ -17,7 +18,8 @@ function ENT:UpdateSocketCount()
     local connectedReceptacles = 0
 
     for _, socket in ipairs( self.Sockets ) do
-        if socket.isReceptacle and IsValid( socket.constraint ) then
+        local eSocket = socket.entity
+        if socket.isReceptacle and IsValid( eSocket ) and IsValid( eSocket.constraint ) then
             connectedReceptacles = connectedReceptacles + 1
         end
     end
