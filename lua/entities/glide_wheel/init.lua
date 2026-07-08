@@ -460,7 +460,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
         hasChangedPos = true
 
         -- Completely negate the downwards velocity
-        springForce = -velU / dt
+        springForce = springForce - ( velU / dt )
 
         -- Teleport back up, using phys:SetPos to prevent going through stuff.
         local linearImp = phys:CalculateVelocityOffset( ray.HitPos - ( contactPos + up * velU * dt ), pos )
