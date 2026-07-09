@@ -79,6 +79,8 @@ local function DrawVehicleHUD()
     end
 end
 
+local calcViewFunctions = {}
+
 local function OnEnter( vehicle, seatIndex )
     vehicle:OnLocalPlayerEnter( seatIndex )
     vehicle.isLocalPlayerInVehicle = true
@@ -104,12 +106,18 @@ local function OnEnter( vehicle, seatIndex )
         RunConsoleCommand( "snd_fixed_rate", "1" )
     end
 
-    -- Simple ThirdPerson compatibility
-    local func = hook.GetTable()["CalcView"]["SimpleTP.Camera.View"]
+    -- Forcibly disable hooks from camera addons defined on Glide.CAMERA_CALC_VIEW_HOOKS
+    local calcViewHookTable = hook.GetTable()["CalcView"]
 
-    if func then
-        Glide.simpleThirdPersonHook = func
-        hook.Remove( "CalcView", "SimpleTP.Camera.View" )
+    if calcViewHookTable then
+        for hookId, _ in pairs( Glide.CAMERA_CALC_VIEW_HOOKS ) do
+            local func = calcViewHookTable[hookId]
+
+            if func then
+                calcViewFunctions[hookId] = func
+                hook.Remove( "CalcView", hookId )
+            end
+        end
     end
 end
 
@@ -137,13 +145,13 @@ local function OnLeave( ply )
         RunConsoleCommand( "snd_fixed_rate", "0" )
     end
 
-    -- Simple ThirdPerson compatibility
-    if Glide.simpleThirdPersonHook then
-        hook.Add( "CalcView", "SimpleTP.Camera.View", Glide.simpleThirdPersonHook )
-    end
-
     timer.Remove( "Glide.CheckMouseVisibility" )
     cvarIsMouseVisible:SetInt( 0 )
+
+    -- Restore disabled hooks from camera addons defined on Glide.CAMERA_CALC_VIEW_HOOKS
+    for hookId, func in pairs( calcViewFunctions ) do
+        hook.Add( "CalcView", hookId, func )
+    end
 end
 
 local IsValid = IsValid

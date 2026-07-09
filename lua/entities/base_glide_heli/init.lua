@@ -5,6 +5,8 @@ include( "shared.lua" )
 
 DEFINE_BASECLASS( "base_glide_aircraft" )
 
+duplicator.RegisterEntityClass( "base_glide_heli", Glide.VehicleFactory, "Data" )
+
 --- Override this base class function.
 function ENT:OnPostInitialize()
     BaseClass.OnPostInitialize( self )
@@ -122,7 +124,6 @@ end
 
 local Approach = math.Approach
 local ExpDecay = Glide.ExpDecay
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
 
 --- Override this base class function.
 function ENT:OnPostThink( dt, selfTbl )
@@ -201,8 +202,10 @@ function ENT:OnPostThink( dt, selfTbl )
         end
     end
 
-    if TriggerOutput then
-        TriggerOutput( self, "Power", power )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        TriggerOutputIfChanged( self, selfTbl.wiremodCache, "Power", power )
     end
 end
 

@@ -5,6 +5,8 @@ include( "shared.lua" )
 
 DEFINE_BASECLASS( "base_glide_car" )
 
+duplicator.RegisterEntityClass( "base_glide_tank", Glide.VehicleFactory, "Data" )
+
 --- Implement this base class function.
 function ENT:OnPostInitialize()
     BaseClass.OnPostInitialize( self )

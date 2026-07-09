@@ -6,6 +6,8 @@ DEFINE_BASECLASS( "base_glide" )
 include( "shared.lua" )
 include( "sv_engine.lua" )
 
+duplicator.RegisterEntityClass( "base_glide_car", Glide.VehicleFactory, "Data" )
+
 --- Implement this base class function.
 function ENT:OnPostInitialize()
     -- Setup variables used on all cars
@@ -97,7 +99,7 @@ function ENT:OnPostInitialize()
     -- Update power distribution next tick
     self.shouldUpdatePowerDistribution = true
 
-    -- Trigger wire outputs
+    -- Reset wire outputs
     if WireLib then
         WireLib.TriggerOutput( self, "MaxGear", self.maxGear )
         WireLib.TriggerOutput( self, "Gear", 0 )
@@ -290,8 +292,6 @@ function ENT:OnSocketDisconnect( socket )
     } )
 end
 
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
-
 function ENT:ChangeSirenState( state )
     if not self.CanSwitchSiren then return end
 
@@ -302,8 +302,8 @@ function ENT:ChangeSirenState( state )
 
     self:SetSirenState( state )
 
-    if TriggerOutput then
-        TriggerOutput( self, "SirenState", state )
+    if WireLib then
+        WireLib.TriggerOutput( self, "SirenState", state )
     end
 end
 
@@ -363,12 +363,15 @@ function ENT:OnPostThink( dt, selfTbl )
     end
 
     local state = self:GetEngineState()
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
 
-    if TriggerOutput then
+    if TriggerOutputIfChanged then
+        local wiremodCache = selfTbl.wiremodCache
         local maxRPM = self:GetMaxRPM()
-        TriggerOutput( self, "MaxRPM", maxRPM )
-        TriggerOutput( self, "Gear", self:GetGear() )
-        TriggerOutput( self, "EngineRPM", Clamp( self:GetFlywheelRPM(), 0, maxRPM ) )
+
+        TriggerOutputIfChanged( self, wiremodCache, "MaxRPM", maxRPM )
+        TriggerOutputIfChanged( self, wiremodCache, "Gear", self:GetGear() )
+        TriggerOutputIfChanged( self, wiremodCache, "EngineRPM", Clamp( self:GetFlywheelRPM(), 0, maxRPM ) )
 
         if selfTbl.wireSetEngineOn ~= nil then
             if selfTbl.wireSetEngineOn then

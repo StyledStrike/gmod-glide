@@ -42,6 +42,8 @@ function ENT:PostEntityPaste( ply, ent, createdEntities )
     self:SetReloadDelay( self.reloadDelay )
     self:SetExplosionRadius( self.explosionRadius )
     self:SetExplosionDamage( self.explosionDamage )
+
+    self.nextShoot = CurTime() + self.reloadDelay
 end
 
 local function MakeSpawner( ply, data )
@@ -99,7 +101,7 @@ function ENT:Initialize()
     self.projectileScale = 1
 
     self.isFiring = false
-    self.nextShoot = 0
+    self.nextShoot = CurTime() + self.reloadDelay
     self.lastPos = Vector()
 
     if WireLib then

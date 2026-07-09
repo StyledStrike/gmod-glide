@@ -51,32 +51,32 @@ list.Set( "GlideProjectileModels", "models/props_phx/misc/potato_launcher_explos
 -- Find and register all entities that are children of `base_glide`
 -- (or any of it's children classes) on the duplicator/entity limit system.
 -- Also add them to a separate list, and make them spawnable on Starfall.
-hook.Add( "InitPostEntity", "Glide.RegisterEntityClasses", function()
-    local IsBasedOn = scripted_ents.IsBasedOn
-    local RegisterEntityClass = duplicator.RegisterEntityClass
+if SERVER then
+    hook.Add( "InitPostEntity", "Glide.RegisterStarfallClasses", function()
+        if SF == nil then return end
 
-    local isStarfallAvailable = SF ~= nil
-    local starfallData = { {} }
+        local starfallData = { {} }
 
-    for class, data in pairs( scripted_ents.GetList() ) do
-        if IsBasedOn( class, "base_glide" ) then
-            if SERVER then
-                RegisterEntityClass( class, Glide.VehicleFactory, "Data" )
-
-                if isStarfallAvailable then
-                    list.Set( "starfall_creatable_sent", class, starfallData )
-                end
-            end
-
-            local entTable = data["t"]
-
-            if entTable and entTable.GlideCategory then
-                list.Set( "GlideVehicles", class, {
-                    Name = entTable.PrintName or class,
-                    Category = entTable.GlideCategory or "Default",
-                    Model = entTable.ChassisModel
-                } )
-            end
+        for class, _ in pairs( list.Get( "GlideVehicles" ) ) do
+            list.Set( "starfall_creatable_sent", class, starfallData )
         end
+    end )
+end
+
+local RegisterEntityClass = duplicator.RegisterEntityClass
+
+hook.Add( "PreRegisterSENT", "Glide.RegisterEntityClasses", function( tbl, class )
+    if not tbl or not class then return end
+    if not tbl.GlideCategory or tbl.GlideCategory == "" then return end
+
+    if SERVER then
+        RegisterEntityClass( class, Glide.VehicleFactory, "Data" )
     end
+
+    list.Set( "GlideVehicles", class, {
+        Name = tbl.PrintName or class,
+        Category = tbl.GlideCategory or "Default",
+        IconOverride = tbl.IconOverride,
+        Model = tbl.ChassisModel
+    } )
 end )
