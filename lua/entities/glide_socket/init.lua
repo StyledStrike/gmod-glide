@@ -16,12 +16,19 @@ function ENT:Initialize()
     self:SetCollisionBounds( -vecRadius, vecRadius )
 end
 
-function ENT:InitializeSockets( socket )
+local IsValid = IsValid
+function ENT:InitializeSocket( socket, vehicle )
+    if not IsValid( vehicle ) then return end
+
+    local vPos = socket.offset or Vector()
+    self:SetPos( vehicle:LocalToWorld( vPos ) )
+    self:SetAngles( vehicle:LocalToWorldAngles( Angle() ) )
+
     self.id = socket.id
     self.isReceptacle = socket.isReceptacle
     self.radius = socket.radius or 80
     self.radiussqrt = self.radius * self.radius
-    self.vecOffset = socket.offset or Vector()
+    self.vecOffset = vPos
 
     if socket.isReceptacle then
         self.forceLimit = socket.forceLimit or 80000
@@ -35,7 +42,6 @@ function ENT:GetIsReceptable()
     return self.isReceptacle
 end
 
-local IsValid = IsValid
 local GetClass = FindMetaTable( "Entity" ).GetClass
 local GetParent = FindMetaTable( "Entity" ).GetParent
 

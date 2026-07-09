@@ -261,9 +261,7 @@ function ENT:Initialize()
     if sockets then
         for _, socket in ipairs( sockets ) do
             local ent = ents.Create( "glide_socket" )
-            ent:SetPos( self:LocalToWorld( socket.offset ) )
-            ent:SetAngles( self:LocalToWorldAngles( Angle() ) )
-            ent:InitializeSockets( socket )
+            ent:InitializeSocket( socket, self )
             ent:SetParent( self )
             ent:Spawn()
 
