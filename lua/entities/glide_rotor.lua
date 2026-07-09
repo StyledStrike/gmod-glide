@@ -160,7 +160,6 @@ end
 local GetDevMode = Glide.GetDevMode
 
 --- Check if the rotor blades are hitting things.
-local color_red = Color( 255, 0, 0 )
 function ENT:CheckRotorClearance( dt, parent )
     -- The trace will use a spinning angle separate from the model
     self.traceAngle = ( self.traceAngle + dt * 1600 ) % 360
@@ -177,7 +176,7 @@ function ENT:CheckRotorClearance( dt, parent )
     data.endpos = origin + dir * self.radius
 
     if GetDevMode() then
-        debugoverlay.Line( data.start, data.endpos, 0.05, color_red, true )
+        debugoverlay.Line( data.start, data.endpos, 0.05, Color( 255, 0, 0 ), true )
     end
 
     local tr = TraceHull( data )

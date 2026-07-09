@@ -97,7 +97,6 @@ local L = StyledTheme.GetUpperLanguagePhrase
 
 local PANEL = {}
 
-local BLACK_COLOR = Color( 0, 0, 0, 255 )
 function PANEL:Init()
     local frameW, frameH = ScaleSize( 1000 ), ScaleSize( 700 )
 
@@ -138,7 +137,7 @@ function PANEL:Init()
     panelFooter:DockPadding( ScaleSize( 4 ), ScaleSize( 4 ), ScaleSize( 4 ), ScaleSize( 4 ) )
 
     panelFooter.Paint = function( _, w, h )
-        surface.SetDrawColor( BLACK_COLOR )
+        surface.SetDrawColor( 0, 0, 0, 255 )
         surface.DrawRect( 0, 0, w, h )
     end
 

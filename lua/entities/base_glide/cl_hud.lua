@@ -10,7 +10,6 @@ do
         ["square"] = "glide/aim_square.png"
     }
 
-    local color_green = Color( 100, 255, 100 )
     function ENT:EnableCrosshair( params )
         params = params or {}
 
@@ -19,7 +18,7 @@ do
             icon = CROSSHAIR_ICONS[params.iconType or "dot"],
 
             size = params.size or 0.05,
-            color = params.color or color_green
+            color = params.color or Color( 100, 255, 100 )
         }
     end
 

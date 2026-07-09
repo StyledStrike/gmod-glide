@@ -375,8 +375,6 @@ local EntSetLocalPos = FindMetaTable( "Entity" ).SetLocalPos
 local tractionCycle = Vector()
 local contactPos = Vector()
 
-local color_gray = Color( 100, 100, 100 )
-local color_green = Color( 0, 200, 0 )
 function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfaceGrip, vehSurfaceResistance, vehPos, vehTbl )
     local selfTbl = GetTable( self )
     local state, params = selfTbl.state, selfTbl.params
@@ -419,8 +417,8 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     state.lastSurfaceId = surfaceId
 
     if state.isDebugging then
-        debugoverlay.Cross( pos, 10, 0.05, color_gray, true )
-        debugoverlay.Box( contactPos, traceData.mins, traceData.maxs, 0.05, color_green )
+        debugoverlay.Cross( pos, 10, 0.05, Color( 100, 100, 100 ), true )
+        debugoverlay.Box( contactPos, traceData.mins, traceData.maxs, 0.05, Color( 0, 200, 0 ) )
     end
 
     if not ray.Hit then

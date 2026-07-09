@@ -123,15 +123,13 @@ function TOOL:Reload( trace )
 end
 
 local TEXT_COLOR = Color( 255, 255, 255, 255 )
-local COLOR_BACKGROUND = Color( 30, 30, 30, 255 )
-local COLOR_HEADER = Color( 70, 70, 70, 255 )
 local HEADER_HEIGHT = 28
 
 local function CategoryPaint( s, w, h )
-    surface.SetDrawColor( COLOR_BACKGROUND )
+    surface.SetDrawColor( 30, 30, 30, 255 )
     surface.DrawRect( 0, 0, w, h )
 
-    surface.SetDrawColor( COLOR_HEADER )
+    surface.SetDrawColor( 70, 70, 70, 255 )
     surface.DrawRect( 0, 0, w, HEADER_HEIGHT )
 
     draw.SimpleText( s._name, "Trebuchet18", 4, HEADER_HEIGHT * 0.5, TEXT_COLOR, 0, 1 )

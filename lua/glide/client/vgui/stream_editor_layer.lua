@@ -372,7 +372,6 @@ end
 
 local COLOR_HEADER = Color( 60, 60, 60 )
 local COLOR_LIST_HEADER = Color( 40, 40, 40, 255 )
-local COLOR_LAYER = Color( 13, 122, 13, 255 )
 local SimpleText = draw.SimpleText
 
 function PANEL:Paint( w, h )
@@ -383,7 +382,7 @@ function PANEL:Paint( w, h )
     DrawRect( 0, 0, w, headerHeight, COLOR_HEADER )
 
     if self.layerData then
-        surface.SetDrawColor( COLOR_LAYER )
+        surface.SetDrawColor( 13, 122, 13, 255 )
         surface.DrawRect( 1, 1, ( w - 2 ) * self.layerData.volume, headerHeight - 2 )
 
         SimpleText( self.id, "StyledTheme_Small", padding, headerHeight * 0.5, colors.buttonText, 0, 1 )
