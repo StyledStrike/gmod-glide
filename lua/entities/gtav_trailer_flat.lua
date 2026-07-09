@@ -28,7 +28,7 @@ if SERVER then
     ENT.SuspensionHeavySound = "Glide.Suspension.CompressTruck"
 
     ENT.Sockets = {
-        { offset = Vector( 213.5, 0, 5 ), id = "TruckSocket", isReceptacle = false }
+        { offset = Vector( 213.5, 0, 5 ), id = "TruckSocket", isReceptacle = false, radius = 25 }
     }
 
     ENT.LightBodygroups = {

@@ -262,6 +262,18 @@ function ENT:Initialize()
     -- Let child classes create things like seats, turrets, etc.
     self:CreateFeatures()
 
+    local sockets = self.Sockets
+    if sockets then
+        for _, socket in ipairs( sockets ) do
+            local ent = ents.Create( "glide_socket" )
+            ent:InitializeSocket( socket, self )
+            ent:SetParent( self )
+            ent:Spawn()
+
+            socket.entity = ent
+        end
+    end
+
     -- Allow players to shoot fast-moving vehicles when their ping is high
     self:SetLagCompensated( true )
 end
@@ -734,11 +746,6 @@ function ENT:Think()
     -- Update wheels
     if selfTbl.wheelCount > 0 then
         self:WheelThink( dt, selfTbl )
-    end
-
-    -- Update trailer sockets
-    if selfTbl.socketCount > 0 then
-        self:SocketThink( dt, time )
     end
 
     -- Handle hold input actions
