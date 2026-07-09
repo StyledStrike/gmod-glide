@@ -382,7 +382,7 @@ function PANEL:Paint( w, h )
     DrawRect( 0, 0, w, headerHeight, COLOR_HEADER )
 
     if self.layerData then
-        surface.SetDrawColor( 13, 122, 13, 255 )
+        surface.SetDrawColor( 13, 122, 13 )
         surface.DrawRect( 1, 1, ( w - 2 ) * self.layerData.volume, headerHeight - 2 )
 
         SimpleText( self.id, "StyledTheme_Small", padding, headerHeight * 0.5, colors.buttonText, 0, 1 )
