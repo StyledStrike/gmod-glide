@@ -519,7 +519,7 @@ function ENT:UpdateSteering( dt, selfTbl )
     self:SetSteering( inputSteer )
     selfTbl.steerAngle[2] = -inputSteer * self:GetMaxSteerAngle()
 
-    -- Reduce front wheel sideways friction when trying to do a J-turn 
+    -- Reduce front wheel sideways friction when trying to do a J-turn
     if selfTbl.forwardSpeed < -100 then
         selfTbl.jTurnMultiplier = 0.5
     else
@@ -629,6 +629,8 @@ function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
 end
 
 local EntityPairs = Glide.EntityPairs
+local EntityMeta = FindMetaTable( "Entity" )
+local GetTable = EntityMeta.GetTable
 
 local traction, tractionFront, tractionRear
 local frontTorque, rearTorque, steerAngle, frontBrake, rearBrake
@@ -653,7 +655,8 @@ function ENT:WheelThink( dt, selfTbl )
     groundedCount, avgRPM, totalSideSlip, totalForwardSlip = 0, 0, 0, 0
 
     for _, w in EntityPairs( selfTbl.wheels ) do
-        w:Update( self, steerAngle, isAsleep, dt )
+        local wheelTbl = GetTable( w )
+        wheelTbl.Update( w, self, steerAngle, isAsleep, dt, wheelTbl )
 
         totalSideSlip = totalSideSlip + w:GetSideSlip()
         totalForwardSlip = totalForwardSlip + w:GetForwardSlip()

@@ -55,17 +55,18 @@ function ENT:GetYawDragMultiplier()
     return 1
 end
 
+local EntityMeta = FindMetaTable( "Entity" )
+local GetTable = EntityMeta.GetTable
+
 function ENT:WheelThink( dt, selfTbl )
     local phys = self:GetPhysicsObject()
     local isAsleep = phys:IsValid() and phys:IsAsleep()
 
-    for _, w in EntityPairs( self.wheels ) do
-        w:Update( self, selfTbl.steerAngle, isAsleep, dt )
+    for _, w in EntityPairs( selfTbl.wheels ) do
+        local wheelTbl = GetTable( w )
+        wheelTbl.Update( w, self, selfTbl.steerAngle, isAsleep, dt, wheelTbl )
     end
 end
-
-local EntityMeta = FindMetaTable( "Entity" )
-local GetTable = EntityMeta.GetTable
 
 local VectorUnpack = FindMetaTable( "Vector" ).Unpack
 local VectorSetUnpacked = FindMetaTable( "Vector" ).SetUnpacked

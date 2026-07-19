@@ -232,8 +232,7 @@ do
     local Deg = math.deg
     local Approach = math.Approach
 
-    function ENT:Update( vehicle, steerAngle, isAsleep, dt )
-        local selfTbl = GetTable( self )
+    function ENT:Update( vehicle, steerAngle, isAsleep, dt, selfTbl )
         local state, params = selfTbl.state, selfTbl.params
 
         -- Get the wheel rotation relative to the vehicle, while applying the steering angle
