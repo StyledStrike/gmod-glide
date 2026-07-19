@@ -295,29 +295,29 @@ local DEFAULT_SIREN_COLOR = Color( 255, 255, 255, 255 )
 --- Implement this base class function.
 function ENT:OnUpdateMisc()
     local dt = FrameTime()
-    local rpmFraction = ( self:GetEngineRPM() - self:GetMinRPM() ) / ( self:GetMaxRPM() - self:GetMinRPM() )
+    local selfTbl = self:GetTable()
+    local rpmFraction = ( selfTbl.GetEngineRPM( self ) - selfTbl.GetMinRPM( self ) ) / ( selfTbl.GetMaxRPM( self ) - selfTbl.GetMinRPM( self ) )
 
-    self.rpmFraction = ExpDecay( self.rpmFraction, rpmFraction, rpmFraction > self.rpmFraction and 7 or 4, dt )
+    selfTbl.rpmFraction = ExpDecay( selfTbl.rpmFraction, rpmFraction, rpmFraction > selfTbl.rpmFraction and 7 or 4, dt )
 
     -- Siren lights/bodygroups
-    local siren = self:GetSirenState()
+    local siren = selfTbl.GetSirenState( self )
 
-    if self.lastSirenState ~= siren then
-        self.lastSirenState = siren
+    if selfTbl.lastSirenState ~= siren then
+        selfTbl.lastSirenState = siren
 
         if siren > 1 then
-            self.lastSirenEnableTime = CurTime()
-
-        elseif self.lastSirenEnableTime then
-            if CurTime() - self.lastSirenEnableTime < 0.25 then
-                Glide.PlaySoundSet( self.SirenInterruptSound, self, self.SirenVolume )
+            selfTbl.lastSirenEnableTime = CurTime()
+        elseif selfTbl.lastSirenEnableTime then
+            if CurTime() - selfTbl.lastSirenEnableTime < 0.25 then
+                Glide.PlaySoundSet( selfTbl.SirenInterruptSound, self, selfTbl.SirenVolume )
             end
 
-            self.lastSirenEnableTime = nil
+            selfTbl.lastSirenEnableTime = nil
         end
 
         -- Set bodygroups to default
-        for _, v in ipairs( self.SirenLights ) do
+        for _, v in ipairs( selfTbl.SirenLights ) do
             if v.bodygroup then
                 self:SetBodygroup( v.bodygroup, 0 )
             end
@@ -327,12 +327,12 @@ function ENT:OnUpdateMisc()
     if siren < 1 then return end
 
     local myPos = self:GetPos()
-    local t = ( CurTime() % self.SirenCycle ) / self.SirenCycle
+    local t = ( CurTime() % selfTbl.SirenCycle ) / selfTbl.SirenCycle
     local on, pos, dir, radius
 
     local bodygroupState = {}
 
-    for _, v in ipairs( self.SirenLights ) do
+    for _, v in ipairs( selfTbl.SirenLights ) do
         on = t > v.time and t < v.time + ( v.duration or 0.125 )
 
         -- Check for optional bodygroup requirement
