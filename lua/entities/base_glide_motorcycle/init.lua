@@ -205,7 +205,7 @@ function ENT:OnSimulatePhysics( phys, _, outLin, outAng, selfTbl )
     outAng[1] = outAng[1] + angVel[1] * mass * selfTbl.KeepUprightDrag
     outAng[1] = outAng[1] + dot * mass * selfTbl.KeepUprightForce
 
-    local revForce = selfTbl:GetForward() * mass * selfTbl.reverseInput * -500
+    local revForce = self:GetForward() * mass * selfTbl.reverseInput * -500
 
     outLin[1] = outLin[1] + revForce[1]
     outLin[2] = outLin[2] + revForce[2]

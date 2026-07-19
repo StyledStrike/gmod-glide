@@ -618,7 +618,7 @@ end
 --- Implement this base class function.
 function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
     if selfTbl.IsAmphibious then
-        local throttle = selfTbl:IsEngineOn() and selfTbl.GetEngineThrottle( self ) or 0
+        local throttle = selfTbl.IsEngineOn( self ) and selfTbl.GetEngineThrottle( self ) or 0
         throttle = selfTbl.GetGear( self ) == -1 and -throttle or throttle
 
         selfTbl.SimulateBoat( self, phys, dt, outLin, outAng, throttle, selfTbl.GetInputFloat( self, 1, "steer" ) )
