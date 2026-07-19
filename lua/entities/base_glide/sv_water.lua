@@ -247,7 +247,7 @@ local floatForce = Vector()
 function ENT:ApplySlowSinkingForces( selfTbl, phys, dt, buoyancy )
     mass = phys:GetMass()
 
-    local drag = -0.15
+    local drag = -0.3
     local upDepth = 200
     local offset, pointVel, buoyancyForce
 
