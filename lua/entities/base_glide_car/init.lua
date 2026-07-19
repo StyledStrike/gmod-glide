@@ -492,29 +492,29 @@ end
 local ExpDecay = Glide.ExpDecay
 
 function ENT:UpdateSteering( dt, selfTbl )
-    local inputSteer = self:GetInputFloat( 1, "steer" )
+    local inputSteer = selfTbl.GetInputFloat( self, 1, "steer" )
     local absInputSteer = Abs( inputSteer )
 
     local sideSlip = Clamp( selfTbl.avgSideSlip, -1, 1 )
-    local steerConeFactor = Clamp( selfTbl.totalSpeed / self:GetSteerConeMaxSpeed(), 0, 1 )
+    local steerConeFactor = Clamp( selfTbl.totalSpeed / selfTbl.GetSteerConeMaxSpeed( self ), 0, 1 )
 
     -- Limit the input depending on speed...
-    local steerCone = 1 - steerConeFactor * ( 1 - self:GetSteerConeMaxAngle() )
+    local steerCone = 1 - steerConeFactor * ( 1 - selfTbl.GetSteerConeMaxAngle( self ) )
 
     -- But only while not slipping.
     steerCone = Clamp( steerCone, Abs( sideSlip ), 1 )
-    inputSteer = ExpDecay( selfTbl.inputSteer, inputSteer * steerCone, self:GetSteerConeChangeRate(), dt )
+    inputSteer = ExpDecay( selfTbl.inputSteer, inputSteer * steerCone, selfTbl.GetSteerConeChangeRate( self ), dt )
 
     selfTbl.inputSteer = inputSteer
 
     -- Counter-steer when slipping, going fast and not using steer input
     local counterSteer = sideSlip * steerConeFactor * ( 1 - absInputSteer )
 
-    counterSteer = Clamp( counterSteer, -1, 1 ) * self:GetCounterSteer()
+    counterSteer = Clamp( counterSteer, -1, 1 ) * selfTbl.GetCounterSteer( self )
     inputSteer = Clamp( inputSteer + counterSteer, -1, 1 )
 
-    self:SetSteering( inputSteer )
-    selfTbl.steerAngle[2] = -inputSteer * self:GetMaxSteerAngle()
+    selfTbl.SetSteering( self, inputSteer )
+    selfTbl.steerAngle[2] = -inputSteer * selfTbl.GetMaxSteerAngle( self )
 
     -- Reduce front wheel sideways friction when trying to do a J-turn
     if selfTbl.forwardSpeed < -100 then
@@ -525,7 +525,7 @@ function ENT:UpdateSteering( dt, selfTbl )
 
     -- Reduce wheel sideways friction when doing a burnout
     if selfTbl.burnout > 0.1 then
-        local frontBurnout = self:GetPowerDistribution() > 0
+        local frontBurnout = selfTbl.GetPowerDistribution( self ) > 0
         selfTbl.frontSideTractionMult = frontBurnout and 0.5 or 1
         selfTbl.rearSideTractionMult = frontBurnout and 1 or 0.5
     else
