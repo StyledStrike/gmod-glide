@@ -13,6 +13,7 @@ function ENT:WaterInit()
 
     self.buoyancyPoints = points
     self.buoyancyPointsCount = #points
+    self.waterFill = 0.0
 end
 
 --- Calculate local positions on the vehicle where buoyancy forces are applied.
@@ -39,11 +40,14 @@ function ENT:GetBuoyancyOffsets()
     }
 end
 
+local Clamp = math.Clamp
+local SinkEaseFunc = math.ease.OutCubic
+
 local IsUnderWater = Glide.IsUnderWater
 local GetDevMode = Glide.GetDevMode
 local EntityPairs = Glide.EntityPairs
 
-function ENT:WaterThink( selfTbl )
+function ENT:WaterThink( selfTbl, dt )
     -- Update buoyancy points
     local underWaterPoints = 0
 
@@ -85,11 +89,24 @@ function ENT:WaterThink( selfTbl )
         end
     end
 
+    -- Logic for slowly sinking in water
+    if selfTbl.SlowWaterSinkingBuoyancy < 1 or selfTbl.IsAmphibious then return end
+
+    local waterFill = Clamp( selfTbl.waterFill + ( waterState > 0 and 0.1 or -0.05 ) * dt, 0, 1 )
+    selfTbl.waterFill = waterFill
+
+    if waterState > 0 then
+        local phys = self:GetPhysicsObject()
+
+        if IsValid( phys ) then
+            -- Make the multiplier fall slowly at first, then speed up
+            local multiplier = SinkEaseFunc( Clamp( 1 - waterFill, 0, 1 ) )
+            self:ApplySlowSinkingForces( selfTbl, phys, dt, 60 + selfTbl.SlowWaterSinkingBuoyancy * multiplier )
+        end
+    end
 end
 
 local Abs = math.abs
-local Clamp = math.Clamp
-
 local mass, linearImp, angularImp
 
 local function AddForceOffset( outLin, outAng, phys, dt, pos, f )
@@ -126,7 +143,6 @@ local TraceLine = util.TraceLine
 local ray = {}
 local traceData = { mask = MASK_WATER, output = ray }
 local worldUp = Vector( 0, 0, 1 )
-local fw, rt, vel, speed
 
 --- Simulate boat physics.
 function ENT:SimulateBoat( phys, dt, outLin, outAng, throttle, steer )
@@ -137,11 +153,11 @@ function ENT:SimulateBoat( phys, dt, outLin, outAng, throttle, steer )
     if self:GetWaterState() < 1 then return end
 
     mass = phys:GetMass()
-    fw = self:GetForward()
-    rt = fw:Cross( worldUp )
 
-    vel = phys:GetVelocity()
-    speed = self:WorldToLocal( phys:GetPos() + vel )[1]
+    local fw = self:GetForward()
+    local rt = fw:Cross( worldUp )
+    local vel = phys:GetVelocity()
+    local speed = self:WorldToLocal( phys:GetPos() + vel )[1]
 
     local params = self.BoatParams
 
@@ -224,4 +240,37 @@ function ENT:SimulateBoat( phys, dt, outLin, outAng, throttle, steer )
     -- Apply the roll force, but only up to a point
     steer = LimitInputWithAngle( steer, Abs( angles[3] ), 30 )
     outAng[1] = outAng[1] + params.rollForce * steer * mass * ( tightTurn and 2 or 1 )
+end
+
+local floatForce = Vector()
+
+function ENT:ApplySlowSinkingForces( selfTbl, phys, dt, buoyancy )
+    mass = phys:GetMass()
+
+    local drag = -0.15
+    local upDepth = 200
+    local offset, pointVel, buoyancyForce
+
+    for _, point in ipairs( selfTbl.buoyancyPoints ) do
+        if point.isUnderWater then
+            offset = self:LocalToWorld( point.offset )
+            pointVel = phys:GetVelocityAtPoint( offset )
+
+            -- Check how far from the surface this point is
+            traceData.start = offset + worldUp * upDepth
+            traceData.endpos = offset
+
+            TraceLine( traceData )
+
+            buoyancyForce = buoyancy * ( 1 - ray.Fraction )
+
+            floatForce:Zero()
+            floatForce:Add( worldUp )
+            floatForce:Mul( buoyancyForce )
+            floatForce:Add( pointVel * drag )
+            floatForce:Mul( mass * dt )
+
+            phys:ApplyForceOffset( floatForce, offset )
+        end
+    end
 end

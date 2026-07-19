@@ -13,11 +13,14 @@ function ENT:OnPostInitialize()
     self:SetEnginePower( 0 )
     self:SetIsHonking( false )
 
-    -- Make boats more slidey on land
     local phys = self:GetPhysicsObject()
 
     if IsValid( phys ) then
+        -- Make boats more slidey on land
         phys:SetMaterial( "glass" )
+
+        -- We do our own water physics
+        phys:SetBuoyancyRatio( 0.0 )
     end
 end
 

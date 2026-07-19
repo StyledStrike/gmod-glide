@@ -311,6 +311,10 @@ if SERVER then
     -- Should passengers fall when under water?
     ENT.FallWhileUnderWater = false
 
+    -- The force that makes this vehicle temporarely float on water.
+    -- Set to 0 to disable the slow water sinking logic.
+    ENT.SlowWaterSinkingBuoyancy = 600
+
     -- Damage things nearby when the vehicle explodes
     ENT.ExplosionRadius = 500
 

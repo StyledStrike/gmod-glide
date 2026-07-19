@@ -193,7 +193,7 @@ function ENT:Initialize()
     phys:SetDamping( 0, 0 )
     phys:SetDragCoefficient( 0 )
     phys:SetAngleDragCoefficient( 0 )
-    phys:SetBuoyancyRatio( 0.07 )
+    phys:SetBuoyancyRatio( 0.0 )
     phys:EnableMotion( true )
     phys:Wake()
 
@@ -713,7 +713,7 @@ function ENT:Think()
     end
 
     -- Update water logic
-    selfTbl.WaterThink( self, selfTbl )
+    selfTbl.WaterThink( self, selfTbl, dt )
 
     -- Deal engine fire damage over time
     if selfTbl.GetIsEngineOnFire( self ) then
