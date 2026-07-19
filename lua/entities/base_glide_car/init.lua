@@ -637,7 +637,7 @@ local groundedCount, rpm, avgRPM, totalSideSlip, totalForwardSlip, state
 function ENT:WheelThink( dt, selfTbl )
     local phys = self:GetPhysicsObject()
     local isAsleep = IsValid( phys ) and phys:IsAsleep()
-    local maxRPM = selfTbl.GetTransmissionMaxRPM( self, self:GetGear(), selfTbl )
+    local maxRPM = selfTbl.GetTransmissionMaxRPM( self, selfTbl.GetGear( self ), selfTbl )
     local inputHandbrake = selfTbl.GetInputBool( self, 1, "handbrake", selfTbl )
 
     traction = selfTbl.GetForwardTractionBias( self )
