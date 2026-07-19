@@ -264,8 +264,8 @@ function ENT:UpdatePlaneWheels( selfTbl )
 end
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
+function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
     if self:WaterLevel() < 2 then
-        self:SimulatePlane( phys, dt, self.PlaneParams, 1, outLin, outAng )
+        selfTbl.SimulatePlane( self, phys, dt, selfTbl.PlaneParams, 1, outLin, outAng )
     end
 end

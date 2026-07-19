@@ -616,12 +616,12 @@ function ENT:CreateWheel( offset, params )
 end
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
-    if self.IsAmphibious then
-        local throttle = self:IsEngineOn() and self:GetEngineThrottle() or 0
-        throttle = self:GetGear() == -1 and -throttle or throttle
+function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
+    if selfTbl.IsAmphibious then
+        local throttle = selfTbl:IsEngineOn() and selfTbl.GetEngineThrottle( self ) or 0
+        throttle = selfTbl.GetGear( self ) == -1 and -throttle or throttle
 
-        self:SimulateBoat( phys, dt, outLin, outAng, throttle, self:GetInputFloat( 1, "steer" ) )
+        selfTbl.SimulateBoat( self, phys, dt, outLin, outAng, throttle, selfTbl.GetInputFloat( self, 1, "steer" ) )
     end
 end
 

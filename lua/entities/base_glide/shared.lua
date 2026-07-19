@@ -435,7 +435,7 @@ if SERVER then
     function ENT:OnWeaponStop( _weapon, _weaponIndex ) end
 
     function ENT:OnPostThink( _dt, _selfTbl ) end
-    function ENT:OnSimulatePhysics( _phys, _dt, _outLin, _outAng ) end
+    function ENT:OnSimulatePhysics( _phys, _dt, _outLin, _outAng, _selfTbl ) end
     function ENT:OnUpdateFeatures( _dt ) end
 
     function ENT:OnSocketConnect( _socket, _otherVehicle ) end

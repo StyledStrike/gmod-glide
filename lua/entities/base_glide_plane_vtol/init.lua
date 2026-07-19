@@ -131,21 +131,21 @@ end
 local Clamp = math.Clamp
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
+function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
     if self:WaterLevel() > 1 then return end
 
-    local power = Clamp( self:GetPower(), 0, 1 )
-    local heliEffectiveness = self:GetVerticalFlight()
+    local power = Clamp( selfTbl.GetPower( self ), 0, 1 )
+    local heliEffectiveness = selfTbl.GetVerticalFlight( self )
     local planeEffectiveness = 1 - heliEffectiveness
 
     if heliEffectiveness > 0.1 then
-        self:SimulateHelicopter( phys, self.HelicopterParams, heliEffectiveness * power, outLin, outAng )
+        selfTbl.SimulateHelicopter( self, phys, selfTbl.HelicopterParams, heliEffectiveness * power, outLin, outAng )
     end
 
     -- Allow plane physics when powered off
     planeEffectiveness = Clamp( planeEffectiveness + Clamp( 1 - power, 0, 1 ), 0, 1 )
 
     if planeEffectiveness > 0.1 then
-        self:SimulatePlane( phys, dt, self.PlaneParams, planeEffectiveness, outLin, outAng )
+        selfTbl.SimulatePlane( self, phys, dt, selfTbl.PlaneParams, planeEffectiveness, outLin, outAng )
     end
 end

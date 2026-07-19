@@ -212,13 +212,13 @@ end
 local Clamp = math.Clamp
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, _, outLin, outAng )
-    local params = self.HelicopterParams
-    local power = Clamp( params.basePower + self:GetPower(), 0, 1 )
+function ENT:OnSimulatePhysics( phys, _, outLin, outAng, selfTbl )
+    local params = selfTbl.HelicopterParams
+    local power = Clamp( params.basePower + selfTbl.GetPower( self ), 0, 1 )
 
     if power > 0.1 then
-        local effectiveness = Clamp( power, 0, self:GetOutOfControl() and 0.5 or 1 )
-        self:SimulateHelicopter( phys, params, effectiveness, outLin, outAng )
+        local effectiveness = Clamp( power, 0, selfTbl.GetOutOfControl( self ) and 0.5 or 1 )
+        selfTbl.SimulateHelicopter( self, phys, params, effectiveness, outLin, outAng )
     end
 end
 

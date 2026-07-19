@@ -160,11 +160,11 @@ function ENT:UpdateUnflip( _phys, _dt, _selfTbl ) end
 local WORLD_UP = Vector( 0, 0, 1 )
 
 --- Override this base class function.
-function ENT:OnSimulatePhysics( phys, _, outLin, outAng )
-    if not self.stayUpright then return end
+function ENT:OnSimulatePhysics( phys, _, outLin, outAng, selfTbl )
+    if not selfTbl.stayUpright then return end
     if self:IsPlayerHolding() then return end
 
-    local isAnyWheelGrounded = self.groundedCount > 0
+    local isAnyWheelGrounded = selfTbl.groundedCount > 0
     local angVel = phys:GetAngleVelocity()
     local mass = phys:GetMass()
 
@@ -172,19 +172,19 @@ function ENT:OnSimulatePhysics( phys, _, outLin, outAng )
     local angles = self:GetAngles()
 
     -- Wheelie
-    local leanBack = self:GetInputBool( 1, "lean_back" )
+    local leanBack = selfTbl.GetInputBool( self, 1, "lean_back" )
 
     if leanBack and isAnyWheelGrounded then
-        local strength = 1 - Clamp( Abs( angles[1] ) / self.WheelieMaxAng, 0, 1 )
+        local strength = 1 - Clamp( Abs( angles[1] ) / selfTbl.WheelieMaxAng, 0, 1 )
 
-        strength = strength * Clamp( self.totalSpeed / 200, 0, 1 )
-        strength = strength * Clamp( 1 - self.frontBrake - self.rearBrake, 0, 1 )
+        strength = strength * Clamp( selfTbl.totalSpeed / 200, 0, 1 )
+        strength = strength * Clamp( 1 - selfTbl.frontBrake - selfTbl.rearBrake, 0, 1 )
 
         -- Wheelie angular drag
-        outAng[2] = outAng[2] + angVel[2] * mass * self.WheelieDrag * strength
+        outAng[2] = outAng[2] + angVel[2] * mass * selfTbl.WheelieDrag * strength
 
-        local frontPos = self.wheels[1]:GetPos()
-        local l, a = phys:CalculateForceOffset( self:GetUp() * mass * strength * self.WheelieForce, frontPos )
+        local frontPos = selfTbl.wheels[1]:GetPos()
+        local l, a = phys:CalculateForceOffset( self:GetUp() * mass * strength * selfTbl.WheelieForce, frontPos )
 
         outLin[1] = outLin[1] + l[1]
         outLin[2] = outLin[2] + l[2]
@@ -199,13 +199,13 @@ function ENT:OnSimulatePhysics( phys, _, outLin, outAng )
     local dot = WORLD_UP:Dot( rt )
     dot = angles[3] > -90 and angles[3] < 90 and dot or -dot
 
-    local tiltForce = isAnyWheelGrounded and self.TiltForce or self.TiltForce * 0.2
+    local tiltForce = isAnyWheelGrounded and selfTbl.TiltForce or selfTbl.TiltForce * 0.2
 
-    outAng[1] = outAng[1] + self.steerTilt * mass * tiltForce
-    outAng[1] = outAng[1] + angVel[1] * mass * self.KeepUprightDrag
-    outAng[1] = outAng[1] + dot * mass * self.KeepUprightForce
+    outAng[1] = outAng[1] + selfTbl.steerTilt * mass * tiltForce
+    outAng[1] = outAng[1] + angVel[1] * mass * selfTbl.KeepUprightDrag
+    outAng[1] = outAng[1] + dot * mass * selfTbl.KeepUprightForce
 
-    local revForce = self:GetForward() * mass * self.reverseInput * -500
+    local revForce = selfTbl:GetForward() * mass * selfTbl.reverseInput * -500
 
     outLin[1] = outLin[1] + revForce[1]
     outLin[2] = outLin[2] + revForce[2]

@@ -91,7 +91,7 @@ function ENT:PhysicsSimulate( phys, dt )
     VectorSetUnpacked( angForce,
         angVelX * angDragX * mass,
         angVelY * angDragY * mass,
-        angVelZ * angDragZ * self:GetYawDragMultiplier() * mass
+        angVelZ * angDragZ * selfTbl.GetYawDragMultiplier( self ) * mass
     )
 
     local groundedCount = 0
@@ -106,11 +106,13 @@ function ENT:PhysicsSimulate( phys, dt )
         local changedPosCount = 0
 
         for _, w in EntityPairs( selfTbl.wheels ) do
-            if w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, selfTbl ) then
+            local wheelTbl = GetTable( w )
+
+            if wheelTbl.DoPhysics( w, self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, selfTbl ) then
                 changedPosCount = changedPosCount + 1
             end
 
-            if w.state.isOnGround then
+            if wheelTbl.state.isOnGround then
                 groundedCount = groundedCount + 1
             end
         end
@@ -126,7 +128,7 @@ function ENT:PhysicsSimulate( phys, dt )
     end
 
     -- Let children classes do additional physics if they want to
-    self:OnSimulatePhysics( phys, dt, linForce, angForce )
+    selfTbl.OnSimulatePhysics( self, phys, dt, linForce, angForce, selfTbl )
 
     -- At slow speeds, try to prevent slipping sideways on mildly steep slopes
     if groundedCount > 0 then
