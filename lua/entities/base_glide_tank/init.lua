@@ -320,6 +320,7 @@ function ENT:UpdateSteering( dt, selfTbl )
 end
 
 local Clamp = math.Clamp
+local GetTable = FindMetaTable( "Entity" ).GetTable
 
 local traction, tractionFront, tractionRear
 local frontTorque, rearTorque, steerAngle, frontBrake, rearBrake
@@ -348,7 +349,8 @@ function ENT:WheelThink( dt, selfTbl )
     groundedCount, avgRPM, totalSideSlip, totalForwardSlip, totalAngVel = 0, 0, 0, 0, 0
 
     for _, w in EntityPairs( selfTbl.wheels ) do
-        w:Update( self, steerAngle, isAsleep, dt )
+        local wheelTbl = GetTable( w )
+        wheelTbl.Update( w, self, steerAngle, isAsleep, dt, wheelTbl )
 
         totalSideSlip = totalSideSlip + w:GetSideSlip()
         totalForwardSlip = totalForwardSlip + w:GetForwardSlip()

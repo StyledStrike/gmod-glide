@@ -665,11 +665,14 @@ function ENT:Think()
     self:NextThink( time )
 
     -- Update speed variables
-    selfTbl.localVelocity = self:WorldToLocal( self:GetPos() + self:GetVelocity() )
+    local pos = self:GetPos()
+    local velocity = self:GetVelocity()
+    velocity:Add( pos )
+
+    selfTbl.localVelocity = self:WorldToLocal( velocity )
     selfTbl.totalSpeed = selfTbl.localVelocity:Length()
 
     local forwardSpeed = selfTbl.localVelocity[1]
-
     selfTbl.forwardAcceleration = ( forwardSpeed - selfTbl.forwardSpeed ) / dt
     selfTbl.forwardSpeed = forwardSpeed
 
@@ -679,9 +682,9 @@ function ENT:Think()
         local driverSeat = selfTbl.seats[1]
         local driver = IsValid( driverSeat ) and driverSeat:GetDriver() or NULL
 
-        if driver ~= self:GetDriver() then
-            self:SetDriver( driver )
-            self:ClearLockOnTarget()
+        if driver ~= selfTbl.GetDriver( self ) then
+            selfTbl.SetDriver( self, driver )
+            selfTbl.ClearLockOnTarget( self )
 
             if IsValid( driver ) then
                 if TriggerOutput then
@@ -689,7 +692,7 @@ function ENT:Think()
                     TriggerOutput( self, "Driver", driver )
                 end
 
-                self:OnDriverEnter()
+                selfTbl.OnDriverEnter( self )
                 selfTbl.lastDriver = driver
             else
                 if TriggerOutput then
@@ -697,7 +700,7 @@ function ENT:Think()
                     TriggerOutput( self, "Driver", NULL )
                 end
 
-                self:OnDriverExit()
+                selfTbl.OnDriverExit( self )
             end
 
             selfTbl.hasTheDriverBeenRagdolled = nil
@@ -706,16 +709,16 @@ function ENT:Think()
 
     -- Update weapons
     if selfTbl.weaponCount > 0 then
-        self:WeaponThink( selfTbl )
+        selfTbl.WeaponThink( self, selfTbl )
     end
 
     -- Update water logic
-    self:WaterThink( selfTbl )
+    selfTbl.WaterThink( self, selfTbl )
 
     -- Deal engine fire damage over time
-    if self:GetIsEngineOnFire() then
+    if selfTbl.GetIsEngineOnFire( self ) then
         if self:WaterLevel() > 2 then
-            self:SetIsEngineOnFire( false )
+            selfTbl.SetIsEngineOnFire( self, false )
         else
             local attacker = IsValid( selfTbl.lastDamageAttacker ) and selfTbl.lastDamageAttacker or self
             local inflictor = IsValid( selfTbl.lastDamageInflictor ) and selfTbl.lastDamageInflictor or self
@@ -726,19 +729,19 @@ function ENT:Think()
             dmg:SetInflictor( inflictor )
             dmg:SetDamageType( 0 )
             dmg:SetDamageForce( Vector() )
-            dmg:SetDamagePosition( self:GetPos() )
+            dmg:SetDamagePosition( pos )
             self:TakeDamageInfo( dmg )
         end
     end
 
     -- Update wheels
     if selfTbl.wheelCount > 0 then
-        self:WheelThink( dt, selfTbl )
+        selfTbl.WheelThink( self, dt, selfTbl )
     end
 
     -- Update trailer sockets
     if selfTbl.socketCount > 0 then
-        self:SocketThink( dt, time )
+        selfTbl.SocketThink( self, dt, time, selfTbl )
     end
 
     -- Handle hold input actions
@@ -746,22 +749,22 @@ function ENT:Think()
         -- If this action has been held for long enough...
         if data.timer and time > data.timer then
             data.timer = nil
-            self:OnHoldInputAction( action, data )
+            selfTbl.OnHoldInputAction( self, action, data )
 
         elseif data.shouldRelease then
             data.shouldRelease = nil
-            self:SetInputBool( 1, action, false )
+            selfTbl.SetInputBool( self, 1, action, false )
         end
     end
 
     -- Update bodygroups
-    self:UpdateLightBodygroups()
+    selfTbl.UpdateLightBodygroups( self, selfTbl )
 
     -- Let children classes do their own stuff
-    self:OnPostThink( dt, selfTbl )
+    selfTbl.OnPostThink( self, dt, selfTbl )
 
     -- Let children classes update their features
-    self:OnUpdateFeatures( dt )
+    selfTbl.OnUpdateFeatures( self, dt )
 
     local phys = self:GetPhysicsObject()
 
@@ -775,10 +778,10 @@ function ENT:Think()
         -- Make sure the physics stay awake when necessary,
         -- otherwise the driver's input won't do anything.
         local driverInput =
-            self:GetInputFloat( 1, "accelerate", selfTbl ) +
-            self:GetInputFloat( 1, "brake", selfTbl ) +
-            self:GetInputFloat( 1, "steer", selfTbl ) +
-            self:GetInputFloat( 1, "throttle", selfTbl )
+            selfTbl.GetInputFloat( self, 1, "accelerate", selfTbl ) +
+            selfTbl.GetInputFloat( self, 1, "brake", selfTbl ) +
+            selfTbl.GetInputFloat( self, 1, "steer", selfTbl ) +
+            selfTbl.GetInputFloat( self, 1, "throttle", selfTbl )
 
         if phys:IsAsleep() and Abs( driverInput ) > 0.01 then
             phys:Wake()

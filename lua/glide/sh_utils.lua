@@ -161,6 +161,7 @@ end
 
 do
     local e
+    local IsValid = FindMetaTable( "Entity" ).IsValid
 
     -- Custom iterator, similar to ipairs, but made to iterate
     -- over a table of entities, while skipping invalid entities.
@@ -168,7 +169,7 @@ do
         i = i + 1
         e = array[i]
 
-        while e and not ( e.IsValid and e:IsValid() ) do
+        while e and not IsValid( e ) do
             i = i + 1
             e = array[i]
         end

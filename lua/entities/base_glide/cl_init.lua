@@ -70,20 +70,36 @@ end
 local IsValid = IsValid
 
 function ENT:GetWheelSpin( index )
-    local wheel = self.wheels and self.wheels[index]
+    local wheels = self.wheels
 
-    if IsValid( wheel ) and wheel.GetLastSpin then
-        return wheel:GetLastSpin()
+    if wheels then
+        local wheel = wheels[index]
+
+        if IsValid( wheel ) then
+            local GetLastSpin = wheel.GetLastSpin
+
+            if GetLastSpin then
+                return GetLastSpin( wheel )
+            end
+        end
     end
 
     return 0
 end
 
 function ENT:GetWheelOffset( index )
-    local wheel = self.wheels and self.wheels[index]
+    local wheels = self.wheels
 
-    if IsValid( wheel ) and wheel.GetBaseZPos then
-        return wheel:GetLocalPos()[3] - wheel:GetBaseZPos()
+    if wheels then
+        local wheel = wheels[index]
+
+        if IsValid( wheel ) then
+            local GetBaseZPos = wheel.GetBaseZPos
+
+            if GetBaseZPos then
+                return wheel:GetLocalPos()[3] - GetBaseZPos( wheel )
+            end
+        end
     end
 
     return 0
@@ -182,7 +198,6 @@ end
 
 local RealTime = RealTime
 local Effect = util.Effect
-local IsGameUIVisible = gui.IsGameUIVisible
 local GetTable = FindMetaTable( "Entity" ).GetTable
 
 local DEFAULT_FLAME_ANGLE = Angle()
@@ -192,12 +207,11 @@ function ENT:InternalUpdateFeatures()
     local selfTbl = GetTable( self )
 
     -- Keep particles consistent even at high FPS
-    if t > selfTbl.particleCD and self:WaterLevel() < 3 and not IsGameUIVisible() then
+    if t > selfTbl.particleCD and self:WaterLevel() < 3 then
         selfTbl.particleCD = t + 0.03
+        selfTbl.OnUpdateParticles( self )
 
-        self:OnUpdateParticles()
-
-        if self:GetIsEngineOnFire() then
+        if selfTbl.GetIsEngineOnFire( self ) then
             local velocity = self:GetVelocity()
             local eff = EffectData()
 
@@ -212,35 +226,33 @@ function ENT:InternalUpdateFeatures()
     end
 
     -- Manually manage the engine fire sound instead of using ENT:CreateLoopingSound
-    if self:GetIsEngineOnFire() then
+    if selfTbl.GetIsEngineOnFire( self ) then
         if not selfTbl.engineFireSound then
             selfTbl.engineFireSound = CreateSound( self, "glide/fire/fire_loop_1.wav" )
             selfTbl.engineFireSound:SetSoundLevel( 80 )
             selfTbl.engineFireSound:PlayEx( 0.9, 100 )
         end
-
     elseif selfTbl.engineFireSound then
         selfTbl.engineFireSound:Stop()
         selfTbl.engineFireSound = nil
     end
 
     if selfTbl.shouldThinkNow then
-        local isSoundActive = self:ShouldActivateSounds()
+        local isSoundActive = selfTbl.ShouldActivateSounds( self )
 
         if isSoundActive then
             if not selfTbl.isSoundActive then
                 selfTbl.isSoundActive = true
-                self:OnActivateSounds()
+                selfTbl.OnActivateSounds( self )
             end
 
             -- Let children classes do their own thing
-            self:OnUpdateSounds()
-
+            selfTbl.OnUpdateSounds( self )
         elseif selfTbl.isSoundActive then
-            self:InternalDeactivateSounds()
+            selfTbl.InternalDeactivateSounds( self )
         end
 
-        local signal = self:GetTurnSignalState()
+        local signal = selfTbl.GetTurnSignalState( self )
 
         if signal > 0 and selfTbl.TurnSignalVolume > 0 then
             local signalBlink = ( CurTime() % selfTbl.TurnSignalCycle ) > selfTbl.TurnSignalCycle * 0.5
@@ -259,7 +271,7 @@ function ENT:InternalUpdateFeatures()
 
         local sounds = selfTbl.sounds
 
-        if sounds.start and self:GetEngineState() ~= 1 then
+        if sounds.start and selfTbl.GetEngineState( self ) ~= 1 then
             sounds.start:Stop()
             sounds.start = nil
 
@@ -270,11 +282,11 @@ function ENT:InternalUpdateFeatures()
     end
 
     -- Update lights and sprites
-    self:UpdateLights( selfTbl )
+    selfTbl.UpdateLights( self, selfTbl )
 
     -- Let children classes do their own thing
-    self:OnUpdateMisc()
-    self:OnUpdateAnimations()
+    selfTbl.OnUpdateMisc( self )
+    selfTbl.OnUpdateAnimations( self )
 end
 
 function ENT:Think()
@@ -283,20 +295,21 @@ function ENT:Think()
     -- Run some things less frequently when the
     -- local player is not inside this vehicle.
     local t = RealTime()
+    local selfTbl = GetTable( self )
     local shouldThinkNow = true
 
-    if not self.isLocalPlayerInVehicle then
-        shouldThinkNow = t > self.lazyThinkCD
+    if not selfTbl.isLocalPlayerInVehicle then
+        shouldThinkNow = t > selfTbl.lazyThinkCD
 
         if shouldThinkNow then
-            self.lazyThinkCD = t + 0.05
+            selfTbl.lazyThinkCD = t + 0.05
         end
     end
 
-    self.shouldThinkNow = shouldThinkNow
+    selfTbl.shouldThinkNow = shouldThinkNow
 
-    if self.rfMisc then
-        self.rfMisc:Think()
+    if selfTbl.rfMisc then
+        selfTbl.rfMisc:Think()
     end
 
     return true

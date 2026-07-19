@@ -48,11 +48,11 @@ local function AttemptConnection( plug, phys, dt )
     phys:ApplyForceOffset( force * distFactor * phys:GetMass() * dt, plugPos )
 end
 
-function ENT:SocketThink( dt, time )
+function ENT:SocketThink( dt, time, selfTbl )
     local phys = self:GetPhysicsObject()
     if not IsValid( phys ) then return end
 
-    for _, socket in ipairs( self.Sockets ) do
+    for _, socket in ipairs( selfTbl.Sockets ) do
 
         -- If this is a plug socket that has a nearby receptacle...
         if
@@ -73,8 +73,8 @@ function ENT:SocketThink( dt, time )
                 socket.nextAttemptTime = time + 3
             end
 
-            self:UpdateSocketCount()
-            self:OnSocketDisconnect( socket )
+            selfTbl.UpdateSocketCount( self )
+            selfTbl.OnSocketDisconnect( self, socket )
         end
 
     end

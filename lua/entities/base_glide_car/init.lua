@@ -355,32 +355,31 @@ local Approach = math.Approach
 --- Implement this base class function.
 function ENT:OnPostThink( dt, selfTbl )
     if selfTbl.shouldUpdateWheelParams then
-        self:UpdateWheelParameters()
+        selfTbl.UpdateWheelParameters( self )
     end
 
     if selfTbl.shouldUpdatePowerDistribution then
-        self:UpdatePowerDistribution()
+        selfTbl.UpdatePowerDistribution( self )
     end
 
-    local state = self:GetEngineState()
+    local state = selfTbl.GetEngineState( self )
     local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
 
     if TriggerOutputIfChanged then
         local wiremodCache = selfTbl.wiremodCache
-        local maxRPM = self:GetMaxRPM()
+        local maxRPM = selfTbl.GetMaxRPM( self )
 
         TriggerOutputIfChanged( self, wiremodCache, "MaxRPM", maxRPM )
-        TriggerOutputIfChanged( self, wiremodCache, "Gear", self:GetGear() )
-        TriggerOutputIfChanged( self, wiremodCache, "EngineRPM", Clamp( self:GetFlywheelRPM(), 0, maxRPM ) )
+        TriggerOutputIfChanged( self, wiremodCache, "Gear", selfTbl.GetGear( self ) )
+        TriggerOutputIfChanged( self, wiremodCache, "EngineRPM", Clamp( selfTbl.GetFlywheelRPM( self ), 0, maxRPM ) )
 
         if selfTbl.wireSetEngineOn ~= nil then
             if selfTbl.wireSetEngineOn then
                 if state < 1 then
-                    self:TurnOn()
+                    selfTbl.TurnOn( self )
                 end
-
             elseif state > 0 then
-                self:TurnOff()
+                selfTbl.TurnOff( self )
             end
 
             selfTbl.wireSetEngineOn = nil
@@ -388,9 +387,9 @@ function ENT:OnPostThink( dt, selfTbl )
     end
 
     -- Damage the engine when underwater
-    self:CheckWaterLevel( dt )
+    selfTbl.CheckWaterLevel( self, dt )
 
-    local health = self:GetEngineHealth()
+    local health = selfTbl.GetEngineHealth( self )
 
     -- Attempt to start the engine
     if state == 1 then
@@ -399,11 +398,11 @@ function ENT:OnPostThink( dt, selfTbl )
                 selfTbl.startupTimer = nil
 
                 if health > 0 then
-                    self:SetEngineState( 2 )
-                    self:SetFlywheelRPM( self:GetMaxRPM() * 0.75 )
-                    self:EngineAccelerate( self.flywheelTorque * 2, dt )
+                    selfTbl.SetEngineState( self, 2 )
+                    selfTbl.SetFlywheelRPM( self, selfTbl.GetMaxRPM( self ) * 0.75 )
+                    selfTbl.EngineAccelerate( self, selfTbl.flywheelTorque * 2, dt )
                 else
-                    self:SetEngineState( 0 )
+                    selfTbl.SetEngineState( self, 0 )
                     Glide.PlaySoundSet( "Glide.Engine.CarStartTail", self )
                 end
             end
@@ -411,11 +410,9 @@ function ENT:OnPostThink( dt, selfTbl )
             local startupTime = health < 0.6 and math.Rand( 1, 2 ) or selfTbl.StartupTime
             selfTbl.startupTimer = CurTime() + startupTime
         end
-
     elseif state == 2 then
         if health <= 0 then
-            self:TurnOff()
-
+            selfTbl.TurnOff( self )
         elseif health < 0.25 then
             -- Stop the throttle at random intervals
             if selfTbl.damageThrottleCooldown and selfTbl.damageThrottleCooldown > 0 then
@@ -432,36 +429,36 @@ function ENT:OnPostThink( dt, selfTbl )
         selfTbl.startupTimer = nil
     end
 
-    if self:IsEngineOn() then
+    if selfTbl.IsEngineOn( self ) then
         -- Ignition cut-off, slowdown the flywheel and then turn off
         if state == 3 then
             selfTbl.clutch = 0
             selfTbl.availableFrontTorque = 0
             selfTbl.availableRearTorque = 0
 
-            local throttle = Approach( self:GetEngineThrottle(), 0, dt * 2 )
-            self:SetEngineThrottle( throttle )
+            local throttle = Approach( selfTbl.GetEngineThrottle( self ), 0, dt * 2 )
+            selfTbl.SetEngineThrottle( self, throttle )
 
-            if self:GetFlywheelRPM() < 10 then
-                self:SetEngineState( 0 )
-                self:SetFlywheelRPM( 0 )
+            if selfTbl.GetFlywheelRPM( self ) < 10 then
+                selfTbl.SetEngineState( self, 0 )
+                selfTbl.SetFlywheelRPM( self, 0 )
             else
                 -- Slowdown flywheel
-                self:EngineAccelerate( selfTbl.flywheelFriction + selfTbl.flywheelTorque * throttle, dt )
+                selfTbl.EngineAccelerate( self, selfTbl.flywheelFriction + selfTbl.flywheelTorque * throttle, dt )
 
                 -- Reassign flywheel RPM to update engine RPM
-                self:SetFlywheelRPM( Clamp( self:GetFlywheelRPM(), 0, self:GetMaxRPM() ) )
+                selfTbl.SetFlywheelRPM( self, Clamp( selfTbl.GetFlywheelRPM( self ), 0, selfTbl.GetMaxRPM( self ) ) )
             end
         else
-            self:EngineThink( dt, selfTbl )
+            selfTbl.EngineThink( self, dt, selfTbl )
         end
     else
         selfTbl.availableFrontTorque = 0
         selfTbl.availableRearTorque = 0
 
-        local brake = self:GetInputFloat( 1, "brake" )
+        local brake = selfTbl.GetInputFloat( self, 1, "brake" )
 
-        if self:GetInputBool( 1, "handbrake", selfTbl ) then
+        if selfTbl.GetInputBool( self, 1, "handbrake", selfTbl ) then
             brake = 0.5
         end
 
@@ -472,16 +469,16 @@ function ENT:OnPostThink( dt, selfTbl )
     end
 
     -- Update driver inputs
-    self:UpdateSteering( dt, selfTbl )
-    self:SetBrakeValue( Clamp( self.frontBrake + self.rearBrake + ( self:GetInputBool( 1, "handbrake" ) and 1 or 0 ), 0, 1 ) )
+    selfTbl.UpdateSteering( self, dt, selfTbl )
+    selfTbl.SetBrakeValue( self, Clamp( selfTbl.frontBrake + selfTbl.rearBrake + ( selfTbl.GetInputBool( self, 1, "handbrake" ) and 1 or 0 ), 0, 1 ) )
 
     local phys = self:GetPhysicsObject()
 
     if selfTbl.groundedCount < 1 and IsValid( phys ) and self:WaterLevel() < 3 then
         if selfTbl.totalSpeed > 200 then
-            self:UpdateAirControls( phys, dt, selfTbl )
+            selfTbl.UpdateAirControls( self, phys, dt, selfTbl )
         else
-            self:UpdateUnflip( phys, dt, selfTbl )
+            selfTbl.UpdateUnflip( self, phys, dt, selfTbl )
         end
     else
         selfTbl.inputAirRoll = 0
@@ -495,31 +492,31 @@ end
 local ExpDecay = Glide.ExpDecay
 
 function ENT:UpdateSteering( dt, selfTbl )
-    local inputSteer = self:GetInputFloat( 1, "steer" )
+    local inputSteer = selfTbl.GetInputFloat( self, 1, "steer" )
     local absInputSteer = Abs( inputSteer )
 
     local sideSlip = Clamp( selfTbl.avgSideSlip, -1, 1 )
-    local steerConeFactor = Clamp( selfTbl.totalSpeed / self:GetSteerConeMaxSpeed(), 0, 1 )
+    local steerConeFactor = Clamp( selfTbl.totalSpeed / selfTbl.GetSteerConeMaxSpeed( self ), 0, 1 )
 
     -- Limit the input depending on speed...
-    local steerCone = 1 - steerConeFactor * ( 1 - self:GetSteerConeMaxAngle() )
+    local steerCone = 1 - steerConeFactor * ( 1 - selfTbl.GetSteerConeMaxAngle( self ) )
 
     -- But only while not slipping.
     steerCone = Clamp( steerCone, Abs( sideSlip ), 1 )
-    inputSteer = ExpDecay( selfTbl.inputSteer, inputSteer * steerCone, self:GetSteerConeChangeRate(), dt )
+    inputSteer = ExpDecay( selfTbl.inputSteer, inputSteer * steerCone, selfTbl.GetSteerConeChangeRate( self ), dt )
 
     selfTbl.inputSteer = inputSteer
 
     -- Counter-steer when slipping, going fast and not using steer input
     local counterSteer = sideSlip * steerConeFactor * ( 1 - absInputSteer )
 
-    counterSteer = Clamp( counterSteer, -1, 1 ) * self:GetCounterSteer()
+    counterSteer = Clamp( counterSteer, -1, 1 ) * selfTbl.GetCounterSteer( self )
     inputSteer = Clamp( inputSteer + counterSteer, -1, 1 )
 
-    self:SetSteering( inputSteer )
-    selfTbl.steerAngle[2] = -inputSteer * self:GetMaxSteerAngle()
+    selfTbl.SetSteering( self, inputSteer )
+    selfTbl.steerAngle[2] = -inputSteer * selfTbl.GetMaxSteerAngle( self )
 
-    -- Reduce front wheel sideways friction when trying to do a J-turn 
+    -- Reduce front wheel sideways friction when trying to do a J-turn
     if selfTbl.forwardSpeed < -100 then
         selfTbl.jTurnMultiplier = 0.5
     else
@@ -528,7 +525,7 @@ function ENT:UpdateSteering( dt, selfTbl )
 
     -- Reduce wheel sideways friction when doing a burnout
     if selfTbl.burnout > 0.1 then
-        local frontBurnout = self:GetPowerDistribution() > 0
+        local frontBurnout = selfTbl.GetPowerDistribution( self ) > 0
         selfTbl.frontSideTractionMult = frontBurnout and 0.5 or 1
         selfTbl.rearSideTractionMult = frontBurnout and 1 or 0.5
     else
@@ -619,16 +616,18 @@ function ENT:CreateWheel( offset, params )
 end
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
-    if self.IsAmphibious then
-        local throttle = self:IsEngineOn() and self:GetEngineThrottle() or 0
-        throttle = self:GetGear() == -1 and -throttle or throttle
+function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
+    if selfTbl.IsAmphibious then
+        local throttle = selfTbl.IsEngineOn( self ) and selfTbl.GetEngineThrottle( self ) or 0
+        throttle = selfTbl.GetGear( self ) == -1 and -throttle or throttle
 
-        self:SimulateBoat( phys, dt, outLin, outAng, throttle, self:GetInputFloat( 1, "steer" ) )
+        selfTbl.SimulateBoat( self, phys, dt, outLin, outAng, throttle, selfTbl.GetInputFloat( self, 1, "steer" ) )
     end
 end
 
 local EntityPairs = Glide.EntityPairs
+local EntityMeta = FindMetaTable( "Entity" )
+local GetTable = EntityMeta.GetTable
 
 local traction, tractionFront, tractionRear
 local frontTorque, rearTorque, steerAngle, frontBrake, rearBrake
@@ -638,10 +637,10 @@ local groundedCount, rpm, avgRPM, totalSideSlip, totalForwardSlip, state
 function ENT:WheelThink( dt, selfTbl )
     local phys = self:GetPhysicsObject()
     local isAsleep = IsValid( phys ) and phys:IsAsleep()
-    local maxRPM = self:GetTransmissionMaxRPM( self:GetGear(), selfTbl )
-    local inputHandbrake = self:GetInputBool( 1, "handbrake", selfTbl )
+    local maxRPM = selfTbl.GetTransmissionMaxRPM( self, selfTbl.GetGear( self ), selfTbl )
+    local inputHandbrake = selfTbl.GetInputBool( self, 1, "handbrake", selfTbl )
 
-    traction = self:GetForwardTractionBias()
+    traction = selfTbl.GetForwardTractionBias( self )
     tractionFront = ( 1 + Clamp( traction, -1, 0 ) ) * selfTbl.frontTractionMult
     tractionRear = ( 1 - Clamp( traction, 0, 1 ) ) * selfTbl.rearTractionMult
 
@@ -653,13 +652,14 @@ function ENT:WheelThink( dt, selfTbl )
     groundedCount, avgRPM, totalSideSlip, totalForwardSlip = 0, 0, 0, 0
 
     for _, w in EntityPairs( selfTbl.wheels ) do
-        w:Update( self, steerAngle, isAsleep, dt )
+        local wheelTbl = GetTable( w )
+        wheelTbl.Update( w, self, steerAngle, isAsleep, dt, wheelTbl )
 
-        totalSideSlip = totalSideSlip + w:GetSideSlip()
-        totalForwardSlip = totalForwardSlip + w:GetForwardSlip()
+        totalSideSlip = totalSideSlip + wheelTbl.GetSideSlip( w )
+        totalForwardSlip = totalForwardSlip + wheelTbl.GetForwardSlip( w )
 
-        state = w.state
-        rpm = w:GetRPM()
+        state = wheelTbl.state
+        rpm = wheelTbl.GetRPM( w )
         avgRPM = avgRPM + rpm * state.distributionFactor
 
         state.torque = state.distributionFactor * ( state.isFrontWheel and frontTorque or rearTorque )
@@ -672,7 +672,7 @@ function ENT:WheelThink( dt, selfTbl )
         end
 
         if rpm > maxRPM then
-            w:SetRPM( maxRPM )
+            wheelTbl.SetRPM( w, maxRPM )
         end
 
         if state.isOnGround then

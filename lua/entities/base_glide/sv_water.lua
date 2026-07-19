@@ -63,17 +63,17 @@ function ENT:WaterThink( selfTbl )
         waterState = 3
     end
 
-    self:SetWaterState( waterState )
+    selfTbl.SetWaterState( self, waterState )
 
     -- If necessary, kick passengers when underwater
     if selfTbl.FallWhileUnderWater and waterState > 2 then
         local ply
 
-        for _, seat in EntityPairs( self.seats ) do
+        for _, seat in EntityPairs( selfTbl.seats ) do
             ply = seat:GetDriver()
 
             if IsValid( ply ) and ply:WaterLevel() > 2 then
-                self:RagdollPlayerOnSeat( seat, 3 )
+                selfTbl.RagdollPlayerOnSeat( self, seat, 3 )
             end
         end
     end

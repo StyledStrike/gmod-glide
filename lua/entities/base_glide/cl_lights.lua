@@ -65,10 +65,10 @@ local colorHeadlight = Color( 255, 255, 255 )
 
 --- Draw sprites depending on which type of lights are active.
 function ENT:UpdateLights( selfTbl )
-    local headlightState = self:GetHeadlightState()
+    local headlightState = selfTbl.GetHeadlightState( self )
 
     if headlightState > 0 then
-        local colorVec = self:GetHeadlightColor()
+        local colorVec = selfTbl.GetHeadlightColor( self )
         colorHeadlight.r = colorVec[1] * 255
         colorHeadlight.g = colorVec[2] * 255
         colorHeadlight.b = colorVec[3] * 255
@@ -77,7 +77,7 @@ function ENT:UpdateLights( selfTbl )
     -- Handle projected lights
     if selfTbl.headlightState ~= headlightState then
         selfTbl.headlightState = headlightState
-        self:RemoveHeadlights()
+        selfTbl.RemoveHeadlights( self )
 
         if headlightState == 0 then return end
 
@@ -93,7 +93,7 @@ function ENT:UpdateLights( selfTbl )
 
             if enable then
                 v.angles = v.angles or Angle( 10, 0, 0 )
-                self:CreateHeadlight( index, v.offset, v.angles, v.color or colorHeadlight, v.texture, v.fovScale )
+                selfTbl.CreateHeadlight( self, index, v.offset, v.angles, v.color or colorHeadlight, v.texture, v.fovScale )
             end
         end
     end
@@ -119,14 +119,14 @@ function ENT:UpdateLights( selfTbl )
     end
 
     -- Handle sprites
-    local allowLights = self:IsEngineOn() or headlightState > 0
+    local allowLights = selfTbl.IsEngineOn( self ) or headlightState > 0
 
-    lightState.brake = allowLights and self:IsBraking()
-    lightState.reverse = allowLights and self:IsReversing()
+    lightState.brake = allowLights and selfTbl.IsBraking( self )
+    lightState.reverse = allowLights and selfTbl.IsReversing( self )
     lightState.headlight = headlightState > 0
     lightState.taillight = headlightState > 0
 
-    local signal = self:GetTurnSignalState()
+    local signal = selfTbl.GetTurnSignalState( self )
     local signalBlink = ( CurTime() % selfTbl.TurnSignalCycle ) > selfTbl.TurnSignalCycle * 0.5
 
     lightState.signal_left = signal == 1 or signal == 3

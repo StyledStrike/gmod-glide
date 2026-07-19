@@ -27,7 +27,7 @@ function ENT:ResetInputs( seatIndex )
 end
 
 --- Mark a input action as one the vehicle's driver can hold.
---- 
+---
 --- When `action` is held for a specified amount of time,
 --- the `ENT:OnHoldInputAction` function runs instead of
 --- performing the original action.
@@ -114,7 +114,7 @@ function ENT:SetInputBool( seatIndex, action, pressed )
             -- Don't run the default logic for this action
             return
         else
-            -- If the driver released this action before the hold timer expired... 
+            -- If the driver released this action before the hold timer expired...
             if holdData.timer then
                 -- Clear the timer, run the original press action,
                 -- and then run the release action on the next tick.

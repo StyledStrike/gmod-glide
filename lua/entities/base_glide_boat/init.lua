@@ -185,8 +185,8 @@ function ENT:UpdateEngine( dt, selfTbl )
 end
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
-    self:SimulateBoat( phys, dt, outLin, outAng, self:GetEngineThrottle(), self:GetInputFloat( 1, "steer" ) )
+function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
+    selfTbl.SimulateBoat( self, phys, dt, outLin, outAng, selfTbl.GetEngineThrottle( self ), selfTbl.GetInputFloat( self, 1, "steer" ) )
 end
 
 --- Override this base class function.
