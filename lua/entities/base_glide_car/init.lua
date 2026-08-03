@@ -655,10 +655,13 @@ function ENT:WheelThink( dt, selfTbl )
         local wheelTbl = GetTable( w )
         wheelTbl.Update( w, self, steerAngle, isAsleep, dt, wheelTbl )
 
-        totalSideSlip = totalSideSlip + wheelTbl.GetSideSlip( w )
-        totalForwardSlip = totalForwardSlip + wheelTbl.GetForwardSlip( w )
-
         state = wheelTbl.state
+
+        -- Read from the wheel rather than from its network variables: these averages steer the
+        -- car and pick its gear, so they should not depend on the presentation layer.
+        totalSideSlip = totalSideSlip + state.effectiveSideSlip
+        totalForwardSlip = totalForwardSlip + state.effectiveForwardSlip
+
         rpm = wheelTbl.GetRPM( w )
         avgRPM = avgRPM + rpm * state.distributionFactor
 

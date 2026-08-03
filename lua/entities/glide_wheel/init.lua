@@ -66,7 +66,13 @@ function ENT:Initialize()
         fraction = 0,
         lastSurfaceId = 0,
         lastForwardSlip = 0,
-        lastSideSlip = 0
+        lastSideSlip = 0,
+
+        -- What the wheel actually reports: the values above, or zero while it is asleep or off
+        -- the ground. Both the network variables and the vehicle's physics read these, so the
+        -- rule that zeroes them is written once.
+        effectiveForwardSlip = 0,
+        effectiveSideSlip = 0
     }
 
     -- Used for raycasting, updates with wheel radius
@@ -264,12 +270,15 @@ do
             -- Slow down eventually
             state.angularVelocity = Approach( state.angularVelocity, 0, dt * 4 )
 
-            selfTbl.SetForwardSlip( self, 0 )
-            selfTbl.SetSideSlip( self, 0 )
+            state.effectiveForwardSlip = 0
+            state.effectiveSideSlip = 0
         else
-            selfTbl.SetForwardSlip( self, state.lastForwardSlip )
-            selfTbl.SetSideSlip( self, state.lastSideSlip )
+            state.effectiveForwardSlip = state.lastForwardSlip
+            state.effectiveSideSlip = state.lastSideSlip
         end
+
+        selfTbl.SetForwardSlip( self, state.effectiveForwardSlip )
+        selfTbl.SetSideSlip( self, state.effectiveSideSlip )
 
         -- Run touch events on entities our trace hits
         local ent = state.ray.Entity
