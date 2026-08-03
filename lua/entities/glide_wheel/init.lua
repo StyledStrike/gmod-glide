@@ -350,6 +350,11 @@ local TAU = math.pi * 2
 local Min = math.min
 local Max = math.max
 local Atan2 = math.atan2
+-- Tick interval the shipped `springDamper` values were tuned against. The damping calculation
+-- below is scaled by this so that at 33 tick nothing changes, and only the dependence on the
+-- tick rate disappears. Changing it retunes every vehicle in existence.
+local DAMPER_REFERENCE_DT = 1 / 33
+
 local Approach = math.Approach
 local TraceHull = util.TraceHull
 local TractionRamp = Glide.TractionRamp
@@ -446,7 +451,11 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Suspension spring force & damping
     local offset = maxLen - ( state.fraction * maxLen )
     local springForce = ( offset * params.springStrength )
-    local damperForce = ( state.lastSpringOffset - offset ) * params.springDamper
+    -- `lastSpringOffset - offset` is a difference of positions between two calls, not a rate,
+    -- so it needs dividing by `dt` to be a damper. Scaling back by the reference interval keeps
+    -- the force identical at 33 tick while removing the dependence.
+    local damperForce = ( ( state.lastSpringOffset - offset ) / dt ) *
+        params.springDamper * DAMPER_REFERENCE_DT
 
     state.lastSpringOffset = offset
 
