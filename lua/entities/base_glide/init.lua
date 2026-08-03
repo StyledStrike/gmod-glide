@@ -13,6 +13,7 @@ include( "sv_wheels.lua" )
 include( "sv_lights.lua" )
 include( "sv_sockets.lua" )
 include( "sv_water.lua" )
+include( "sv_parking.lua" )
 include( "sh_vehicle_compat.lua" )
 
 duplicator.RegisterEntityClass( "base_glide", Glide.VehicleFactory, "Data" )
@@ -767,6 +768,7 @@ function ENT:Think()
     selfTbl.OnUpdateFeatures( self, dt )
 
     local phys = self:GetPhysicsObject()
+    local parkInterval
 
     if IsValid( phys ) then
         local lin, ang = phys:GetDamping()
@@ -786,11 +788,17 @@ function ENT:Think()
         if phys:IsAsleep() and Abs( driverInput ) > 0.01 then
             phys:Wake()
         end
+
+        parkInterval = selfTbl.GlideParkingThink( self, time, selfTbl )
     end
 
     -- Draw debug overlays, if `developer` cvar is active
     if GetDevMode() then
         debugoverlay.Axis( self:LocalToWorld( phys:GetMassCenter() ), self:GetAngles(), 15, 0.1, true )
+    end
+
+    if parkInterval then
+        self:NextThink( time + parkInterval )
     end
 
     return true
