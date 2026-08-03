@@ -73,6 +73,7 @@ local VectorSetUnpacked = FindMetaTable( "Vector" ).SetUnpacked
 
 local Abs = math.abs
 local Clamp = math.Clamp
+local Rad = math.rad
 local ClampForce = Glide.ClampForce
 
 local linForce, angForce = Vector(), Vector()
@@ -104,6 +105,19 @@ function ENT:PhysicsSimulate( phys, dt )
 
         local vehPos = phys:GetPos()
         local changedPosCount = 0
+
+        -- Derive here, once, what all four wheels would otherwise ask the physics object for
+        -- individually. See DoPhysics for why these are worth hoisting.
+        --
+        -- GetAngleVelocity is in degrees per second on the object's local axes, so it is
+        -- converted to radians and rotated into world space a single time.
+        local angVel = phys:GetAngleVelocity()
+        local worldAngVel = Vector( Rad( angVel[1] ), Rad( angVel[2] ), Rad( angVel[3] ) )
+        worldAngVel:Rotate( self:GetAngles() )
+
+        selfTbl.wheelAngularVelocity = worldAngVel
+        selfTbl.wheelMassCenter = self:LocalToWorld( phys:GetMassCenter() )
+        selfTbl.wheelVelocity = self:GetVelocity()
 
         for _, w in EntityPairs( selfTbl.wheels ) do
             local wheelTbl = GetTable( w )
