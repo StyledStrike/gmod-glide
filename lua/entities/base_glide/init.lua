@@ -789,7 +789,7 @@ function ENT:Think()
     end
 
     -- Draw debug overlays, if `developer` cvar is active
-    if GetDevMode() then
+    if GetDevMode() and IsValid( phys ) then
         debugoverlay.Axis( self:LocalToWorld( phys:GetMassCenter() ), self:GetAngles(), 15, 0.1, true )
     end
 
