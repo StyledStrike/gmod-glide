@@ -510,7 +510,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     state.lastSideSlip = slipAngle * Clamp( vehTbl.totalSpeed * 0.005, 0, 1 ) * 2
 
     -- Sideways traction ramp
-    slipAngle = Abs( slipAngle * slipAngle )
+    slipAngle = Abs( slipAngle )
     maxTraction = TractionRamp( slipAngle, params.sideTractionMaxAng, params.sideTractionMax, params.sideTractionMin )
     maxTraction = state.isBlown and maxTraction * 0.2 or maxTraction
 
