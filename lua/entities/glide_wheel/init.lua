@@ -519,8 +519,12 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Reduce sideways traction force as the wheel slips forward
     sideForce = sideForce * ( 1 - Clamp( Abs( gripLoss ) * 0.1, 0, 1 ) * 0.9 )
 
-    -- Reduce sideways force as the suspension spring applies less force
-    surfaceGrip = surfaceGrip * Clamp( springForce / params.springStrength, 0, 1 )
+    -- Reduce sideways force as the suspension compresses less.
+    --
+    -- `springForce` is `offset * springStrength`, so dividing it by `springStrength` yields
+    -- `offset`: the spring strength cancels and this is the suspension travel clamped to one,
+    -- not a load factor. Written out so it does not read as one.
+    surfaceGrip = surfaceGrip * Clamp( offset, 0, 1 )
 
     -- Apply sideways traction force
     VectorAdd( force, Clamp( sideForce, -maxTraction, maxTraction ) * surfaceGrip * rt )
