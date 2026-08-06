@@ -125,10 +125,7 @@ hook.Add( "VariableEdited", "Glide.EditVariables", function( ent, _, _, _, edito
     if not editor.min or not editor.max then return end
 
     ent.shouldUpdateWheelParams = true
-
-    if ent.hasValidPhysics then
-        ent:GetPhysicsObject():Wake()
-    end
+    ent:AwakePhysics()
 end )
 
 -- Block "Disable Collisions" option on tanks

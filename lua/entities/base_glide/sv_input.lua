@@ -102,6 +102,8 @@ do
 end
 
 function ENT:SetInputBool( seatIndex, action, pressed )
+    self:AwakePhysics()
+
     -- Check if this vehicle has a "hold" version for this input action.
     local holdData = self.holdInputActions[action]
 

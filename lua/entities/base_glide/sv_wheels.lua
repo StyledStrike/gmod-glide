@@ -55,6 +55,13 @@ function ENT:GetYawDragMultiplier()
     return 1
 end
 
+-- Wrapper function to wake the entity's PhysObj.
+-- Please use this instead of `ent:GetPhysicsObject():Wake()`.
+function ENT:AwakePhysics()
+    self:PhysWake()
+    self.hasSleepingPhysics = false
+end
+
 local EntityMeta = FindMetaTable( "Entity" )
 local GetTable = EntityMeta.GetTable
 

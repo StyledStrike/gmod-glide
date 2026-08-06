@@ -557,10 +557,6 @@ function ENT:UpdateUnflip( phys, dt, selfTbl )
     local ang = self:GetAngles()
     if Abs( ang[3] ) < 70 then return end
 
-    if phys:IsAsleep() then
-        phys:Wake()
-    end
-
     local angVel = phys:GetAngleVelocity()
     local force = selfTbl.inputSteer * phys:GetMass() * Clamp( 1 - Abs( angVel[1] ) / 50, 0, 1 ) * selfTbl.UnflipForce
 

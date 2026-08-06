@@ -32,10 +32,8 @@ end
 function ENT:SetStaySpright( toggle, dontWakePhys )
     self.stayUpright = toggle
 
-    local phys = self:GetPhysicsObject()
-
-    if not dontWakePhys and IsValid( phys ) then
-        phys:Wake()
+    if not dontWakePhys then
+        self:AwakePhysics()
     end
 end
 

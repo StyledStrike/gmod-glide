@@ -658,7 +658,6 @@ function ENT:CreateSeat( offset, angle, exitPos, isHidden )
     return seat
 end
 
-local Abs = math.abs
 local CurTime = CurTime
 local TickInterval = engine.TickInterval
 local GetDevMode = Glide.GetDevMode
@@ -727,18 +726,6 @@ function ENT:Think()
 
             if lin > 0 or ang > 0 then
                 phys:SetDamping( 0, 0 )
-            end
-
-            -- Make sure the physics stay awake when necessary,
-            -- otherwise the driver's input won't do anything.
-            local driverInput =
-                selfTbl.GetInputFloat( self, 1, "accelerate", selfTbl ) +
-                selfTbl.GetInputFloat( self, 1, "brake", selfTbl ) +
-                selfTbl.GetInputFloat( self, 1, "steer", selfTbl ) +
-                selfTbl.GetInputFloat( self, 1, "throttle", selfTbl )
-
-            if selfTbl.hasSleepingPhysics and Abs( driverInput ) > 0.01 then
-                phys:Wake()
             end
         end
     end

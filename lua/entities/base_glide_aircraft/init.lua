@@ -111,9 +111,7 @@ function ENT:ChangeSuspensionLengthMultiplier( multiplier )
         w.state.suspensionLengthMult = multiplier
     end
 
-    if self.hasValidPhysics then
-        self:GetPhysicsObject():Wake()
-    end
+    self:AwakePhysics()
 end
 
 function ENT:SetLandingGearState( state )
