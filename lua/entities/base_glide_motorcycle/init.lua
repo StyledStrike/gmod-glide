@@ -149,7 +149,7 @@ function ENT:UpdateSteering( dt, selfTbl )
     local driver = self:GetDriver()
     local phys = self:GetPhysicsObject()
 
-    if not IsValid( driver ) and IsValid( phys ) and phys:IsAsleep() then
+    if not IsValid( driver ) and selfTbl.hasValidPhysics and phys:IsAsleep() then
         self:SetStaySpright( false, true )
     end
 end

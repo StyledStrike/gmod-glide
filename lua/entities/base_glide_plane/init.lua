@@ -152,9 +152,8 @@ function ENT:OnPostThink( dt, selfTbl )
     self:SetThrottle( throttle )
 
     if self:IsEngineOn() then
-        local phys = self:GetPhysicsObject()
-
-        if IsValid( phys ) then
+        if selfTbl.hasValidPhysics then
+            local phys = self:GetPhysicsObject()
             local pitchVel = Clamp( Abs( phys:GetAngleVelocity()[2] / 50 ), -1, 1 ) * 0.1
             local downDot = WORLD_DOWN:Dot( self:GetForward() )
 

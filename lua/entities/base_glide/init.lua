@@ -264,6 +264,13 @@ function ENT:Initialize()
 
     -- Allow players to shoot fast-moving vehicles when their ping is high
     self:SetLagCompensated( true )
+
+    -- Only check for PhysObj validity/sleepyness every one in a while instead of every tick.
+    -- This may approach might cause errors, but only for a brief time,
+    -- until the next PhysObj:IsValid call is made.
+    self.hasValidPhysics = true
+    self.hasSleepingPhysics = false
+    self.nextPhysicsValidCheck = 0
 end
 
 function ENT:InitializePhysics()
@@ -707,6 +714,35 @@ function ENT:Think()
         end
     end
 
+    local phys = self:GetPhysicsObject()
+
+    -- Check physics object every 2 seconds
+    if time > selfTbl.nextPhysicsValidCheck then
+        selfTbl.nextPhysicsValidCheck = time + 2
+        selfTbl.hasValidPhysics = IsValid( phys )
+        selfTbl.hasSleepingPhysics = selfTbl.hasValidPhysics and phys:IsAsleep()
+
+        if selfTbl.hasValidPhysics then
+            local lin, ang = phys:GetDamping()
+
+            if lin > 0 or ang > 0 then
+                phys:SetDamping( 0, 0 )
+            end
+
+            -- Make sure the physics stay awake when necessary,
+            -- otherwise the driver's input won't do anything.
+            local driverInput =
+                selfTbl.GetInputFloat( self, 1, "accelerate", selfTbl ) +
+                selfTbl.GetInputFloat( self, 1, "brake", selfTbl ) +
+                selfTbl.GetInputFloat( self, 1, "steer", selfTbl ) +
+                selfTbl.GetInputFloat( self, 1, "throttle", selfTbl )
+
+            if selfTbl.hasSleepingPhysics and Abs( driverInput ) > 0.01 then
+                phys:Wake()
+            end
+        end
+    end
+
     -- Update weapons
     if selfTbl.weaponCount > 0 then
         selfTbl.WeaponThink( self, selfTbl )
@@ -734,8 +770,10 @@ function ENT:Think()
         end
     end
 
+    local isValidPhys = selfTbl.hasValidPhysics
+
     -- Update wheels
-    if selfTbl.wheelCount > 0 then
+    if selfTbl.wheelCount > 0 and isValidPhys then
         selfTbl.WheelThink( self, dt, selfTbl )
     end
 
@@ -766,30 +804,8 @@ function ENT:Think()
     -- Let children classes update their features
     selfTbl.OnUpdateFeatures( self, dt )
 
-    local phys = self:GetPhysicsObject()
-
-    if IsValid( phys ) then
-        local lin, ang = phys:GetDamping()
-
-        if lin > 0 or ang > 0 then
-            phys:SetDamping( 0, 0 )
-        end
-
-        -- Make sure the physics stay awake when necessary,
-        -- otherwise the driver's input won't do anything.
-        local driverInput =
-            selfTbl.GetInputFloat( self, 1, "accelerate", selfTbl ) +
-            selfTbl.GetInputFloat( self, 1, "brake", selfTbl ) +
-            selfTbl.GetInputFloat( self, 1, "steer", selfTbl ) +
-            selfTbl.GetInputFloat( self, 1, "throttle", selfTbl )
-
-        if phys:IsAsleep() and Abs( driverInput ) > 0.01 then
-            phys:Wake()
-        end
-    end
-
     -- Draw debug overlays, if `developer` cvar is active
-    if GetDevMode() and IsValid( phys ) then
+    if GetDevMode() and isValidPhys then
         debugoverlay.Axis( self:LocalToWorld( phys:GetMassCenter() ), self:GetAngles(), 15, 0.1, true )
     end
 

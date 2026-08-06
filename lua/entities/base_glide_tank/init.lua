@@ -190,7 +190,7 @@ function ENT:OnWeaponFire( weapon, slotIndex )
 
     local phys = self:GetPhysicsObject()
 
-    if IsValid( phys ) then
+    if self.hasValidPhysics then
         phys:ApplyForceOffset( dir * phys:GetMass() * -self.TurretRecoilForce, projectilePos )
     end
 
@@ -330,8 +330,7 @@ local groundedCount, rpm, avgRPM, totalSideSlip, totalForwardSlip, totalAngVel, 
 --- On tanks, if `isTurningInPlace` is true, `frontTorque` and `rearTorque`
 --- becomes the torque for the right-side track wheels and left-side track wheels respectively.
 function ENT:WheelThink( dt, selfTbl )
-    local phys = self:GetPhysicsObject()
-    local isAsleep = IsValid( phys ) and phys:IsAsleep()
+    local isAsleep = selfTbl.hasSleepingPhysics
     local isTurningInPlace = selfTbl.isTurningInPlace
 
     local maxRPM = self:GetTransmissionMaxRPM( self:GetGear(), selfTbl )

@@ -474,7 +474,7 @@ function ENT:OnPostThink( dt, selfTbl )
 
     local phys = self:GetPhysicsObject()
 
-    if selfTbl.groundedCount < 1 and IsValid( phys ) and self:WaterLevel() < 3 then
+    if selfTbl.groundedCount < 1 and selfTbl.hasValidPhysics and self:WaterLevel() < 3 then
         if selfTbl.totalSpeed > 200 then
             selfTbl.UpdateAirControls( self, phys, dt, selfTbl )
         else
@@ -635,8 +635,7 @@ local groundedCount, rpm, avgRPM, totalSideSlip, totalForwardSlip, state
 
 --- Implement this base class function.
 function ENT:WheelThink( dt, selfTbl )
-    local phys = self:GetPhysicsObject()
-    local isAsleep = IsValid( phys ) and phys:IsAsleep()
+    local isAsleep = selfTbl.hasSleepingPhysics
     local maxRPM = selfTbl.GetTransmissionMaxRPM( self, selfTbl.GetGear( self ), selfTbl )
     local inputHandbrake = selfTbl.GetInputBool( self, 1, "handbrake", selfTbl )
 

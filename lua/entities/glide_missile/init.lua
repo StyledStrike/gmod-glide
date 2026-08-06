@@ -159,7 +159,7 @@ function ENT:Think()
 
     local phys = self:GetPhysicsObject()
 
-    if not self.applyThrust or not IsValid( phys ) then
+    if not self.applyThrust then
         return true
     end
 

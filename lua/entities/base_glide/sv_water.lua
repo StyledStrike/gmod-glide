@@ -20,8 +20,11 @@ end
 --- Children classes can safely override this function
 --- if they want to manually specify these offsets.
 function ENT:GetBuoyancyOffsets()
+    if not self.hasValidPhysics then
+        return {}
+    end
+
     local phys = self:GetPhysicsObject()
-    if not IsValid( phys ) then return {} end
 
     local center = phys:GetMassCenter()
     local mins, maxs = phys:GetAABB()
@@ -95,14 +98,12 @@ function ENT:WaterThink( selfTbl, dt )
     local waterFill = Clamp( selfTbl.waterFill + ( waterState > 0 and 0.1 or -0.05 ) * dt, 0, 1 )
     selfTbl.waterFill = waterFill
 
-    if waterState > 0 then
+    if waterState > 0 and selfTbl.hasValidPhysics then
         local phys = self:GetPhysicsObject()
 
-        if IsValid( phys ) then
-            -- Make the multiplier fall slowly at first, then speed up
-            local multiplier = SinkEaseFunc( Clamp( 1 - waterFill, 0, 1 ) )
-            self:ApplySlowSinkingForces( selfTbl, phys, dt, 60 + selfTbl.SlowWaterSinkingBuoyancy * multiplier )
-        end
+        -- Make the multiplier fall slowly at first, then speed up
+        local multiplier = SinkEaseFunc( Clamp( 1 - waterFill, 0, 1 ) )
+        self:ApplySlowSinkingForces( selfTbl, phys, dt, 60 + selfTbl.SlowWaterSinkingBuoyancy * multiplier )
     end
 end
 

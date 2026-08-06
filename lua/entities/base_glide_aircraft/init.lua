@@ -111,10 +111,8 @@ function ENT:ChangeSuspensionLengthMultiplier( multiplier )
         w.state.suspensionLengthMult = multiplier
     end
 
-    local phys = self:GetPhysicsObject()
-
-    if IsValid( phys ) then
-        phys:Wake()
+    if self.hasValidPhysics then
+        self:GetPhysicsObject():Wake()
     end
 end
 

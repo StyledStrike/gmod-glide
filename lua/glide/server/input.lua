@@ -246,9 +246,9 @@ local function HandleMouseInput( ply, active, dt )
     if vehType ~= 3 and vehType ~= 4 then
         -- Glide.MOUSE_STEER_MODE.AIM
         if settings.mouseSteerMode == 1 then
-            local phys = vehicle:GetPhysicsObject()
-            if not IsValid( phys ) then return end
+            if not vehicle.hasValidPhysics then return end
 
+            local phys = vehicle:GetPhysicsObject()
             local angVel = phys:GetAngleVelocity()
             local targetDir = ply:GlideGetAimPos() - phys:GetPos()
             targetDir:Normalize()
@@ -276,10 +276,9 @@ local function HandleMouseInput( ply, active, dt )
 
     -- Glide.MOUSE_FLY_MODE.AIM
     if settings.mouseFlyMode == 0 then
+        if not vehicle.hasValidPhysics then return end
 
         local phys = vehicle:GetPhysicsObject()
-        if not IsValid( phys ) then return end
-
         local angVel = phys:GetAngleVelocity()
         local targetDir = ply:GlideGetAimAngles():Forward()
 

@@ -166,12 +166,9 @@ function ENT:Think()
         self.submerged = true
 
         local phys = self:GetPhysicsObject()
-
-        if IsValid( phys ) then
-            phys:Wake()
-            phys:EnableGravity( true )
-            phys:SetVelocityInstantaneous( self.velocity * 0.5 )
-        end
+        phys:Wake()
+        phys:EnableGravity( true )
+        phys:SetVelocityInstantaneous( self.velocity * 0.5 )
 
         return false
     end

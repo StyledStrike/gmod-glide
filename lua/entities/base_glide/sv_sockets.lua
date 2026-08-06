@@ -49,8 +49,9 @@ local function AttemptConnection( plug, phys, dt )
 end
 
 function ENT:SocketThink( dt, time, selfTbl )
+    if not selfTbl.hasValidPhysics then return end
+
     local phys = self:GetPhysicsObject()
-    if not IsValid( phys ) then return end
 
     for _, socket in ipairs( selfTbl.Sockets ) do
 

@@ -59,8 +59,7 @@ local EntityMeta = FindMetaTable( "Entity" )
 local GetTable = EntityMeta.GetTable
 
 function ENT:WheelThink( dt, selfTbl )
-    local phys = self:GetPhysicsObject()
-    local isAsleep = phys:IsValid() and phys:IsAsleep()
+    local isAsleep = selfTbl.hasSleepingPhysics
 
     for _, w in EntityPairs( selfTbl.wheels ) do
         local wheelTbl = GetTable( w )
