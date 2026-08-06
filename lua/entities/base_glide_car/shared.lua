@@ -202,7 +202,7 @@ end
 
 if SERVER then
     ENT.CollisionParticleSize = 0.9
-    ENT.AngularDrag = Vector( -0.5, -0.5, -4 ) -- Roll, pitch, yaw
+    ENT.AngularDrag = Vector( -0.5, -0.5, -0.5 ) -- Roll, pitch, yaw
 
     -- How long does it take for the vehicle to start up?
     ENT.StartupTime = 0.6
