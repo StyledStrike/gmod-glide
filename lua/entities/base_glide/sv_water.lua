@@ -20,11 +20,11 @@ end
 --- Children classes can safely override this function
 --- if they want to manually specify these offsets.
 function ENT:GetBuoyancyOffsets()
-    if not self.hasValidPhysics then
+    local phys = self:GetPhysicsObject()
+
+    if not IsValid( phys ) then
         return {}
     end
-
-    local phys = self:GetPhysicsObject()
 
     local center = phys:GetMassCenter()
     local mins, maxs = phys:GetAABB()
