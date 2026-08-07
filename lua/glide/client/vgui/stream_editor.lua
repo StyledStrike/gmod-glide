@@ -628,7 +628,7 @@ function PANEL:ShowExportFrame( code, titleText, helpText )
     local labelHelp = vgui.Create( "DLabel", frame )
     labelHelp:SetFont( "Trebuchet18" )
     labelHelp:SetText( helpText )
-    labelHelp:SetTextColor( Color( 255, 255, 255 ) )
+    labelHelp:SetTextColor( color_white )
     labelHelp:Dock( TOP )
     labelHelp:SetContentAlignment( 5 )
 
