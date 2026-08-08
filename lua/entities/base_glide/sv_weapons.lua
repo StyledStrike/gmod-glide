@@ -262,7 +262,7 @@ function ENT:FireBullet( params )
         params.attacker = self:GetCreator()
     end
 
-    if not params.shellDirection then
+    if params.shellDirection ~= false and not params.shellDirection then
         params.shellDirection = params.pos - self:GetPos()
         params.shellDirection:Normalize()
     end

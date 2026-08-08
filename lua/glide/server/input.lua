@@ -7,7 +7,7 @@ local activeData = Glide.activeInputData or {}
 Glide.activeInputData = activeData
 
 local EntityMeta = FindMetaTable( "Entity" )
-local getTable = EntityMeta.GetTable
+local GetTable = EntityMeta.GetTable
 
 do
     local SetNumber = Glide.SetNumber
@@ -157,6 +157,8 @@ end
 
 local ACTION_ALIASES = Glide.ACTION_ALIASES
 local SEAT_SWITCH_BUTTONS = Glide.SEAT_SWITCH_BUTTONS
+
+local HookRun = hook.Run
 local IsValid = IsValid
 
 local MOUSE_FIRST = MOUSE_FIRST
@@ -212,11 +214,13 @@ local function HandleInput( ply, button, active, pressed )
     end
 
     for _, action in ipairs( actions ) do
-        if settings.replaceYawWithRoll and MOUSE_ACTION_OVERRIDE[action] then
-            action = MOUSE_ACTION_OVERRIDE[action]
-        end
+        if HookRun( "Glide_CanPlayerVehicleInput", ply, vehicle, action, pressed ) ~= false then
+            if settings.replaceYawWithRoll and MOUSE_ACTION_OVERRIDE[action] then
+                action = MOUSE_ACTION_OVERRIDE[action]
+            end
 
-        vehicle:SetInputBool( active.seatIndex, ACTION_ALIASES[action] or action, pressed )
+            vehicle:SetInputBool( active.seatIndex, ACTION_ALIASES[action] or action, pressed )
+        end
     end
 end
 
@@ -234,7 +238,7 @@ local function HandleMouseInput( ply, active, dt )
     local settings = playerSettings[ply]
     if not settings then return end
 
-    local vehTbl = getTable( vehicle )
+    local vehTbl = GetTable( vehicle )
     local vehType = vehTbl.VehicleType
     local seatIndex = active.seatIndex
 
@@ -242,9 +246,9 @@ local function HandleMouseInput( ply, active, dt )
     if vehType ~= 3 and vehType ~= 4 then
         -- Glide.MOUSE_STEER_MODE.AIM
         if settings.mouseSteerMode == 1 then
-            local phys = vehicle:GetPhysicsObject()
-            if not IsValid( phys ) then return end
+            if not vehicle.hasValidPhysics then return end
 
+            local phys = vehicle:GetPhysicsObject()
             local angVel = phys:GetAngleVelocity()
             local targetDir = ply:GlideGetAimPos() - phys:GetPos()
             targetDir:Normalize()
@@ -272,10 +276,9 @@ local function HandleMouseInput( ply, active, dt )
 
     -- Glide.MOUSE_FLY_MODE.AIM
     if settings.mouseFlyMode == 0 then
+        if not vehicle.hasValidPhysics then return end
 
         local phys = vehicle:GetPhysicsObject()
-        if not IsValid( phys ) then return end
-
         local angVel = phys:GetAngleVelocity()
         local targetDir = ply:GlideGetAimAngles():Forward()
 

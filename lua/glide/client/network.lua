@@ -15,7 +15,7 @@ commands[Glide.CMD_INCOMING_DANGER] = function()
         Glide.LockOnHandler:OnIncomingLockOn()
 
     elseif dangerType == Glide.DANGER_TYPE.MISSILE then
-        Glide.LockOnHandler:OnIncomingMissile( net.ReadUInt( 32 ) )
+        Glide.LockOnHandler:OnIncomingMissile( net.ReadUInt( MAX_EDICT_BITS ) )
 
         if IsValid( Glide.currentVehicle ) and Glide.IsAircraft( Glide.currentVehicle ) then
             Glide.ShowKeyTip(
@@ -51,22 +51,6 @@ commands[Glide.CMD_SHOW_KEY_NOTIFICATION] = function()
     if button then
         Glide.ShowKeyTip( text, button, icon, true )
     end
-end
-
-commands[Glide.CMD_SET_CURRENT_VEHICLE] = function()
-    local ply = LocalPlayer()
-    local vehicle = net.ReadEntity()
-    local seatIndex = net.ReadUInt( 6 )
-
-    -- BUG: ReadEntity returns `worldspawn` if a NULL entity was sent.
-    -- In that case, using IsValid on `worldspawn` returns false, which
-    -- we can use to detect if it was NULL.
-    if not IsValid( vehicle ) then
-        vehicle = NULL
-    end
-
-    ply:SetNWEntity( "GlideVehicle", vehicle )
-    ply:SetNWInt( "GlideSeatIndex", seatIndex )
 end
 
 commands[Glide.CMD_RELOAD_VSWEP] = function()

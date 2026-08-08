@@ -55,17 +55,24 @@ function ENT:GetYawDragMultiplier()
     return 1
 end
 
-function ENT:WheelThink( dt, selfTbl )
-    local phys = self:GetPhysicsObject()
-    local isAsleep = phys:IsValid() and phys:IsAsleep()
-
-    for _, w in EntityPairs( self.wheels ) do
-        w:Update( self, selfTbl.steerAngle, isAsleep, dt )
-    end
+-- Wrapper function to wake the entity's PhysObj.
+-- Please use this instead of `ent:GetPhysicsObject():Wake()`.
+function ENT:AwakePhysics()
+    self:PhysWake()
+    self.hasSleepingPhysics = false
 end
 
 local EntityMeta = FindMetaTable( "Entity" )
 local GetTable = EntityMeta.GetTable
+
+function ENT:WheelThink( dt, selfTbl )
+    local isAsleep = selfTbl.hasSleepingPhysics
+
+    for _, w in EntityPairs( selfTbl.wheels ) do
+        local wheelTbl = GetTable( w )
+        wheelTbl.Update( w, self, selfTbl.steerAngle, isAsleep, dt, wheelTbl )
+    end
+end
 
 local VectorUnpack = FindMetaTable( "Vector" ).Unpack
 local VectorSetUnpacked = FindMetaTable( "Vector" ).SetUnpacked
@@ -90,7 +97,7 @@ function ENT:PhysicsSimulate( phys, dt )
     VectorSetUnpacked( angForce,
         angVelX * angDragX * mass,
         angVelY * angDragY * mass,
-        angVelZ * angDragZ * self:GetYawDragMultiplier() * mass
+        angVelZ * angDragZ * selfTbl.GetYawDragMultiplier( self ) * mass
     )
 
     local groundedCount = 0
@@ -102,24 +109,32 @@ function ENT:PhysicsSimulate( phys, dt )
         local surfaceResistance = selfTbl.surfaceResistance
 
         local vehPos = phys:GetPos()
-        local vehVel = phys:GetVelocity()
-        local vehAngVel = phys:GetAngleVelocity()
+        local changedPosCount = 0
 
         for _, w in EntityPairs( selfTbl.wheels ) do
-            w:DoPhysics( self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, vehVel, vehAngVel )
+            local wheelTbl = GetTable( w )
 
-            if w.state.isOnGround then
+            if wheelTbl.DoPhysics( w, self, phys, traceFilter, linForce, angForce, dt, surfaceGrip, surfaceResistance, vehPos, selfTbl ) then
+                changedPosCount = changedPosCount + 1
+            end
+
+            if wheelTbl.state.isOnGround then
                 groundedCount = groundedCount + 1
             end
         end
 
-        phys:SetPos( vehPos )
-        phys:SetVelocityInstantaneous( vehVel )
-        phys:SetAngleVelocityInstantaneous( vehAngVel )
+        if changedPosCount > 0 then
+            local vehVel = phys:GetVelocity()
+            local vehAngVel = phys:GetAngleVelocity()
+
+            phys:SetPos( vehPos )
+            phys:SetVelocityInstantaneous( vehVel )
+            phys:SetAngleVelocityInstantaneous( vehAngVel )
+        end
     end
 
     -- Let children classes do additional physics if they want to
-    self:OnSimulatePhysics( phys, dt, linForce, angForce )
+    selfTbl.OnSimulatePhysics( self, phys, dt, linForce, angForce, selfTbl )
 
     -- At slow speeds, try to prevent slipping sideways on mildly steep slopes
     if groundedCount > 0 then

@@ -5,23 +5,22 @@ include( "shared.lua" )
 
 DEFINE_BASECLASS( "base_glide" )
 
+duplicator.RegisterEntityClass( "base_glide_boat", Glide.VehicleFactory, "Data" )
+
 --- Implement this base class function.
 function ENT:OnPostInitialize()
     self:SetEngineThrottle( 0 )
     self:SetEnginePower( 0 )
     self:SetIsHonking( false )
 
-    -- Make boats more slidey on land
     local phys = self:GetPhysicsObject()
 
     if IsValid( phys ) then
+        -- Make boats more slidey on land
         phys:SetMaterial( "glass" )
-    end
 
-    -- Trigger wire outputs
-    if WireLib then
-        WireLib.TriggerOutput( self, "EngineThrottle", 0 )
-        WireLib.TriggerOutput( self, "EnginePower", 0 )
+        -- We do our own water physics
+        phys:SetBuoyancyRatio( 0.0 )
     end
 end
 
@@ -84,7 +83,6 @@ local Clamp = math.Clamp
 local WORLD_UP = Vector( 0, 0, 1 )
 
 local ExpDecay = Glide.ExpDecay
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
 
 --- Implement this base class function.
 function ENT:OnPostThink( dt, selfTbl )
@@ -139,9 +137,13 @@ function ENT:OnPostThink( dt, selfTbl )
         end
     end
 
-    if TriggerOutput then
-        TriggerOutput( self, "EngineThrottle", self:GetEngineThrottle() )
-        TriggerOutput( self, "EnginePower", self:GetEnginePower() )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        local wiremodCache = selfTbl.wiremodCache
+
+        TriggerOutputIfChanged( self, wiremodCache, "EngineThrottle", self:GetEngineThrottle() )
+        TriggerOutputIfChanged( self, wiremodCache, "EnginePower", self:GetEnginePower() )
 
         if selfTbl.wireSetEngineOn ~= nil then
             if selfTbl.wireSetEngineOn then
@@ -186,8 +188,8 @@ function ENT:UpdateEngine( dt, selfTbl )
 end
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
-    self:SimulateBoat( phys, dt, outLin, outAng, self:GetEngineThrottle(), self:GetInputFloat( 1, "steer" ) )
+function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
+    selfTbl.SimulateBoat( self, phys, dt, outLin, outAng, selfTbl.GetEngineThrottle( self ), selfTbl.GetInputFloat( self, 1, "steer" ) )
 end
 
 --- Override this base class function.

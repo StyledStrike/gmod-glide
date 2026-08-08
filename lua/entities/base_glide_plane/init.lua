@@ -5,6 +5,8 @@ include( "shared.lua" )
 
 DEFINE_BASECLASS( "base_glide_aircraft" )
 
+duplicator.RegisterEntityClass( "base_glide_plane", Glide.VehicleFactory, "Data" )
+
 --- Override this base class function.
 function ENT:OnPostInitialize()
     BaseClass.OnPostInitialize( self )
@@ -113,8 +115,6 @@ local ExpDecay = Glide.ExpDecay
 local EntityPairs = Glide.EntityPairs
 
 local IsValid = IsValid
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
-
 local WORLD_DOWN = Vector( 0, 0, -1 )
 
 --- Override this base class function.
@@ -152,9 +152,8 @@ function ENT:OnPostThink( dt, selfTbl )
     self:SetThrottle( throttle )
 
     if self:IsEngineOn() then
-        local phys = self:GetPhysicsObject()
-
-        if IsValid( phys ) then
+        if selfTbl.hasValidPhysics then
+            local phys = self:GetPhysicsObject()
             local pitchVel = Clamp( Abs( phys:GetAngleVelocity()[2] / 50 ), -1, 1 ) * 0.1
             local downDot = WORLD_DOWN:Dot( self:GetForward() )
 
@@ -200,8 +199,10 @@ function ENT:OnPostThink( dt, selfTbl )
         end
     end
 
-    if TriggerOutput then
-        TriggerOutput( self, "Power", power )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        TriggerOutputIfChanged( self, selfTbl.wiremodCache, "Power", power )
     end
 
     self:UpdatePlaneWheels( selfTbl )
@@ -262,8 +263,8 @@ function ENT:UpdatePlaneWheels( selfTbl )
 end
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, dt, outLin, outAng )
+function ENT:OnSimulatePhysics( phys, dt, outLin, outAng, selfTbl )
     if self:WaterLevel() < 2 then
-        self:SimulatePlane( phys, dt, self.PlaneParams, 1, outLin, outAng )
+        selfTbl.SimulatePlane( self, phys, dt, selfTbl.PlaneParams, 1, outLin, outAng )
     end
 end

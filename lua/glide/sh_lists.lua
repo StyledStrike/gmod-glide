@@ -47,3 +47,36 @@ list.Set( "GlideProjectileModels", "models/props_phx/torpedo.mdl", { scale = 0.4
 list.Set( "GlideProjectileModels", "models/props_phx/cannonball.mdl", { scale = 0.8, offset = Vector( 0, 0, -21 ) } )
 list.Set( "GlideProjectileModels", "models/props_phx/misc/flakshell_big.mdl", { scale = 0.5, offset = Vector( -15, 0, 0 ), angle = Angle( 90, 0, 0 ) } )
 list.Set( "GlideProjectileModels", "models/props_phx/misc/potato_launcher_explosive.mdl", { offset = Vector( -10, 0, 0 ), angle = Angle( 90, 0, 0 ) } )
+
+-- Find and register all entities that are children of `base_glide`
+-- (or any of it's children classes) on the duplicator/entity limit system.
+-- Also add them to a separate list, and make them spawnable on Starfall.
+if SERVER then
+    hook.Add( "InitPostEntity", "Glide.RegisterStarfallClasses", function()
+        if SF == nil then return end
+
+        local starfallData = { {} }
+
+        for class, _ in pairs( list.Get( "GlideVehicles" ) ) do
+            list.Set( "starfall_creatable_sent", class, starfallData )
+        end
+    end )
+end
+
+local RegisterEntityClass = duplicator.RegisterEntityClass
+
+hook.Add( "PreRegisterSENT", "Glide.RegisterEntityClasses", function( tbl, class )
+    if not tbl or not class then return end
+    if not tbl.GlideCategory or tbl.GlideCategory == "" then return end
+
+    if SERVER then
+        RegisterEntityClass( class, Glide.VehicleFactory, "Data" )
+    end
+
+    list.Set( "GlideVehicles", class, {
+        Name = tbl.PrintName or class,
+        Category = tbl.GlideCategory or "Default",
+        IconOverride = tbl.IconOverride,
+        Model = tbl.ChassisModel
+    } )
+end )

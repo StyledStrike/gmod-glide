@@ -61,10 +61,6 @@ do
     local TraceHull = util.TraceHull
     local EffectData = EffectData
 
-    local pos, ang
-    local attacker, inflictor, length
-    local damage, spread, explosionRadius
-
     local ray, rayWater = {}, {}
 
     local traceData = {
@@ -81,12 +77,15 @@ do
     }
 
     function Glide.FireBullet( params, traceFilter )
-        pos = params.pos
-        ang = params.ang
+        local pos = params.pos
+        local ang = params.ang
 
-        attacker = params.attacker
-        inflictor = params.inflictor or attacker
-        spread = params.spread or 0.3
+        local attacker = params.attacker
+        local inflictor = params.inflictor or attacker
+        local spread = params.spread or 0.3
+
+        local length
+        local damage, explosionRadius
 
         if params.isExplosive then
             length = params.length or 8000
@@ -178,7 +177,7 @@ do
         if shellDir then
             eff = EffectData()
             eff:SetAngles( shellDir:Angle() )
-            eff:SetOrigin( pos - dir * 30 )
+            eff:SetOrigin( params.shellOrigin or ( pos - dir * 30 ) )
             eff:SetEntity( inflictor )
             eff:SetMagnitude( 1 )
             eff:SetRadius( 5 )
@@ -249,6 +248,8 @@ do
     function Glide.CanLockOnEntity( ent, origin, normal, threshold, maxDistance, attacker, traceFilter )
         maxDistance = maxDistance * maxDistance
 
+        if not ent:TestPVS( origin ) then return false end
+
         local entPos = LocalToWorld( ent, ent:OBBCenter() )
 
         VecSet( diff, entPos )
@@ -314,11 +315,21 @@ local function CanAddToLockableEnts( ent )
     return false
 end
 
+local IsValid = IsValid
 local lockableEnts = {}
+local vehicleEnts = {}
 
-local function TrackLockableEnt( ent )
+function Glide.GetAllVehicleEntities()
+    return vehicleEnts
+end
+
+local function TrackLockableEnt( ent, addToVehicleEnts )
     ent.GlideIsLockable = true
     lockableEnts[#lockableEnts + 1] = ent
+
+    if addToVehicleEnts then
+        vehicleEnts[#vehicleEnts + 1] = ent
+    end
 end
 
 hook.Add( "OnEntityCreated", "Glide.UpdateLockOnWhitelist", function( ent )
@@ -344,7 +355,7 @@ hook.Add( "OnEntityCreated", "Glide.UpdateLockOnWhitelist", function( ent )
         end )
     else
         -- Everything else gets added to the list right away
-        TrackLockableEnt( ent )
+        TrackLockableEnt( ent, true )
     end
 end )
 
@@ -353,6 +364,13 @@ hook.Add( "EntityRemoved", "Glide.UpdateLockOnWhitelist", function( ent )
         for i = 1, #lockableEnts do
             if ent == lockableEnts[i] then
                 table.remove( lockableEnts, i )
+                break
+            end
+        end
+
+        for i = 1, #vehicleEnts do
+            if ent == vehicleEnts[i] then
+                table.remove( vehicleEnts, i )
                 break
             end
         end
@@ -375,7 +393,7 @@ function Glide.FindLockOnTarget( origin, normal, threshold, maxDistance, attacke
     end
 
     for _, e in ipairs( lockableEnts ) do
-        if e ~= attacker and not ignore[e] then
+        if e ~= attacker and not ignore[e] and IsValid( e ) then
             canLock, dot = CanLockOnEntity( e, origin, normal, threshold, maxDistance, attacker, traceFilter )
 
             if canLock and dot > largestDot then

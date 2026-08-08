@@ -63,6 +63,31 @@ hook.Add( "StyledTheme_OnResolutionChange", "StyledTheme.UpdateDimensions", func
 end )
 
 --[[
+    Watch for changes in screen resolution
+]]
+local UpdateResolution
+
+do
+    local screenW, screenH = ScrW(), ScrH()
+    local Floor = math.floor
+
+    --- Scales the given size (in pixels) from a 1080p resolution to 
+    --- the resolution currently being used by the game.
+    function StyledTheme.ScaleSize( size )
+        return Floor( ( size / 1080 ) * screenH )
+    end
+
+    UpdateResolution = function()
+        screenW, screenH = ScrW(), ScrH()
+        hook.Run( "StyledTheme_OnResolutionChange", screenW, screenH )
+    end
+
+    -- Only update resolution on gamemode initialization.
+    hook.Add( "Initialize", "StyledTheme.UpdateResolution", UpdateResolution )
+    hook.Add( "OnScreenSizeChanged", "StyledTheme.UpdateResolution", UpdateResolution )
+end
+
+--[[
     Setup fonts
 ]]
 StyledTheme.BASE_FONT_NAME = "Roboto"
@@ -76,7 +101,10 @@ function StyledTheme.RegisterFont( name, screenSize, data )
     data.extended = true
 
     StyledTheme.fonts[name] = data
-    StyledTheme.forceUpdateResolution = true
+
+    -- Use a one-time identified timer, to avoid spamming `UpdateResolution`
+    -- when `RegisterFont` is called repeatedly during Lua initialization.
+    timer.Create( "StyledTheme.ScheduleUpdateResolution", 1, 1, UpdateResolution )
 end
 
 StyledTheme.RegisterFont( "StyledTheme_Small", 0.018, {
@@ -93,37 +121,6 @@ hook.Add( "StyledTheme_OnResolutionChange", "StyledTheme.UpdateFonts", function(
         surface.CreateFont( name, data )
     end
 end )
-
---[[
-    Watch for changes in screen resolution
-]]
-do
-    local screenW, screenH = ScrW(), ScrH()
-    local Floor = math.floor
-
-    --- Scales the given size (in pixels) from a 1080p resolution to 
-    --- the resolution currently being used by the game.
-    function StyledTheme.ScaleSize( size )
-        return Floor( ( size / 1080 ) * screenH )
-    end
-
-    local function UpdateResolution()
-        screenW, screenH = ScrW(), ScrH()
-        StyledTheme.forceUpdateResolution = false
-        hook.Run( "StyledTheme_OnResolutionChange", screenW, screenH )
-    end
-
-    -- Only update resolution on gamemode initialization.
-    hook.Add( "Initialize", "StyledTheme.UpdateResolution", UpdateResolution )
-
-    local ScrW, ScrH = ScrW, ScrH
-
-    timer.Create( "StyledTheme.CheckResolution", 2, 0, function()
-        if ScrW() ~= screenW or ScrH() ~= screenH or StyledTheme.forceUpdateResolution then
-            UpdateResolution()
-        end
-    end )
-end
 
 --[[
     Misc. utility functions
@@ -621,7 +618,7 @@ do
                 value = math.Round( value, decimals )
             end
 
-            callback( value )            
+            callback( value )
         end
 
         return slider

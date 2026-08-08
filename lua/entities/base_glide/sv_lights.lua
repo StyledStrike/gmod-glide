@@ -42,25 +42,25 @@ local lightState = {
 local CurTime = CurTime
 
 --- Update out model's bodygroups depending on which lights are on.
-function ENT:UpdateLightBodygroups()
-    local headlightState = self:GetHeadlightState()
-    local allowLights = self:IsEngineOn() or headlightState > 0
+function ENT:UpdateLightBodygroups( selfTbl )
+    local headlightState = selfTbl.GetHeadlightState( self )
+    local allowLights = selfTbl.IsEngineOn( self ) or headlightState > 0
 
-    lightState.brake = allowLights and self:IsBraking()
-    lightState.reverse = allowLights and self:IsReversing()
+    lightState.brake = allowLights and selfTbl.IsBraking( self )
+    lightState.reverse = allowLights and selfTbl.IsReversing( self )
     lightState.headlight = headlightState > 0
     lightState.brake_or_taillight = lightState.brake or lightState.headlight
 
-    local signal = self:GetTurnSignalState()
-    local signalBlink = ( CurTime() % self.TurnSignalCycle ) > self.TurnSignalCycle * 0.5
+    local signal = selfTbl.GetTurnSignalState( self )
+    local signalBlink = ( CurTime() % selfTbl.TurnSignalCycle ) > selfTbl.TurnSignalCycle * 0.5
 
     lightState.signal_left = signal == 1 or signal == 3
     lightState.signal_right = signal == 2 or signal == 3
 
-    local lastBodygroups = self.lastBodygroups
+    local lastBodygroups = selfTbl.lastBodygroups
     local enable, targetSubModel
 
-    for _, l in ipairs( self.LightBodygroups ) do
+    for _, l in ipairs( selfTbl.LightBodygroups ) do
         enable = lightState[l.type]
 
         -- Blink "signal_*" light types

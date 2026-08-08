@@ -121,34 +121,36 @@ end
 local CurTime = CurTime
 local FrameTime = FrameTime
 local TraceHull = util.TraceHull
+local GetTable = FindMetaTable( "Entity" ).GetTable
 
 function ENT:Think()
+    local selfTbl = GetTable( self )
+
     -- Destroy when under water
     if self:WaterLevel() > 0 then
-        self:Destroy()
+        selfTbl.Destroy( self )
         return
     end
 
     local dt = FrameTime()
-
-    self.spinAngle = ( self.spinAngle + self.maxSpinSpeed * self.spinMultiplier * dt ) % 360
+    selfTbl.spinAngle = ( selfTbl.spinAngle + selfTbl.maxSpinSpeed * selfTbl.spinMultiplier * dt ) % 360
 
     -- Set position/angles relative to the parent
     local parent = self:GetParent()
 
     if IsValid( parent ) then
-        local angles = parent:LocalToWorldAngles( self.baseAngles )
-        angles:RotateAroundAxis( angles[self.spinAxis]( angles ), self.spinAngle )
+        local angles = parent:LocalToWorldAngles( selfTbl.baseAngles )
+        angles:RotateAroundAxis( angles[selfTbl.spinAxis]( angles ), selfTbl.spinAngle )
 
-        self:SetLocalPos( self.offset )
+        self:SetLocalPos( selfTbl.offset )
         self:SetAngles( angles )
 
         -- Pretty colors
         self:SetColor( parent:GetColor() )
 
         -- Do collision detection
-        if self.enableTrace and self.spinMultiplier > 0.2 then
-            self:CheckRotorClearance( dt, parent )
+        if selfTbl.enableTrace and selfTbl.spinMultiplier > 0.2 then
+            selfTbl.CheckRotorClearance( self, dt, parent, selfTbl )
         end
     end
 
@@ -160,20 +162,20 @@ end
 local GetDevMode = Glide.GetDevMode
 
 --- Check if the rotor blades are hitting things.
-function ENT:CheckRotorClearance( dt, parent )
+function ENT:CheckRotorClearance( dt, parent, selfTbl )
     -- The trace will use a spinning angle separate from the model
-    self.traceAngle = ( self.traceAngle + dt * 1600 ) % 360
+    selfTbl.traceAngle = ( selfTbl.traceAngle + dt * 1600 ) % 360
 
-    local ang = parent:LocalToWorldAngles( self.baseAngles )
-    ang:RotateAroundAxis( ang[self.spinAxis]( ang ), self.traceAngle )
+    local ang = parent:LocalToWorldAngles( selfTbl.baseAngles )
+    ang:RotateAroundAxis( ang[selfTbl.spinAxis]( ang ), selfTbl.traceAngle )
 
-    local dir = self.spinAxis == "Forward" and ang:Right() or ang:Forward()
-    local data = self.traceData
+    local dir = selfTbl.spinAxis == "Forward" and ang:Right() or ang:Forward()
+    local data = selfTbl.traceData
     local origin = self:GetPos()
 
     -- Trace towards the angle direction
     data.start = origin
-    data.endpos = origin + dir * self.radius
+    data.endpos = origin + dir * selfTbl.radius
 
     if GetDevMode() then
         debugoverlay.Line( data.start, data.endpos, 0.05, Color( 255, 0, 0 ), true )
@@ -182,17 +184,17 @@ function ENT:CheckRotorClearance( dt, parent )
     local tr = TraceHull( data )
 
     if tr.Hit and not tr.HitSky and not tr.HitNoDraw and tr.HitTexture ~= "**empty**" then
-        self:OnRotorHit( tr.Entity, tr.HitPos, origin )
+        selfTbl.OnRotorHit( self, tr.Entity, tr.HitPos, origin, selfTbl )
         return
     end
 
     -- Another trace on the opposite direction
-    data.endpos = origin - dir * self.radius
+    data.endpos = origin - dir * selfTbl.radius
 
     tr = TraceHull( data )
 
     if tr.Hit and not tr.HitSky and not tr.HitNoDraw and tr.HitTexture ~= "**empty**" then
-        self:OnRotorHit( tr.Entity, tr.HitPos, origin )
+        selfTbl.OnRotorHit( self, tr.Entity, tr.HitPos, origin, selfTbl )
         return
     end
 end
@@ -221,8 +223,8 @@ local Effect = util.Effect
 local PlaySoundSet = Glide.PlaySoundSet
 
 --- Called when the rotor's trace hits something.
-function ENT:OnRotorHit( ent, pos, origin )
-    self.rotorHealth = self.rotorHealth - 1
+function ENT:OnRotorHit( ent, pos, origin, selfTbl )
+    selfTbl.rotorHealth = selfTbl.rotorHealth - 1
 
     local parent = self:GetParent()
 
@@ -236,8 +238,8 @@ function ENT:OnRotorHit( ent, pos, origin )
         parent:TakeDamageInfo( dmg )
     end
 
-    if self.rotorHealth < 0 then
-        self:Destroy()
+    if selfTbl.rotorHealth < 0 then
+        selfTbl.Destroy( self )
 
         if IsValid( parent ) then
             parent:TakeEngineDamage( 0.8 )
@@ -254,7 +256,7 @@ function ENT:OnRotorHit( ent, pos, origin )
     if IsValid( ent ) then
         local isOrganism = ent:IsPlayer() or ent:IsNPC()
 
-        DoDamage( self, ent, ( isOrganism and 80 or 5 ) * self.spinMultiplier, dir * 50000 )
+        DoDamage( self, ent, ( isOrganism and 80 or 5 ) * selfTbl.spinMultiplier, dir * 50000 )
 
         if isOrganism then
             -- Do some flesh-related hit effects
@@ -280,8 +282,8 @@ function ENT:OnRotorHit( ent, pos, origin )
     -- Play sound, but not too frequently
     local t = CurTime()
 
-    if t > self.hitSoundCD then
-        self.hitSoundCD = t + 0.2
+    if t > selfTbl.hitSoundCD then
+        selfTbl.hitSoundCD = t + 0.2
         PlaySoundSet( "Glide.Rotor.Collision", self )
     end
 end

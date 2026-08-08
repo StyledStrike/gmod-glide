@@ -49,15 +49,8 @@ hook.Add( "PlayerEnteredVehicle", "Glide.OnEnterSeat", function( ply, seat )
 
     -- Store some variables on this player
     ply.IsUsingGlideVehicle = true
-    ply:SetNWEntity( "GlideVehicle", parent )
     ply:SetNWInt( "GlideSeatIndex", seatIndex )
     ply:DrawShadow( false )
-
-    -- Make sure the player knows about their current vehicle/seat
-    Glide.StartCommand( Glide.CMD_SET_CURRENT_VEHICLE, false )
-    net.WriteEntity( parent )
-    net.WriteUInt( seatIndex, 6 )
-    net.Send( ply )
 
     -- Enable vehicle input
     Glide.ActivateInput( ply, parent, seatIndex )
@@ -67,26 +60,23 @@ end )
 
 -- Once a player leaves a Glide vehicle, cleanup network variables
 -- and trigger the `Glide_OnExitVehicle` hook.
-hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply )
+hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
     if not ply.IsUsingGlideVehicle then return end
 
-    local vehicle = ply:GlideGetVehicle()
-    local seatIndex = ply:GlideGetSeatIndex()
+    local seatIndex = seat.GlideSeatIndex
+    if not seatIndex then return end
+
+    local vehicle = seat:GetParent()
+    if not IsValid( vehicle ) then return end
+    if not vehicle.IsGlideVehicle then return end
 
     -- Disable vehicle input
     Glide.DeactivateInput( ply )
 
     -- Cleanup variables
     ply.IsUsingGlideVehicle = false
-    ply:SetNWEntity( "GlideVehicle", NULL )
     ply:SetNWInt( "GlideSeatIndex", 0 )
     ply:DrawShadow( true )
-
-    -- Make sure the player knows that they aren't on a vehicle anymore
-    Glide.StartCommand( Glide.CMD_SET_CURRENT_VEHICLE, false )
-    net.WriteEntity( NULL )
-    net.WriteUInt( 0, 6 )
-    net.Send( ply )
 
     if IsValid( vehicle ) then
         ply:SetPos( vehicle:GetSeatExitPos( seatIndex ) )
@@ -128,14 +118,14 @@ hook.Add( "CanEditVariable", "Glide.ValidateEditVariables", function( ent, _, _,
 
     if value < editor.min then return false end
     if value > editor.max then return false end
+end )
+
+hook.Add( "VariableEdited", "Glide.EditVariables", function( ent, _, _, _, editor )
+    if not ent.IsGlideVehicle then return end
+    if not editor.min or not editor.max then return end
 
     ent.shouldUpdateWheelParams = true
-
-    local phys = ent:GetPhysicsObject()
-
-    if IsValid( phys ) then
-        phys:Wake()
-    end
+    ent:AwakePhysics()
 end )
 
 -- Block "Disable Collisions" option on tanks
@@ -249,28 +239,6 @@ do
         physenv.SetPerformanceSettings( settings )
     end )
 end
-
--- The spawnmenu is configured to recognize it as a vehicle,
--- so we should run spawn hooks that are for vehicles too.
-hook.Add( "PlayerSpawnSENT", "Glide.RunVehiclePreSpawnHook", function( ply, entClass )
-    local entTable = scripted_ents.GetStored( entClass )
-    if not entTable then return end
-
-    local vehicleTable = entTable["t"]
-    if not vehicleTable or not isstring( vehicleTable["GlideCategory"] ) then return end
-
-    local bAllow = hook.Run( "PlayerSpawnVehicle", ply, vehicleTable["ChassisModel"], vehicleTable["PrintName"], vehicleTable )
-    return bAllow ~= false
-end )
-
-hook.Add( "PlayerSpawnedSENT", "Glide.RunVehiclePostSpawnHook", function( ply, ent )
-    if not IsValid( ent ) then return end
-    if not ent.IsGlideVehicle then return end
-
-    hook.Run( "PlayerSpawnedVehicle", ply, ent )
-
-    return true
-end )
 
 local allVehicle = {}
 local istable = istable

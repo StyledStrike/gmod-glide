@@ -5,6 +5,8 @@ include( "shared.lua" )
 
 DEFINE_BASECLASS( "base_glide" )
 
+duplicator.RegisterEntityClass( "base_glide_aircraft", Glide.VehicleFactory, "Data" )
+
 --- Implement this base class function.
 function ENT:OnPostInitialize()
     -- Setup variables used on all aircraft
@@ -30,7 +32,7 @@ function ENT:OnPostInitialize()
     -- Countermeasure system
     self.countermeasureCD = 0
 
-    -- Trigger wire outputs
+    -- Reset wire outputs
     if WireLib then
         WireLib.TriggerOutput( self, "Power", 0 )
         WireLib.TriggerOutput( self, "Altitude", 0 )
@@ -109,11 +111,7 @@ function ENT:ChangeSuspensionLengthMultiplier( multiplier )
         w.state.suspensionLengthMult = multiplier
     end
 
-    local phys = self:GetPhysicsObject()
-
-    if IsValid( phys ) then
-        phys:Wake()
-    end
+    self:AwakePhysics()
 end
 
 function ENT:SetLandingGearState( state )
@@ -259,7 +257,7 @@ end
 --- Implement this base class function.
 function ENT:OnPostThink( dt, selfTbl )
     -- Find the altitude
-    self:UpdateAltitude()
+    self:UpdateAltitude( selfTbl )
 
     -- Update landing gear
     if selfTbl.HasLandingGear then
@@ -350,9 +348,8 @@ end
 
 local WORLD_UP = Vector( 0, 0, 1 )
 local TraceLine = util.TraceLine
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
 
-function ENT:UpdateAltitude()
+function ENT:UpdateAltitude( selfTbl )
     local mins = self:OBBMins()
     mins[1] = 0
     mins[2] = 0
@@ -360,10 +357,12 @@ function ENT:UpdateAltitude()
     local traceStart = self:GetPos() + mins * 0.9
     local tr = TraceLine( self:GetTraceData( traceStart, traceStart - WORLD_UP * 10000 ) )
 
-    self.altitude = tr.Hit and tr.Fraction * 10000 or 10000
+    selfTbl.altitude = tr.Hit and tr.Fraction * 10000 or 10000
 
-    if TriggerOutput then
-        TriggerOutput( self, "Altitude", self.altitude )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        TriggerOutputIfChanged( self, selfTbl.wiremodCache, "Altitude", selfTbl.altitude )
     end
 end
 
@@ -381,14 +380,6 @@ local function AddForce( out, f )
     out[1] = out[1] + f[1] * mass * effectiveness
     out[2] = out[2] + f[2] * mass * effectiveness
     out[3] = out[3] + f[3] * mass * effectiveness
-end
-
-local function LimitInputWithAngle( value, ang, maxAng )
-    if ang > maxAng then
-        value = value * ( 1 - Clamp( ( ang - maxAng ) / 20, 0, 1 ) )
-    end
-
-    return value
 end
 
 --- Simulate helicopter physics.
@@ -424,17 +415,16 @@ function ENT:SimulateHelicopter( phys, params, effective, outLin, outAng )
     AddForce( outLin, params.pushUpForce * self:GetInputFloat( 1, "throttle" ) * inputMult * up )
 
     -- Input control forces
-    local angles = self:GetAngles()
-    local inputPitch = LimitInputWithAngle( self.inputPitch, Abs( angles[1] ), params.maxPitch - 20 )
-    local inputRoll = self.inputRoll --LimitInputWithAngle( self.inputRoll, Abs( angles[3] ), params.maxRoll - 20 )
+    local inputPitch = self.inputPitch
+    local inputRoll = self.inputRoll
 
     outAng[1] = outAng[1] + inputRoll * params.rollForce * inputMult * effectiveness * mass
     outAng[2] = outAng[2] + inputPitch * params.pitchForce * inputMult * effectiveness * mass
     outAng[3] = outAng[3] - self.inputYaw * params.yawForce * inputMult * effectiveness * mass
 
     -- Keep upright force
-    outAng[1] = outAng[1] + rt:Dot( WORLD_UP ) * params.uprightForce * ( 1 - Abs( inputPitch ) ) * effectiveness * mass
-    outAng[2] = outAng[2] + fw:Dot( WORLD_UP ) * params.uprightForce * ( 1 - Abs( inputRoll ) ) * effectiveness * mass
+    outAng[1] = outAng[1] + rt:Dot( WORLD_UP ) * params.uprightForce * ( 1 - Abs( inputRoll ) * 0.8 ) * effectiveness * mass
+    outAng[2] = outAng[2] + fw:Dot( WORLD_UP ) * params.uprightForce * ( 1 - Abs( inputPitch ) * 0.8 ) * effectiveness * mass
 
     -- Forward input force & speed limit
     local speed = localVel[1]

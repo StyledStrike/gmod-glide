@@ -196,10 +196,10 @@ if SERVER then
 
         self:SetSuspensionLength( 9 )
         self:SetSpringStrength( 200 )
-        self:SetSpringDamper( 1500 )
+        self:SetSpringDamper( 1000 )
 
         self:SetSideTractionMultiplier( 15 )
-        self:SetSideTractionMax( 2800 )
+        self:SetSideTractionMax( 2000 )
         self:SetSideTractionMin( 500 )
 
         self:CreateSeat( Vector( -23, 0, 4 ), Angle( 0, 270, -16 ), Vector( 0, 60, 0 ), true )

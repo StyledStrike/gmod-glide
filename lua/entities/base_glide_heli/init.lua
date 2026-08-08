@@ -5,6 +5,8 @@ include( "shared.lua" )
 
 DEFINE_BASECLASS( "base_glide_aircraft" )
 
+duplicator.RegisterEntityClass( "base_glide_heli", Glide.VehicleFactory, "Data" )
+
 --- Override this base class function.
 function ENT:OnPostInitialize()
     BaseClass.OnPostInitialize( self )
@@ -122,7 +124,6 @@ end
 
 local Approach = math.Approach
 local ExpDecay = Glide.ExpDecay
-local TriggerOutput = WireLib and WireLib.TriggerOutput or nil
 
 --- Override this base class function.
 function ENT:OnPostThink( dt, selfTbl )
@@ -201,21 +202,23 @@ function ENT:OnPostThink( dt, selfTbl )
         end
     end
 
-    if TriggerOutput then
-        TriggerOutput( self, "Power", power )
+    local TriggerOutputIfChanged = selfTbl.TriggerOutputIfChanged
+
+    if TriggerOutputIfChanged then
+        TriggerOutputIfChanged( self, selfTbl.wiremodCache, "Power", power )
     end
 end
 
 local Clamp = math.Clamp
 
 --- Implement this base class function.
-function ENT:OnSimulatePhysics( phys, _, outLin, outAng )
-    local params = self.HelicopterParams
-    local power = Clamp( params.basePower + self:GetPower(), 0, 1 )
+function ENT:OnSimulatePhysics( phys, _, outLin, outAng, selfTbl )
+    local params = selfTbl.HelicopterParams
+    local power = Clamp( params.basePower + selfTbl.GetPower( self ), 0, 1 )
 
     if power > 0.1 then
-        local effectiveness = Clamp( power, 0, self:GetOutOfControl() and 0.5 or 1 )
-        self:SimulateHelicopter( phys, params, effectiveness, outLin, outAng )
+        local effectiveness = Clamp( power, 0, selfTbl.GetOutOfControl( self ) and 0.5 or 1 )
+        selfTbl.SimulateHelicopter( self, phys, params, effectiveness, outLin, outAng )
     end
 end
 

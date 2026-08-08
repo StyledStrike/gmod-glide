@@ -76,6 +76,9 @@ if SERVER then
     ENT.CollisionDamageMultiplier = 0.4
     ENT.SoftCollisionSound = "Glide.Collision.BoatHard"
 
+    -- Disable the slow sinking logic
+    ENT.SlowWaterSinkingBuoyancy = 0
+
     -- How long does it take for the vehicle to start up?
     ENT.StartupTime = 0.9
 

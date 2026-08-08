@@ -28,7 +28,7 @@ if SERVER then
 
         duplicator.ClearEntityModifier( ent, "glide_ragdoll_disabler" )
 
-        local enableFall = type( data == "table" ) and data.enableFall == true
+        local enableFall = type( data ) == "table" and data.enableFall == true
         ent.FallOnCollision = enableFall
         ent.FallWhileUnderWater = enableFall
 
@@ -61,6 +61,9 @@ function TOOL:RightClick( trace )
     if not veh then return false end
 
     if SERVER then
+        local owner = self:GetOwner()
+        if not IsValid( owner ) then return end
+
         ApplyRagdollDisabler( owner, veh, { enableFall = true } )
     end
 

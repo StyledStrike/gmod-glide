@@ -169,7 +169,7 @@ function Glide.SendMissileDanger( target, missile )
 
     Glide.StartCommand( Glide.CMD_INCOMING_DANGER, false )
     net.WriteUInt( Glide.DANGER_TYPE.MISSILE, 3 )
-    net.WriteUInt( missile:EntIndex(), 32 )
+    net.WriteUInt( missile:EntIndex(), MAX_EDICT_BITS )
     net.Send( target )
 end
 

@@ -25,7 +25,7 @@ function SWEP:PrimaryAttack()
     local ent = self.repairTarget
     if not ent then return end
 
-    local wasHealthIncreased, hasFinished = Glide.PartialRepair( ent, 99999, 1.0, user )
+    local wasHealthIncreased, hasFinished = Glide.PartialRepair( ent, 99999, 1.0 )
 
     if wasHealthIncreased then
         if user.ViewPunch then

@@ -226,12 +226,14 @@ do
     end
 end
 
+local GetTable = FindMetaTable( "Entity" ).GetTable
+
 do
     local Deg = math.deg
     local Approach = math.Approach
 
-    function ENT:Update( vehicle, steerAngle, isAsleep, dt )
-        local state, params = self.state, self.params
+    function ENT:Update( vehicle, steerAngle, isAsleep, dt, selfTbl )
+        local state, params = selfTbl.state, selfTbl.params
 
         -- Get the wheel rotation relative to the vehicle, while applying the steering angle
         local ang = vehicle:LocalToWorldAngles( steerAngle * params.steerMultiplier )
@@ -244,15 +246,15 @@ do
 
         -- Do suspsension sounds
         local fraction = state.fraction
-        self:DoSuspensionSounds( fraction - state.lastFraction, vehicle )
+        selfTbl.DoSuspensionSounds( self, fraction - state.lastFraction, vehicle, selfTbl )
         state.lastFraction = fraction
 
         -- Set NW variables
         if isAsleep then
-            self:SetContactSurface( 0 )
+            selfTbl.SetContactSurface( self, 0 )
         else
-            self:SetLastSpin( state.spin )
-            self:SetContactSurface( state.lastSurfaceId )
+            selfTbl.SetLastSpin( self, state.spin )
+            selfTbl.SetContactSurface( self, state.lastSurfaceId )
         end
 
         if isAsleep or not state.isOnGround then
@@ -262,11 +264,11 @@ do
             -- Slow down eventually
             state.angularVelocity = Approach( state.angularVelocity, 0, dt * 4 )
 
-            self:SetForwardSlip( 0 )
-            self:SetSideSlip( 0 )
+            selfTbl.SetForwardSlip( self, 0 )
+            selfTbl.SetSideSlip( self, 0 )
         else
-            self:SetForwardSlip( state.lastForwardSlip )
-            self:SetSideSlip( state.lastSideSlip )
+            selfTbl.SetForwardSlip( self, state.lastForwardSlip )
+            selfTbl.SetSideSlip( self, state.lastSideSlip )
         end
 
         -- Run touch events on entities our trace hits
@@ -274,30 +276,43 @@ do
         ent = ( ent and ent.IsValid and ent:IsValid() ) and ent or nil
 
         if ent ~= state.lastTouchedEnt then
-            if state.lastTouchedEnt and state.lastTouchedEnt.EndTouch then
-                state.lastTouchedEnt:EndTouch( self )
+            if state.lastTouchedEnt then
+                local endTouch = state.lastTouchedEnt.EndTouch
+
+                if endTouch then
+                    endTouch( state.lastTouchedEnt, self )
+                end
             end
 
-            if ent and ent.StartTouch then
-                ent:StartTouch( self )
+            if ent then
+                local startTouch = ent.StartTouch
+
+                if startTouch then
+                    startTouch( ent, self )
+                end
             end
 
             state.lastTouchedEnt = ent
         end
 
-        if ent and ent.Touch then
-            ent:Touch( self )
+        if ent then
+            local touch = ent.Touch
+
+            if touch then
+                touch( ent, self )
+            end
         end
     end
 
     local TAU = math.pi * 2
+    local RAD_TO_RPM = 60 / TAU
 
     function ENT:GetRPM()
-        return self.state.angularVelocity * 60 / TAU
+        return self.state.angularVelocity * RAD_TO_RPM
     end
 
     function ENT:SetRPM( rpm )
-        self.state.angularVelocity = rpm / ( 60 / TAU )
+        self.state.angularVelocity = rpm / RAD_TO_RPM
     end
 end
 
@@ -308,20 +323,20 @@ do
     local CurTime = CurTime
     local PlaySoundSet = Glide.PlaySoundSet
 
-    function ENT:DoSuspensionSounds( change, vehicle )
-        if not self:GetSoundsEnabled() then return end
+    function ENT:DoSuspensionSounds( change, vehicle, selfTbl )
+        if not selfTbl.GetSoundsEnabled( self ) then return end
 
         local t = CurTime()
 
-        if change > 0.01 and t > self.expandSoundCD then
-            self.expandSoundCD = t + 0.3
+        if change > 0.01 and t > selfTbl.expandSoundCD then
+            selfTbl.expandSoundCD = t + 0.3
             PlaySoundSet( vehicle.SuspensionUpSound, self, Clamp( Abs( change ) * 15, 0, 0.5 ) )
         end
 
-        if change < -0.01 and t > self.contractSoundCD then
+        if change < -0.01 and t > selfTbl.contractSoundCD then
             change = Abs( change )
 
-            self.contractSoundCD = t + 0.3
+            selfTbl.contractSoundCD = t + 0.3
             PlaySoundSet( change > 0.03 and vehicle.SuspensionHeavySound or vehicle.SuspensionDownSound, self, Clamp( change * 10, 0, 1 ) )
         end
     end
@@ -359,14 +374,15 @@ local EntSetLocalPos = FindMetaTable( "Entity" ).SetLocalPos
 local tractionCycle = Vector()
 local contactPos = Vector()
 
-function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfaceGrip, vehSurfaceResistance, vehPos, vehVel, vehAngVel )
-    local state, params = self.state, self.params
+function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfaceGrip, vehSurfaceResistance, vehPos, vehTbl )
+    local selfTbl = GetTable( self )
+    local state, params = selfTbl.state, selfTbl.params
 
     -- Get the starting point of the raycast, where the suspension connects to the chassis
     local pos = PhysLocalToWorld( phys, params.basePos )
 
     -- Get the wheel rotation relative to the chassis, applying the steering angle if necessary
-    local ang = EntLocalToWorldAngles( vehicle, vehicle.steerAngle * params.steerMultiplier )
+    local ang = EntLocalToWorldAngles( vehicle, vehTbl.steerAngle * params.steerMultiplier )
 
     -- Do the raycast
     local up = AngUp( ang )
@@ -405,19 +421,13 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     end
 
     if not ray.Hit then
-        return
+        return false
     end
 
     pos = contactPos
 
     -- Get the velocity at the wheel position
     local vel = PhysGetVelocityAtPoint( phys, pos )
-
-    -- If the binary module is installed, use it to run the math.
-    --[[if Accelerate then
-        -- TODO
-        return
-    end]]
 
     -- Store some directions, perpendicular to the surface normal
     local upAlign = VectorDot( up, ray.HitNormal )
@@ -437,22 +447,23 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     local offset = maxLen - ( state.fraction * maxLen )
     local springForce = ( offset * params.springStrength )
     local damperForce = ( state.lastSpringOffset - offset ) * params.springDamper
+
     state.lastSpringOffset = offset
 
     -- If the suspension spring is going to be fully compressed on the next frame...
+    local hasChangedPos = false
+
     if upAlign > 0.5 and velU < 0 and offset + Abs( velU * dt ) > params.suspensionLength then
-        -- Completely negate the downwards velocity at the local position
-        local linearImp, angularImp = phys:CalculateVelocityOffset( ( -velU / dt ) * up, pos )
-
-        VectorAdd( vehVel, linearImp )
-        VectorAdd( vehAngVel, angularImp )
-
-        -- Teleport back up, using phys:SetPos to prevent going through stuff.
-        linearImp = phys:CalculateVelocityOffset( ray.HitPos - ( contactPos + up * velU * dt ), pos )
-        VectorAdd( vehPos, linearImp / dt )
-
         -- Remove the damping force, to prevent a excessive bounce.
         damperForce = 0
+        hasChangedPos = true
+
+        -- Completely negate the downwards velocity
+        springForce = springForce - ( velU / dt )
+
+        -- Teleport back up, using phys:SetPos to prevent going through stuff.
+        local linearImp = phys:CalculateVelocityOffset( ray.HitPos - ( contactPos + up * velU * dt ), pos )
+        VectorAdd( vehPos, linearImp / dt )
     end
 
     local force = ( springForce - damperForce ) * upAlign * up
@@ -496,20 +507,25 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
 
     -- Calculate side slip angle
     local slipAngle = ( Atan2( velR, Abs( velF ) ) / PI ) * 2
-    state.lastSideSlip = slipAngle * Clamp( vehicle.totalSpeed * 0.005, 0, 1 ) * 2
+    state.lastSideSlip = slipAngle * Clamp( vehTbl.totalSpeed * 0.005, 0, 1 ) * 2
 
     -- Sideways traction ramp
-    slipAngle = Abs( slipAngle * slipAngle )
+    slipAngle = Abs( slipAngle )
     maxTraction = TractionRamp( slipAngle, params.sideTractionMaxAng, params.sideTractionMax, params.sideTractionMin )
     maxTraction = state.isBlown and maxTraction * 0.2 or maxTraction
 
-    local sideForce = -VectorDot( rt, vel * params.sideTractionMultiplier * state.sideTractionMult )
+    -- The "* 0.75" is to compensate for existing vehicles after a change to how slipAngle is calculated was made
+    local sideForce = -VectorDot( rt, vel * params.sideTractionMultiplier * state.sideTractionMult * 0.75 )
 
     -- Reduce sideways traction force as the wheel slips forward
-    sideForce = sideForce * ( 1 - Clamp( Abs( gripLoss ) * 0.1, 0, 1 ) * 0.9 )
+    sideForce = sideForce * ( 1 - Clamp( Abs( gripLoss ) * 0.1, 0, 1 ) * 0.75 )
 
-    -- Reduce sideways force as the suspension spring applies less force
-    surfaceGrip = surfaceGrip * Clamp( springForce / params.springStrength, 0, 1 )
+    -- Reduce sideways force as the suspension compresses less.
+    --
+    -- `springForce` is `offset * springStrength`, so dividing it by `springStrength` yields
+    -- `offset`: the spring strength cancels and this is the suspension travel clamped to one,
+    -- not a load factor. Written out so it does not read as one.
+    surfaceGrip = surfaceGrip * Clamp( offset, 0, 1 )
 
     -- Apply sideways traction force
     VectorAdd( force, Clamp( sideForce, -maxTraction, maxTraction ) * surfaceGrip * rt )
@@ -528,4 +544,6 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     outAng[1] = outAng[1] + angularImp[1] / dt
     outAng[2] = outAng[2] + angularImp[2] / dt
     outAng[3] = outAng[3] + angularImp[3] / dt
+
+    return hasChangedPos
 end

@@ -118,7 +118,7 @@ function ENT:OnTakeDamage( dmginfo )
 
         local phys = self:GetPhysicsObject()
 
-        if IsValid( phys ) then
+        if self.hasValidPhysics then
             local damagePos = dmginfo:GetDamagePosition()
             local damageForce = dmginfo:GetDamageForce() * phys:GetMass() * self.BlastForceMultiplier
 
