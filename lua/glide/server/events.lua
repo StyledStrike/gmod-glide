@@ -240,17 +240,17 @@ do
     end )
 end
 
-local allVehicle = {}
 local istable = istable
 local interactPlayer = CreateConVar( "glide_interact_player", "0", { FCVAR_ARCHIVE, FCVAR_REPLICATED }, "Whether players can interact with entities while inside Glide vehicles." )
 
 -- Clear players from all trace filters when the convar is disabled to prevent any potential issues with players getting stuck in vehicles or having collision issues after exiting.
 local function clearFilterPlayers( filter )
     for i = #filter, 1, -1 do
-        local entFilter = filter[i]
-        if IsValid( entFilter ) and entFilter:IsPlayer() then
-            if entFilter:GetCollisionGroup() == COLLISION_GROUP_WEAPON then
-                entFilter:SetCollisionGroup( COLLISION_GROUP_IN_VEHICLE )
+        local playerFilter = filter[i]
+
+        if IsValid( playerFilter ) and playerFilter:IsPlayer() then
+            if playerFilter:GetCollisionGroup() == COLLISION_GROUP_WEAPON then
+                playerFilter:SetCollisionGroup( COLLISION_GROUP_IN_VEHICLE )
             end
 
             table.remove( filter, i )
@@ -259,62 +259,39 @@ local function clearFilterPlayers( filter )
 end
 
 cvars.AddChangeCallback( "glide_interact_player", function( _, oldValue, newValue )
-    if newValue == oldValue then return end
-    if newValue ~= "0" then return end
+    if newValue == oldValue or newValue ~= "0" then return end
 
-    for vehicle, _ in pairs( allVehicle ) do
-        if not IsValid( vehicle ) then continue end
+    for _, vehicle in ipairs( Glide.GetAllVehicleEntities() ) do
+        if IsValid( vehicle ) and vehicle.playerInVehicle then
+            if vehicle.rotors then
+                for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
+                    if IsValid( rotor ) and rotor.traceData and rotor.traceData.filter then
+                        clearFilterPlayers( rotor.traceData.filter )
+                    end
+                end
+            end
 
-        for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
-            if IsValid( rotor ) and rotor.traceData and rotor.traceData.filter then
-                clearFilterPlayers( rotor.traceData.filter )
+            if istable( vehicle.selfTraceFilter ) then
+                clearFilterPlayers( vehicle.selfTraceFilter )
             end
         end
-
-        if istable( vehicle.selfTraceFilter ) then
-            clearFilterPlayers( vehicle.selfTraceFilter )
-        end
     end
 
-    allVehicle = {}
 end )
 
-local function isRotorAndSeatsValid( vehicle )
-    if not IsValid( vehicle ) then return false end
-    if not istable( vehicle.rotors ) then return false end
-    if not istable( vehicle.seats ) or #vehicle.seats == 0 then return false end
+local function removeFilter( filter, ent )
+    local hasFoundPlayer = false
+    for i = #filter, 1, -1 do
+        local filterEnt = filter[i]
 
-    return true
-end
-
-local function vehicleHasPlayerFilters( vehicle )
-    if not IsValid( vehicle ) then return false end
-    if not istable( vehicle.selfTraceFilter ) then return false end
-
-    for i = 1, #vehicle.selfTraceFilter do
-        local entFilter = vehicle.selfTraceFilter[i]
-        if IsValid( entFilter ) and entFilter:IsPlayer() then
-            return true
-        end
-    end
-
-    return false
-end
-
-local function removeFilter( filter, ent, vehicleMain )
-    for i = 1, #filter do
-        local entFilter = filter[i]
-        if entFilter == ent then
+        if filterEnt == ent then
             table.remove( filter, i )
-            break
+        elseif IsValid( filterEnt ) and filterEnt:IsPlayer() then
+            hasFoundPlayer = true
         end
     end
 
-    if IsValid( vehicleMain ) and not vehicleHasPlayerFilters( vehicleMain ) then
-        allVehicle[vehicleMain] = nil
-        vehicleMain:RemoveCallOnRemove( "Glide_RemoveFromVehicleList" )
-    end
-
+    return hasFoundPlayer
 end
 
 hook.Add( "Glide_OnEnterVehicle", "Glide.UpdateFilter", function( ply, vehicle )
@@ -325,19 +302,14 @@ hook.Add( "Glide_OnEnterVehicle", "Glide.UpdateFilter", function( ply, vehicle )
     end
 
     ply:SetCollisionGroup( COLLISION_GROUP_WEAPON )
+    vehicle.playerInVehicle = true
 
-    if not allVehicle[vehicle] then
-        allVehicle[vehicle] = true
-        vehicle:CallOnRemove( "Glide_RemoveFromVehicleList", function()
-            allVehicle[vehicle] = nil
-        end )
-    end
-
-    if not isRotorAndSeatsValid( vehicle ) then return end
-
-    for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
-        if IsValid( rotor ) and rotor.traceData and rotor.traceData.filter then
-            table.insert( rotor.traceData.filter, ply )
+    if vehicle.rotors then
+        for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
+            local filter = rotor.traceData and rotor.traceData.filter
+            if filter then
+                table.insert( filter, ply )
+            end
         end
     end
 end )
@@ -345,16 +317,22 @@ end )
 hook.Add( "Glide_OnExitVehicle", "Glide.UpdateFilter", function( ply, vehicle )
     if not interactPlayer:GetBool() then return end
 
-    if istable( vehicle.selfTraceFilter ) then
-        removeFilter( vehicle.selfTraceFilter, ply, vehicle )
+    local hasFoundPlayer = false
+    if istable( vehicle.selfTraceFilter ) and removeFilter( vehicle.selfTraceFilter, ply, vehicle ) then
+        hasFoundPlayer = true
     end
 
-    if not isRotorAndSeatsValid( vehicle ) then return end
-
-    for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
-        if IsValid( rotor ) and rotor.traceData and rotor.traceData.filter then
-            removeFilter( rotor.traceData.filter, ply )
+    if vehicle.rotors then
+        for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
+            local filter = rotor.traceData and rotor.traceData.filter
+            if filter and removeFilter( filter, ply, vehicle ) then
+                hasFoundPlayer = true
+            end
         end
+    end
+
+    if not hasFoundPlayer then
+        vehicle.playerInVehicle = false
     end
 end )
 
