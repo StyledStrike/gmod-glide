@@ -265,7 +265,7 @@ cvars.AddChangeCallback( "glide_interact_player", function( _, oldValue, newValu
         if IsValid( vehicle ) and vehicle.playerInVehicle then
             if vehicle.rotors then
                 for _, rotor in Glide.EntityPairs( vehicle.rotors ) do
-                    if IsValid( rotor ) and rotor.traceData and rotor.traceData.filter then
+                    if rotor.traceData and rotor.traceData.filter then
                         clearFilterPlayers( rotor.traceData.filter )
                     end
                 end
