@@ -350,10 +350,11 @@ local TAU = math.pi * 2
 local Min = math.min
 local Max = math.max
 local Atan2 = math.atan2
--- Tick interval the shipped `springDamper` values were tuned against. The damping calculation
--- below is scaled by this so that at 33 tick nothing changes, and only the dependence on the
--- tick rate disappears. Changing it retunes every vehicle in existence.
-local DAMPER_REFERENCE_DT = 1 / 33
+-- Physics step the shipped `springDamper` values were tuned against: Garry's Mod's default
+-- tick interval, which is what base vehicles were developed with. The damping calculation below
+-- is scaled by this so that at the default tick rate nothing changes, and only the dependence
+-- on the tick rate disappears. Changing it retunes every vehicle in existence.
+local DAMPER_REFERENCE_DT = 0.015
 
 local Approach = math.Approach
 local TraceHull = util.TraceHull
@@ -453,7 +454,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     local springForce = ( offset * params.springStrength )
     -- `lastSpringOffset - offset` is a difference of positions between two calls, not a rate,
     -- so it needs dividing by `dt` to be a damper. Scaling back by the reference interval keeps
-    -- the force identical at 33 tick while removing the dependence.
+    -- the force identical at the default tick rate while removing the dependence.
     local damperForce = ( ( state.lastSpringOffset - offset ) / dt ) *
         params.springDamper * DAMPER_REFERENCE_DT
 
