@@ -48,7 +48,12 @@ function ENT:GlideParkingThink( time, selfTbl )
     local hasDriver = IsValid( driverSeat ) and IsValid( driverSeat:GetDriver() )
     local moving = selfTbl.totalSpeed > PARK_SPEED
 
-    if hasDriver or moving then
+    -- A running engine keeps things ticking with nobody aboard: a car turned on by the Wiremod
+    -- `Ignition` input still runs its fake engine, and state 3 is a shutdown ramp that has to
+    -- finish. `EngineState` is a base_glide network var, so this holds for every vehicle type.
+    local isEngineOff = selfTbl.GetEngineState( self ) < 1
+
+    if hasDriver or moving or not isEngineOff then
         self:GlideUnpark( selfTbl )
 
         return nil
