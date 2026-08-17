@@ -10,9 +10,16 @@
     mass, so it still reacts to a shove, a blast or an impact in the same tick as before; only
     Think work is deferred, by at most PARK_THINK_INTERVAL.
 
-    That is also why polling the wake condition is enough. An earlier version that disabled the
-    wheels did need a zero-latency wake -- and dropped every vehicle onto its chassis, since a
-    Glide vehicle hangs from its wheel raycasts rather than resting on its collision hull.
+    Deferring it is safe because ENT:Think measures its own `dt` rather than assuming the tick
+    interval. Anything integrating over that `dt` -- buoyancy and slow sinking forces, engine
+    fire damage -- keeps its rate; it loses granularity, not magnitude. A Think that assumed a
+    fixed rate would instead have a floating vehicle sink the moment it parked.
+
+    That is also why polling most wake conditions is enough; only the engine, which can start
+    with nobody aboard, unparks immediately from ENT:OnEngineStateChange. An earlier version
+    that disabled the wheels did need a zero-latency wake for all of them -- and dropped every
+    vehicle onto its chassis, since a Glide vehicle hangs from its wheel raycasts rather than
+    resting on its collision hull.
 ]]
 
 -- Speed below which a vehicle counts as standing still. What remains at rest is suspension
