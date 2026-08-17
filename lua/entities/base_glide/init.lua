@@ -325,6 +325,13 @@ if TriggerOutput then
 end
 
 function ENT:OnEngineStateChange( _, lastState, state )
+    -- Leaving state 0 while parked, which the Wiremod `Ignition` input can do on an empty
+    -- vehicle, has to take effect now rather than on the next slow Think.
+    if state > 0 then
+        self:GlideUnpark()
+        self:NextThink( CurTime() )
+    end
+
     if lastState == 1 and state == 2 then
         self:OnTurnOn()
 
