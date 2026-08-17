@@ -271,6 +271,9 @@ function ENT:Initialize()
     self.hasValidPhysics = true
     self.hasSleepingPhysics = false
     self.nextPhysicsValidCheck = 0
+
+    -- Set on the first `ENT:Think`, then used to measure the time between calls
+    self.lastThinkTime = nil
 end
 
 function ENT:InitializePhysics()
@@ -663,12 +666,17 @@ local TickInterval = engine.TickInterval
 local GetDevMode = Glide.GetDevMode
 
 function ENT:Think()
-    local dt = TickInterval()
     local selfTbl = GetTable( self )
 
     -- Run again next tick
     local time = CurTime()
     self:NextThink( time )
+
+    -- Time elapsed since the last call, rather than the tick interval. Everything below that
+    -- integrates over `dt` -- buoyancy forces, engine fire damage, wheel and socket updates --
+    -- is only correct if this is the real elapsed time, so `Think` cannot assume its own rate.
+    local dt = time - ( selfTbl.lastThinkTime or time - TickInterval() )
+    selfTbl.lastThinkTime = time
 
     -- Update speed variables
     local pos = self:GetPos()
