@@ -331,6 +331,8 @@ function ENT:OnEngineStateChange( _, lastState, state )
     if TriggerOutput then
         TriggerOutput( self, "EngineState", state )
     end
+
+    self:AwakePhysics()
 end
 
 function ENT:TurnOn()
