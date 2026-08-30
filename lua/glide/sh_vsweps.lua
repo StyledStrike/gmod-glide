@@ -1,6 +1,6 @@
 --[[
     Validate and load Vehicle Scripted Weapons (VSWEPS).
-    Thanks you kirillbrest123, for the idea and code snippets to achieve this.
+    Thank you kirillbrest123, for the idea and code snippets to achieve this.
 ]]
 
 if SERVER then
