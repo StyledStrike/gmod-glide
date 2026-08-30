@@ -206,10 +206,19 @@ class EngineStream {
         this.pannerNode.channelCountMode = "explicit";
         this.pannerNode.channelInterpretation = "discrete";
 
+        this.compressorNode = new DynamicsCompressorNode(context, {
+            threshold: -30,
+            knee: 5,
+            ratio: 1.0,
+            attack: 0.01,
+            release: 0.5
+        });
+
         this.bassBoostNode.connect(this.trebleBoostNode);
         this.trebleBoostNode.connect(this.lowpassNode);
         this.lowpassNode.connect(this.pannerNode);
-        this.pannerNode.connect(streamManager.preGainNode);
+        this.pannerNode.connect(this.compressorNode);
+        this.compressorNode.connect(streamManager.preGainNode);
     }
 
     destroy() {
@@ -219,10 +228,12 @@ class EngineStream {
         this.bassBoostNode.disconnect();
         this.trebleBoostNode.disconnect();
         this.pannerNode.disconnect();
+        this.compressorNode.disconnect();
 
         this.bassBoostNode = undefined;
         this.trebleBoostNode = undefined;
         this.pannerNode = undefined;
+        this.compressorNode = undefined;
 
         // Remove references to data
         this.layers = undefined;
@@ -602,7 +613,8 @@ class EngineStreamManager {
         const nodeParam = this.busParameters[name];
 
         if (nodeParam) {
-            nodeParam.value = value;
+            //nodeParam.value = value;
+            nodeParam.setValueAtTime(value, this.audioContext.currentTime);
             debug.setValue(name, value);
         }
     }
