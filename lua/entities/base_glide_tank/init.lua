@@ -351,10 +351,10 @@ function ENT:WheelThink( dt, selfTbl )
         local wheelTbl = GetTable( w )
         wheelTbl.Update( w, self, steerAngle, isAsleep, dt, wheelTbl )
 
-        totalSideSlip = totalSideSlip + w:GetSideSlip()
-        totalForwardSlip = totalForwardSlip + w:GetForwardSlip()
+        state = wheelTbl.state
+        totalSideSlip = totalSideSlip + state.lastSideSlip
+        totalForwardSlip = totalForwardSlip + state.lastForwardSlip
 
-        state = w.state
         rpm = w:GetRPM()
         avgRPM = avgRPM + rpm * state.distributionFactor
 

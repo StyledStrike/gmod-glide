@@ -264,12 +264,12 @@ do
             -- Slow down eventually
             state.angularVelocity = Approach( state.angularVelocity, 0, dt * 4 )
 
-            selfTbl.SetForwardSlip( self, 0 )
-            selfTbl.SetSideSlip( self, 0 )
-        else
-            selfTbl.SetForwardSlip( self, state.lastForwardSlip )
-            selfTbl.SetSideSlip( self, state.lastSideSlip )
+            state.lastForwardSlip = 0
+            state.lastSideSlip = 0
         end
+
+        selfTbl.SetForwardSlip( self, state.lastForwardSlip )
+        selfTbl.SetSideSlip( self, state.lastSideSlip )
 
         -- Run touch events on entities our trace hits
         local ent = state.ray.Entity
