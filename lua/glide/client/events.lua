@@ -17,13 +17,12 @@ end, nil, "Switch seats while inside a Glide vehicle." )
 
 ----- Check if the local player has entered/left a Glide vehicle.
 
-local hideComponent = {
-    ["CHudHealth"] = true,
+local hideComponents = {
     ["CHudBattery"] = true
 }
 
 local function HUDShouldDraw( name )
-    if hideComponent[name] then return false end
+    if hideComponents[name] then return false end
 end
 
 -- Block (some) binds that uses the same buttons as Glide

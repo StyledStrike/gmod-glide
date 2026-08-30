@@ -192,7 +192,7 @@ do
             ang = -self:WorldToLocalAngles( Camera.angles )[2]
         end
 
-        local x, y = screenW * 0.5, screenH * 0.92
+        local x, y = screenW * 0.5, screenH * 0.87
         local size = screenH * 0.15
 
         SetColor( 255, 255, 255, 255 )
