@@ -350,11 +350,6 @@ local TAU = math.pi * 2
 local Min = math.min
 local Max = math.max
 local Atan2 = math.atan2
--- Physics step the shipped `springDamper` values were tuned against: Garry's Mod's default
--- tick interval, which is what base vehicles were developed with. The damping calculation below
--- is scaled by this so that at the default tick rate nothing changes, and only the dependence
--- on the tick rate disappears. Changing it retunes every vehicle in existence.
-local DAMPER_REFERENCE_DT = 0.015
 
 local Approach = math.Approach
 local TraceHull = util.TraceHull
@@ -452,11 +447,13 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Suspension spring force & damping
     local offset = maxLen - ( state.fraction * maxLen )
     local springForce = ( offset * params.springStrength )
-    -- `lastSpringOffset - offset` is a difference of positions between two calls, not a rate,
-    -- so it needs dividing by `dt` to be a damper. Scaling back by the reference interval keeps
-    -- the force identical at the default tick rate while removing the dependence.
-    local damperForce = ( ( state.lastSpringOffset - offset ) / dt ) *
-        params.springDamper * DAMPER_REFERENCE_DT
+
+    -- `lastSpringOffset - offset` is a difference of positions between two calls,
+    -- and it needs dividing by `dt` to be a damper rate.
+    -- That division was not being done when Glide and many vehicles were made in the past,
+    -- so scaling back by the reference tick interval (which by default in Gmod is 1 / 66.666... = ~0.015)
+    -- keeps the force identical for backwards compatibility.
+    local damperForce = ( ( state.lastSpringOffset - offset ) / dt ) * params.springDamper * 0.015
 
     state.lastSpringOffset = offset
 
