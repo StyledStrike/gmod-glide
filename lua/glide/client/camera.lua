@@ -21,8 +21,8 @@ local function AddHook( name, priority )
     local id = "GlideCamera_" .. name
     Camera.hooks[id] = name
 
-    hook.Add( name, id, function( a, b, c )
-        return Camera[name]( Camera, a, b, c )
+    hook.Add( name, id, function( a, b, c, d, e, f )
+        return Camera[name]( Camera, a, b, c, d, e, f )
     end, priority )
 end
 
