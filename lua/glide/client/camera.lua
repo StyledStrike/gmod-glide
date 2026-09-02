@@ -61,6 +61,7 @@ function Camera:Initialize( user, vehicle, seatIndex )
     AddHook( "CreateMove", HOOK_HIGH )
     AddHook( "PlayerBindPress" )
     AddHook( "InputMouseApply", HOOK_HIGH )
+    AddHook( "CalcViewModelView", HOOK_HIGH )
 end
 
 function Camera:Shutdown()
@@ -484,4 +485,12 @@ function Camera:InputMouseApply( _, x, y )
     angles[2] = ( angles[2] - lookX ) % 360
 
     self.angles = self.allowRolling and vehicle:LocalToWorldAngles( angles ) or angles
+end
+
+function Camera:CalcViewModelView( _, _, _, _, pos, ang )
+    if not self.isActive or not self.isInFirstPerson then
+        return pos, ang
+    end
+
+    return self.position, self.angles + self.punchAngle
 end
