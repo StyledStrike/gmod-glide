@@ -203,9 +203,7 @@ if SERVER then
 
         -- Since the model already has a visual representation
         -- for the wheels and tracks, hide the actual wheels.
-        for _, w in ipairs( self.wheels ) do
-            Glide.HideEntity( w, true )
-        end
+        Glide.HideWheels( self, true )
 
         -- Manipulate these on the server side only, to allow
         -- spawning projectiles on the correct position.
