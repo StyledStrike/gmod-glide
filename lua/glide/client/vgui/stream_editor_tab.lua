@@ -8,7 +8,9 @@ end
 
 local PANEL = {}
 
+local color_red = nil
 function PANEL:Init()
+    color_red = Color( 255, 0, 0 )
     local separator = ScaleSize( 4 )
 
     -- Right-side panel
@@ -518,9 +520,9 @@ function PANEL:Think()
 
     isRedlining = isRedlining and throttle > 0
 
-    if self.isRedlining ~= isRedlining then
+    if self.isRedlining ~= isRedlining and color_red then
         self.isRedlining = isRedlining
-        self.rpmLabel:SetColor( isRedlining and Color( 255, 0, 0 ) or color_white )
+        self.rpmLabel:SetColor( isRedlining and color_red or color_white )
     end
 
     local rpmFraction = ( rpm - self.minRPM ) / ( self.maxRPM - self.minRPM )
