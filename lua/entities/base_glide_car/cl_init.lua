@@ -10,6 +10,7 @@ function ENT:OnPostInitialize()
 
     self.rpmFraction = 0
     self.streamJSONOverride = nil
+    self.AlarmSound = Glide.GetRandomSound( "Glide.Alarm.Car" )
 end
 
 function ENT:OnGearChange( _, _, gear )
@@ -121,6 +122,7 @@ function ENT:OnUpdateSounds()
     local dt = FrameTime()
     local isSirenEnabled = self.lastSirenEnableTime and CurTime() - self.lastSirenEnableTime > 0.25
     local isHonking = self:GetIsHonking()
+    local isAlarmed = self:GetIsAlarmed()
 
     if isHonking and self.HornSound and self.HornSound ~= "" then
         local volume = GetVolume( "hornVolume" ) * ( isSirenEnabled and self.SirenVolume or 1 )
@@ -132,7 +134,6 @@ function ENT:OnUpdateSounds()
                 isSirenEnabled and self.SirenLoopAltSound or self.HornSound ), 85, self )
             snd:PlayEx( volume, 100 )
         end
-
     elseif sounds.horn then
         if sounds.horn:GetVolume() > 0 then
             sounds.horn:ChangeVolume( sounds.horn:GetVolume() - dt * 8 )
@@ -140,6 +141,20 @@ function ENT:OnUpdateSounds()
             sounds.horn:Stop()
             sounds.horn = nil
         end
+    end
+
+    if isAlarmed and self.AlarmSound and self.AlarmSound ~= "" then
+        local volume = GetVolume( "hornVolume" )
+
+        if sounds.alarm then
+            sounds.alarm:ChangeVolume( volume )
+        else
+            local snd = self:CreateLoopingSound( "alarm", self.AlarmSound, 85, self )
+            snd:PlayEx( volume, 100 )
+        end
+    elseif sounds.alarm then
+        sounds.alarm:Stop()
+        sounds.alarm = nil
     end
 
     if isSirenEnabled and not isHonking then
