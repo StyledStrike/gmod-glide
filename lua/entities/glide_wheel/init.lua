@@ -204,6 +204,11 @@ function ENT:ChangeRadius( radius )
     -- Used on util.TraceHull
     state.traceData.mins = Vector( radius * -0.2, radius * -0.2, 0 )
     state.traceData.maxs = Vector( radius * 0.2, radius * 0.2, radius * 0.5 )
+
+    local parent = self:GetParent()
+    if IsValid( parent ) then
+        parent:AwakePhysics()
+    end
 end
 
 do
