@@ -44,7 +44,10 @@ const clamp = (value, min, max) => {
 };
 
 const remap = (value, inMin, inMax, outMin, outMax) => {
-    return outMin + (((value - inMin) / (inMax - inMin)) * (outMax - outMin));
+    const inDiff = inMax - inMin;
+    if (inDiff == 0) return outMin;
+
+    return outMin + (((value - inMin) / inDiff) * (outMax - outMin));
 };
 
 const approach = (cur, target, inc) => {
