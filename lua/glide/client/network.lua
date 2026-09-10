@@ -66,6 +66,19 @@ commands[Glide.CMD_FORCE_THIRDPERSON] = function()
     Glide.Camera:SetFirstPerson( not useThirdPerson )
 end
 
+commands[Glide.CMD_MANAGE_VEHICLE] = function()
+    local action = net.ReadUInt( 2 )
+    local seat = net.ReadEntity()
+
+    if not IsValid( seat ) then return end
+
+    if action == 1 then
+        hook.Run( "Glide_OnLocalEnterNotGlideVehicle", seat, LocalPlayer() )
+    elseif action == 2 then
+        hook.Run( "Glide_OnLocalExitNotGlideVehicle", seat, LocalPlayer() )
+    end
+end
+
 net.Receive( "glide.command", function()
     local cmd = net.ReadUInt( Glide.CMD_SIZE )
 
