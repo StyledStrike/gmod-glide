@@ -3,11 +3,12 @@ AddCSLuaFile( "cl_init.lua" )
 
 include( "shared.lua" )
 
+local SOLID_FLAGS = bit.bor( FSOLID_TRIGGER, FSOLID_TRIGGER_TOUCH_DEBRIS, FSOLID_USE_TRIGGER_BOUNDS )
 function ENT:Initialize()
     self:SetModel( "models/hunter/misc/sphere025x025.mdl" )
     self:SetSolid( SOLID_NONE )
     self:SetMoveType( MOVETYPE_VPHYSICS )
-    self:SetSolidFlags( bit.bor( FSOLID_TRIGGER, FSOLID_TRIGGER_TOUCH_DEBRIS, FSOLID_USE_TRIGGER_BOUNDS ) )
+    self:SetSolidFlags( SOLID_FLAGS )
 
     self.params = {
         -- Suspension
