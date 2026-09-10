@@ -11,6 +11,27 @@ ENT.AutomaticFrameAdvance = true
 
 if not SERVER then return end
 
+list.Set( "starfall_creatable_sent", "glide_missile_launcher", {
+    _postFactory = function( _ply, ent, entTbl )
+        ent:SetReloadDelay( entTbl.ReloadDelay )
+        ent:SetMissileLifetime( entTbl.MissileLifetime )
+        ent:SetExplosionRadius( entTbl.ExplosionRadius )
+        ent:SetExplosionDamage( entTbl.ExplosionDamage )
+
+        ent:SetMissileModel( entTbl.MissileModel )
+        ent:SetMissileScale( entTbl.MissileModelScale )
+    end,
+
+    {
+        ["ReloadDelay"] = { TYPE_NUMBER, 1 },
+        ["MissileLifetime"] = { TYPE_NUMBER, 5 },
+        ["ExplosionRadius"] = { TYPE_NUMBER, 350 },
+        ["ExplosionDamage"] = { TYPE_NUMBER, 100 },
+        ["MissileModel"] = { TYPE_STRING, "models/glide/weapons/homing_rocket.mdl" },
+        ["MissileModelScale"] = { TYPE_NUMBER, 1 },
+    }
+} )
+
 local ENT_VARS = {
     ["reloadDelay"] = true,
     ["missileLifetime"] = true,

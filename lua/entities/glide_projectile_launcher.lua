@@ -11,6 +11,38 @@ ENT.AutomaticFrameAdvance = true
 
 if not SERVER then return end
 
+list.Set( "starfall_creatable_sent", "glide_projectile_launcher", {
+    _postFactory = function( _ply, ent, entTbl )
+        ent:SetProjectileSpeed( entTbl.ProjectileSpeed )
+        ent:SetProjectileGravity( entTbl.ProjectileGravity )
+        ent:SetProjectileLifetime( entTbl.ProjectileLifetime )
+
+        ent:SetReloadDelay( entTbl.ReloadDelay )
+        ent:SetExplosionRadius( entTbl.ExplosionRadius )
+        ent:SetExplosionDamage( entTbl.ExplosionDamage )
+
+        ent:SetProjectileModel( entTbl.ProjectileModel )
+        ent:SetProjectileScale( entTbl.ProjectileModelScale )
+
+        local smokeColor = entTbl.SmokeColor
+        ent:SetSmokeColor( smokeColor.r, smokeColor.g, smokeColor.b )
+    end,
+
+    {
+        ["ProjectileSpeed"] = { TYPE_NUMBER, 10000 },
+        ["ProjectileGravity"] = { TYPE_NUMBER, 700 },
+        ["ProjectileLifetime"] = { TYPE_NUMBER, 5 },
+
+        ["ReloadDelay"] = { TYPE_NUMBER, 1 },
+        ["ExplosionRadius"] = { TYPE_NUMBER, 350 },
+        ["ExplosionDamage"] = { TYPE_NUMBER, 100 },
+
+        ["ProjectileModel"] = { TYPE_STRING, "models/glide/weapons/homing_rocket.mdl" },
+        ["ProjectileModelScale"] = { TYPE_NUMBER, 1 },
+        ["SmokeColor"] = { TYPE_COLOR, Color( 80, 80, 80 ) },
+    }
+} )
+
 local ENT_VARS = {
     ["projectileSpeed"] = true,
     ["projectileGravity"] = true,
