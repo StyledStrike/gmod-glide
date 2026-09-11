@@ -51,6 +51,26 @@ if SERVER then
 
             return EnterVehicle( self, vehicle )
         end
+
+        Glide._OriginalEyeAngles = Glide._OriginalEyeAngles or EntityMeta.EyeAngles
+        local IsPlayer = PlayerMeta.IsPlayer
+        function EntityMeta:EyeAngles()
+            if IsPlayer( self ) and self.IsUsingGlideVehicle then
+                return self:GlideGetAimAngles()
+            end
+
+            return Glide._OriginalEyeAngles( self )
+        end
+
+        Glide._OriginalGetAimVector = Glide._OriginalGetAimVector or PlayerMeta.GetAimVector
+        function PlayerMeta:GetAimVector()
+            if self.IsUsingGlideVehicle then
+                return self:GlideGetAimAngles():Forward()
+            end
+
+            return Glide._OriginalGetAimVector( self )
+        end
+
     end
 
     --- Utility function to get the entity creator

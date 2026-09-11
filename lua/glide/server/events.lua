@@ -241,6 +241,21 @@ do
     end )
 end
 
+local GetDevMode = Glide.GetDevMode
+hook.Add( "EntityFireBullets", "Glide.FixBulletDirection", function( ent, data )
+    if not IsValid( ent ) or not ent:IsPlayer() or not ent.IsUsingGlideVehicle then return end
+
+    data.Dir = ent:GlideGetAimAngles():Forward()
+    data.Src = ent:EyePos()
+
+    if GetDevMode() then
+        debugoverlay.Cross( data.Src, 10, 5, Color( 0, 255, 0 ), true )
+        debugoverlay.Line( data.Src, data.Src + data.Dir * 1000, 5, Color( 255, 0, 0 ), true )
+    end
+
+    return true
+end )
+
 if not game.SinglePlayer() then return end
 
 local function ResetVehicle( vehicle )
