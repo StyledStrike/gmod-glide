@@ -13,6 +13,7 @@ include( "sv_wheels.lua" )
 include( "sv_lights.lua" )
 include( "sv_sockets.lua" )
 include( "sv_water.lua" )
+include( "sv_parking.lua" )
 include( "sh_vehicle_compat.lua" )
 
 duplicator.RegisterEntityClass( "base_glide", Glide.VehicleFactory, "Data" )
@@ -271,6 +272,9 @@ function ENT:Initialize()
     self.hasValidPhysics = true
     self.hasSleepingPhysics = false
     self.nextPhysicsValidCheck = 0
+
+    -- Set on the first `ENT:Think`, then used to measure the time between calls
+    self.lastThinkTime = nil
 end
 
 function ENT:InitializePhysics()
@@ -319,6 +323,13 @@ if TriggerOutput then
 end
 
 function ENT:OnEngineStateChange( _, lastState, state )
+    -- Leaving state 0 while parked, which the Wiremod `Ignition` input can do on an empty
+    -- vehicle, has to take effect now rather than on the next slow Think.
+    if state > 0 then
+        self:GlideUnpark()
+        self:NextThink( CurTime() )
+    end
+
     if lastState == 1 and state == 2 then
         self:OnTurnOn()
 
@@ -664,12 +675,17 @@ local TickInterval = engine.TickInterval
 local GetDevMode = Glide.GetDevMode
 
 function ENT:Think()
-    local dt = TickInterval()
     local selfTbl = GetTable( self )
 
     -- Run again next tick
     local time = CurTime()
     self:NextThink( time )
+
+    -- Time elapsed since the last call, rather than the tick interval. Everything below that
+    -- integrates over `dt` -- buoyancy forces, engine fire damage, wheel and socket updates --
+    -- is only correct if this is the real elapsed time, so `Think` cannot assume its own rate.
+    local dt = time - ( selfTbl.lastThinkTime or time - TickInterval() )
+    selfTbl.lastThinkTime = time
 
     -- Update speed variables
     local pos = self:GetPos()
@@ -795,6 +811,13 @@ function ENT:Think()
     -- Draw debug overlays, if `developer` cvar is active
     if GetDevMode() and isValidPhys then
         debugoverlay.Axis( self:LocalToWorld( phys:GetMassCenter() ), self:GetAngles(), 15, 0.1, true )
+    end
+
+    -- Decide whether this vehicle can think slower for a while
+    local parkInterval = selfTbl.GlideParkingThink( self, time, selfTbl )
+
+    if parkInterval then
+        self:NextThink( time + parkInterval )
     end
 
     return true
