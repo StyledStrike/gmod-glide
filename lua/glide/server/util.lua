@@ -235,7 +235,7 @@ function Glide.EnterVehicleSeat( ply, vehicle, seat )
     local seatIndex = seat.GlideSeatIndex
     if not seatIndex then return end
 
-    if seatIndex == 1 and vehicle.weaponCount > 0 then
+    if vehicle.weaponCount > 0 then
         ply:SetAllowWeaponsInVehicle( false )
     else
         ply:SetAllowWeaponsInVehicle( cvarAllowPlayerWeaponsInVehicle:GetBool() )
