@@ -239,10 +239,11 @@ class EngineStream {
         this.compressorNode = undefined;
 
         // Remove references to data
-        this.layers = undefined;
+        this.layers = {};
         this.position = undefined;
         this.inputs = undefined;
         this.params = undefined;
+        this.isPlaying = false;
     }
 
     setPosition(x, y, z) {
@@ -267,6 +268,13 @@ class EngineStream {
         if (!(id in this.layers)) return;
 
         const layer = this.layers[id];
+
+        // Remove event handlers from the load request, if it exists
+        if (layer.loadRequest) {
+            layer.loadRequest.onload = null;
+            layer.loadRequest.onerror = null;
+            layer.loadRequest.onabort = null;
+        }
 
         // Abort an existing download request, if it is active
         if (layer.loadRequest && layer.loadRequest.readyState < 4) {
@@ -389,7 +397,22 @@ class EngineStream {
         this.pannerNode.refDistance = params.fadeDist * 0.1;
         this.pannerNode.maxDistance = params.fadeDist;
 
-        let baseVol = params.volume * this.volumeMultiplier;
+        let attenuation = 1;
+        const listener = this.streamManager && this.streamManager.audioContext.listener;
+
+        if (listener) {
+            const position = this.position;
+            const dx = position[0] - listener.positionX.value;
+            const dy = position[1] - listener.positionY.value;
+            const dz = position[2] - listener.positionZ.value;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            const range = params.fadeDist > 0 ? params.fadeDist : 2500;
+            const start = range * 0.5;
+            attenuation = 1 - clamp((distance - start) / (range - start), 0, 1);
+        }
+
+        let baseVol = params.volume * this.volumeMultiplier * attenuation;
         let pitch = 1;
 
         // Gear switch "wobble"
