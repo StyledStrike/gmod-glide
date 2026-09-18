@@ -77,6 +77,7 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
     ply.IsUsingGlideVehicle = false
     ply:SetNWInt( "GlideSeatIndex", 0 )
     ply:DrawShadow( true )
+    ply:SetAllowWeaponsInVehicle( false )
 
     if IsValid( vehicle ) then
         ply:SetPos( vehicle:GetSeatExitPos( seatIndex ) )

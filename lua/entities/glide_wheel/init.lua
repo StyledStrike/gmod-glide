@@ -204,6 +204,11 @@ function ENT:ChangeRadius( radius )
     -- Used on util.TraceHull
     state.traceData.mins = Vector( radius * -0.2, radius * -0.2, 0 )
     state.traceData.maxs = Vector( radius * 0.2, radius * 0.2, radius * 0.5 )
+
+    local parent = self:GetParent()
+    if IsValid( parent ) then
+        parent:AwakePhysics()
+    end
 end
 
 do
@@ -264,12 +269,12 @@ do
             -- Slow down eventually
             state.angularVelocity = Approach( state.angularVelocity, 0, dt * 4 )
 
-            selfTbl.SetForwardSlip( self, 0 )
-            selfTbl.SetSideSlip( self, 0 )
-        else
-            selfTbl.SetForwardSlip( self, state.lastForwardSlip )
-            selfTbl.SetSideSlip( self, state.lastSideSlip )
+            state.lastForwardSlip = 0
+            state.lastSideSlip = 0
         end
+
+        selfTbl.SetForwardSlip( self, state.lastForwardSlip )
+        selfTbl.SetSideSlip( self, state.lastSideSlip )
 
         -- Run touch events on entities our trace hits
         local ent = state.ray.Entity
@@ -350,6 +355,7 @@ local TAU = math.pi * 2
 local Min = math.min
 local Max = math.max
 local Atan2 = math.atan2
+
 local Approach = math.Approach
 local TraceHull = util.TraceHull
 local TractionRamp = Glide.TractionRamp
@@ -446,7 +452,13 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Suspension spring force & damping
     local offset = maxLen - ( state.fraction * maxLen )
     local springForce = ( offset * params.springStrength )
-    local damperForce = ( state.lastSpringOffset - offset ) * params.springDamper
+
+    -- `lastSpringOffset - offset` is a difference of positions between two calls,
+    -- and it needs dividing by `dt` to be a damper rate.
+    -- That division was not being done when Glide and many vehicles were made in the past,
+    -- so scaling back by the reference tick interval (which by default in Gmod is 1 / 66.666... = ~0.015)
+    -- keeps the force identical for backwards compatibility.
+    local damperForce = ( ( state.lastSpringOffset - offset ) / dt ) * params.springDamper * 0.015
 
     state.lastSpringOffset = offset
 

@@ -271,25 +271,26 @@ if CLIENT then
     local ammoText = "%d / %d"
 
     --- Draw the weapon HUD.
-    function VSWEP:DrawHUD( _screenW, screenH )
+    function VSWEP:DrawHUD( screenW, screenH )
         self:DrawCrosshair()
-
-        local h = Floor( screenH * 0.04 )
-        local y = screenH - Floor( screenH * 0.03 ) - h
-        local margin = Floor( screenH * 0.005 )
-        local iconSize = h * 0.8
 
         local ammo = self.ammo or 0
         local maxAmmo = self.maxAmmo or 0
         local text = maxAmmo > 0 and ammoText:format( ammo, maxAmmo ) or "ꝏ"
 
         surface.SetFont( "GlideHUD" )
-        local w = surface.GetTextSize( text )
+        local textW = surface.GetTextSize( text )
 
-        w = w + iconSize + margin * 4
+        local h = Floor( screenH * 0.04 )
+        local margin = Floor( screenH * 0.005 )
+        local iconSize = h * 0.8
+        local w = textW + iconSize + margin * 3
+
+        local x = Floor( ( screenW * 0.5 ) - ( w * 0.5 ) )
+        local y = screenH - Floor( screenH * 0.02 ) - h
 
         SetColor( 30, 30, 30, 230 )
-        DrawRect( 0, y, w, h )
+        DrawRect( x, y, w, h )
 
         -- Draw a progress bar if this weapon is reloading or does not have infinite ammo.
         local progressBar = self.reloadProgress > 0 and self.reloadProgress or ( maxAmmo > 0 and ammo / maxAmmo or 0 )
@@ -297,8 +298,8 @@ if CLIENT then
         self.progressBar = ExpDecay( self.progressBar, Clamp( progressBar, 0, 1 ), 6, FrameTime() )
 
         if self.progressBar > 0 then
-            SetColor( colors.accent:Unpack() )
-            DrawRect( 1, y + 1, ( w - 2 ) * self.progressBar, h - 2 )
+            SetColor( colors.accent )
+            DrawRect( x + 1, y + 1, ( w - 2 ) * self.progressBar, h - 2 )
         end
 
         local ammoColor = colors.text
@@ -307,8 +308,8 @@ if CLIENT then
             ammoColor = ammo > 0 and ( ammo > maxAmmo * 0.3 and colors.text or colors.lowAmmo ) or colors.noAmmo
         end
 
-        DrawSimpleText( text, "GlideHUD", iconSize + margin * 2, y + h * 0.5, ammoColor, 0, 1 )
-        DrawIcon( margin + iconSize * 0.5, y + h * 0.5, self.Icon, iconSize, colors.text, 0 )
+        DrawSimpleText( text, "GlideHUD", x + iconSize + margin, y + h * 0.5, ammoColor, 0, 1 )
+        DrawIcon( x + margin + iconSize * 0.5, y + h * 0.5, self.Icon, iconSize, colors.text, 0 )
     end
 
     local LOCKON_STATE_COLORS = {

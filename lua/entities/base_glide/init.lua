@@ -295,8 +295,7 @@ function ENT:Use( activator )
         local seat = self:GetFreeSeat()
 
         if seat then
-            activator:SetAllowWeaponsInVehicle( false )
-            activator:EnterVehicle( seat )
+            Glide.EnterVehicleSeat( activator, self, seat )
             return
         end
     end
@@ -304,8 +303,7 @@ function ENT:Use( activator )
     local freeSeat = self:GetClosestAvailableSeat( activator:GetShootPos() )
 
     if freeSeat then
-        activator:SetAllowWeaponsInVehicle( false )
-        activator:EnterVehicle( freeSeat )
+        Glide.EnterVehicleSeat( activator, self, freeSeat )
     end
 end
 
@@ -331,6 +329,8 @@ function ENT:OnEngineStateChange( _, lastState, state )
     if TriggerOutput then
         TriggerOutput( self, "EngineState", state )
     end
+
+    self:AwakePhysics()
 end
 
 function ENT:TurnOn()
@@ -563,19 +563,20 @@ end
 
 --- Gets the closest available seat to a position.
 function ENT:GetClosestAvailableSeat( pos )
-    local closestSeat = nil
+    local closestSeat, closestSeatIndex = nil, nil
     local closestDistance = math.huge
 
-    for _, seat in EntityPairs( self.seats ) do
+    for i, seat in EntityPairs( self.seats ) do
         local distance = pos:DistToSqr( seat:GetPos() )
 
         if distance < closestDistance and not IsValid( seat:GetDriver() ) then
             closestSeat = seat
+            closestSeatIndex = i
             closestDistance = distance
         end
     end
 
-    return closestSeat
+    return closestSeat, closestSeatIndex
 end
 
 --- Create a new seat.

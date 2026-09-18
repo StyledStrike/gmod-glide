@@ -242,7 +242,7 @@ function ENT:UpdatePlaneWheels( selfTbl )
 
         if state.isOnGround then
             isGrounded = true
-            totalSideSlip = totalSideSlip + w:GetSideSlip()
+            totalSideSlip = totalSideSlip + state.lastSideSlip
         end
     end
 

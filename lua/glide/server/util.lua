@@ -227,6 +227,23 @@ function Glide.CanEnterLockedVehicle( ply, vehicle )
     return cvarAlwaysEnterLocked:GetBool() or Glide.CanLockVehicle( ply, vehicle )
 end
 
+local cvarAllowPlayerWeaponsInVehicle = GetConVar( "glide_allow_player_weapons_in_vehicle" )
+
+function Glide.EnterVehicleSeat( ply, vehicle, seat )
+    if not IsValid( vehicle ) or not IsValid( seat ) then return end
+
+    local seatIndex = seat.GlideSeatIndex
+    if not seatIndex then return end
+
+    if seatIndex == 1 and vehicle.weaponCount > 0 then
+        ply:SetAllowWeaponsInVehicle( false )
+    else
+        ply:SetAllowWeaponsInVehicle( cvarAllowPlayerWeaponsInVehicle:GetBool() )
+    end
+
+    ply:EnterVehicle( seat )
+end
+
 --- Make a player switch to another seat
 --- while inside a Glide vehicle.
 function Glide.SwitchSeat( ply, seatIndex )
@@ -238,6 +255,7 @@ function Glide.SwitchSeat( ply, seatIndex )
     if not IsValid( vehicle ) then return end
 
     local seat = vehicle.seats[seatIndex]
+
     if not IsValid( seat ) then
         ply:EmitSound( "player/suit_denydevice.wav", 50, 100, 1.0, 6, 0, 0 )
         return
@@ -249,8 +267,7 @@ function Glide.SwitchSeat( ply, seatIndex )
     end
 
     ply:ExitVehicle()
-    ply:SetAllowWeaponsInVehicle( false )
-    ply:EnterVehicle( seat )
+    Glide.EnterVehicleSeat( ply, vehicle, seat )
 
     hook.Run( "Glide_PostSwitchSeat", ply, seatIndex )
 end

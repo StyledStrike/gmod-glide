@@ -87,8 +87,7 @@ function ENT:Use( activator )
         return
     end
 
-    activator:SetAllowWeaponsInVehicle( false )
-    activator:EnterVehicle( freeSeat )
+    Glide.EnterVehicleSeat( activator, self, freeSeat )
 end
 
 --- Override this base class function.

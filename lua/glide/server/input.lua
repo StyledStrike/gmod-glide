@@ -194,7 +194,8 @@ local function HandleInput( ply, button, active, pressed )
                     immediate = true
                 } )
             end
-        else
+
+        elseif not ply:GetAllowWeaponsInVehicle() then
             Glide.SwitchSeat( ply, SEAT_SWITCH_BUTTONS[button] )
         end
 
