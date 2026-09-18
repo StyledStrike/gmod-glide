@@ -21,7 +21,7 @@ do
 
     Glide._OriginalGetAimVector = Glide._OriginalGetAimVector or PlayerMeta.GetAimVector
     function PlayerMeta:GetAimVector()
-        if self.IsUsingGlideVehicle then
+        if self:GlideGetSeatIndex() ~= 0 then
             return ( ( CLIENT and Glide.GetCameraAimPos() or self:GlideGetAimPos() ) - self:EyePos() ):GetNormalized()
         end
 
