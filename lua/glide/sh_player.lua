@@ -21,6 +21,7 @@ do
 
     Glide._OriginalGetAimVector = Glide._OriginalGetAimVector or PlayerMeta.GetAimVector
     function PlayerMeta:GetAimVector()
+        -- There is a significant risk or it may even be the case that the vector will always return the LocalPlayer's value instead of the intended player's if called on the client side.
         if self:GlideGetSeatIndex() ~= 0 then
             return ( ( CLIENT and Glide.GetCameraAimPos() or self:GlideGetAimPos() ) - self:EyePos() ):GetNormalized()
         end
