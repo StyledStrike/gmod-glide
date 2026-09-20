@@ -72,10 +72,6 @@ function ENT:Explode( attacker, inflictor )
         gib:SetOnFire()
 
         SetEntityCreator( gib, creator )
-
-        for _, v in ipairs( gib:GetBodyGroups() ) do
-            gib:SetBodygroup( v.id, 1 )
-        end
     else
         -- Spawn gibs given by the `ExplosionGibs` table
         for k, v in ipairs( self.ExplosionGibs ) do
