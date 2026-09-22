@@ -46,7 +46,7 @@ function ENT:Explode( attacker, inflictor )
                 gib:SetAngles( w:GetAngles() )
                 gib:SetModel( w:GetModel() )
                 gib:Spawn()
-                gib:CopyVelocities( self )
+                gib:SetupCopy( self )
 
                 SetEntityCreator( gib, creator )
 
@@ -68,14 +68,10 @@ function ENT:Explode( attacker, inflictor )
         gib:SetAngles( self:GetAngles() )
         gib:SetModel( self:GetModel() )
         gib:Spawn()
-        gib:CopyVelocities( self )
+        gib:SetupCopy( self )
         gib:SetOnFire()
 
         SetEntityCreator( gib, creator )
-
-        for _, v in ipairs( gib:GetBodyGroups() ) do
-            gib:SetBodygroup( v.id, 1 )
-        end
     else
         -- Spawn gibs given by the `ExplosionGibs` table
         for k, v in ipairs( self.ExplosionGibs ) do
@@ -84,7 +80,7 @@ function ENT:Explode( attacker, inflictor )
             gib:SetAngles( self:GetAngles() )
             gib:SetModel( v )
             gib:Spawn()
-            gib:CopyVelocities( self )
+            gib:SetupCopy( self )
 
             SetEntityCreator( gib, creator )
 
