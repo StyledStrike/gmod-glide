@@ -138,7 +138,7 @@ function ENT:OnTakeDamage( dmginfo )
         self:SetIsEngineOnFire( true )
     end
 
-    if health < 1 then
+    if health < 1 and self.CanExplode then
         self:Explode( self.lastDamageAttacker, self.lastDamageInflictor )
     end
 end
