@@ -424,10 +424,7 @@ do
     local GetDevMode = Glide.GetDevMode
     local TraceHull = util.TraceHull
 
-    local traceData = {
-        mask = MASK_SHOT_HULL - MASK_WATER, -- Ignore water
-        collisiongroup = COLLISION_GROUP_VEHICLE,
-    }
+    local traceData = {}
 
     local function ValidateExitPos( vehicle, origin, localPos )
         return Glide.ValidateExitPos( origin, vehicle:LocalToWorld( localPos ), traceData )
@@ -450,7 +447,6 @@ do
 
         -- Ignore the vehicle itself and players
         traceData.filter[#traceData.filter + 1] = self
-        traceData.filter[#traceData.filter + 1] = "player"
 
         -- Try the original exit position first
         local origin = self:LocalToWorld( self:OBBCenter() )
