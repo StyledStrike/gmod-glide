@@ -125,7 +125,7 @@ function ENT:OnTakeDamage( dmginfo )
         amount = amount * self.BulletDamageMultiplier * cvarBullet:GetFloat()
     end
 
-    health = health - amount
+    health = math.max( 0, health - amount )
 
     self:SetChassisHealth( health )
     self:TakeEngineDamage( ( amount / self.MaxChassisHealth ) * self.EngineDamageMultiplier )
