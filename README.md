@@ -66,8 +66,9 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | ------- | -----------
 | `glide_homing_launcher_lock_required` `<number>` | Should the homing launcher require a lock to fire?
 | `glide_pacifist_mode` `<number>` | When set to `1`, disables all VSWEPs and vehicle turrets
+| `glide_allow_player_weapons_in_vehicle` `<number>` | Allows player to use their own weapons in a vehicle.
 
-### Vehicle damage multipliers
+### Vehicle damage
 
 | Command | Description
 | ------- | -----------
@@ -77,6 +78,7 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | `glide_world_physics_damage_multiplier` `<number>` | Damage multiplier taken by Glide vehicles after colliding against the world.
 | `glide_global_damage_multiplier` `<number>` | Multiplier for damage taken from any source (except from collisions)
 | `glide_player_collision_damage_multiplier` `<number>` | Damage multiplier for players inside vehicles taking damage from hard collisions.
+| `glide_enable_damage_player_on_collision` `<number>` | Whether players inside vehicles can take damage from hard collisions.
 
 ### Sandbox limits
 
@@ -87,13 +89,17 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | `sbox_maxglide_standalone_turrets` `<number>` | Max. number of Glide Turrets that one player can have
 | `sbox_maxglide_missile_launchers` `<number>` | Max. number of Glide Missile Launchers that one player can have
 | `sbox_maxglide_projectile_launchers` `<number>` | Max. number of Glide Projectile Launchers that one player can have
+| `sbox_maxglide_engine_stream_chips` `<number>` | Max. number of Glide Engine Stream Chips that one player can have
+| `sbox_maxglide_repair_rays` `<number>` | Max. number of Glide Repair Rays that one player can have
+| `sbox_maxglide_flare_launchers` `<number>` | Max. number of Glide Flare Launchers that one player can have
 
-### Turret tool limits
+### Turret tool
 
 | Command | Description
 | ------- | -----------
 | `glide_turret_max_damage` `<number>` | Maximum damage dealt per bullet for Glide Turrets
 | `glide_turret_min_delay` `<number>` | Minimum delay allowed for Glide Turrets
+| `glide_turret_explosive_allow` `<number>` | Allows Glide Turrets to use explosive bullets.
 
 ### Missile Launcher tool limits
 
@@ -135,6 +141,19 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 | ------- | -----------
 | `glide_ragdoll_enable` `<number>` | When set to 0, players will not be ragdolled when unsuccessfully falling out of vehicles
 | `glide_ragdoll_max_time` `<number>` | The max. amount of time a player can stay ragdolled. Set to 0 for infinite
+
+### Gib
+| Command | Description
+| ------- | -----------
+| `glide_gib_lifetime` `<number>` | Lifetime of Glide Gibs, 0 for no despawning.
+| `glide_gib_enable_collisions` `<number>` | When set to 0, gibs wont collide with players/props.
+
+### Other
+| Command | Description
+| ------- | -----------
+| `glide_allow_gravity_gun_punt` `<number>` | When set to 1, allows players to push vehicles with the Gravity Gun.
+| `glide_always_can_enter_locked_vehicles` `<number>` | Whether players can enter locked vehicles they don't own.
+| `glide_repairswep_speedmul` `<number>` | Changes the repair speed of the glide Vehicle Repair SWEP
 
 ## Contributing
 
