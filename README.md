@@ -37,6 +37,7 @@ A pack of content and entity classes to add cars, motorcycles, planes, helicopte
 ### SWEPS
 
 - `Vehicle Repair` SWEP, shows the chassis and engine health
+- `Instant Vehicle Repair` SWEP, shows the chassis and engine health. Instantly repairs the vehicle.
 - `Homing Launcher` SWEP, can also lock on any player on a seat
 
 ### Tools
