@@ -487,10 +487,22 @@ function Camera:InputMouseApply( _, x, y )
     self.angles = self.allowRolling and vehicle:LocalToWorldAngles( angles ) or angles
 end
 
-function Camera:CalcViewModelView( _, _, _, _, pos, ang )
-    if not self.isActive or not self.isInFirstPerson then
-        return pos, ang
+function Camera:CalcViewModelView( weapon, vm, oldPos, oldAng )
+    if not self.isActive or not self.isInFirstPerson then return end
+
+    local targetPos = self.position
+    local targetAng = self.angles + self.punchAngle
+    local finalPos, finalAng
+
+    if IsValid( weapon ) then
+        if weapon.CalcViewModelView then
+            finalPos, finalAng = weapon:CalcViewModelView( vm, oldPos, oldAng, targetPos, targetAng )
+        end
+
+        if weapon.GetViewModelPosition then
+            finalPos, finalAng = weapon:GetViewModelPosition( targetPos, targetAng )
+        end
     end
 
-    return self.position, self.angles + self.punchAngle
+    return finalPos or targetPos, finalAng or targetAng
 end
