@@ -70,8 +70,8 @@ hook.Add( "CanExitVehicle", "Glide.CheckExitVehicle", function( seat, ply  )
     if not IsValid( vehicle ) then return end
     if not vehicle.IsGlideVehicle then return end
 
-    local blocked, exitPos = vehicle:GetSeatExitPos( seatIndex )
-    if blocked then
+    local exitPos = vehicle:GetSeatExitPos( seatIndex )
+    if not exitPos then
         Glide.SendNotification( ply, {
             text = "#glide.notify.exit_blocked",
             icon = "materials/glide/icons/locked.png",
@@ -107,12 +107,7 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
     ply:SetAllowWeaponsInVehicle( false )
 
     if IsValid( vehicle ) then
-        local _, posExit = vehicle:GetSeatExitPos( seatIndex )
-        if not always_exit_vehicle:GetBool() and ply.exitPosGlide then
-            posExit = ply.exitPosGlide
-        end
-
-        ply:SetPos( posExit )
+        ply:SetPos( not always_exit_vehicle:GetBool() and istable( ply.exitPosGlide ) and ply.exitPosGlide or vehicle:GetSeatExitPos( seatIndex ) )
         ply:SetVelocity( vehicle:GetPhysicsObject():GetVelocity() )
         ply:SetEyeAngles( Angle( 0, vehicle:GetAngles().y, 0 ) )
     end

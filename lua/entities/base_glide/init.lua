@@ -486,7 +486,7 @@ do
 
         if blocked then
             -- We're cooked...
-            pos = seat:GetPos()
+            pos = cvars.Bool( "glide_always_exit_vehicle", true ) and seat:GetPos() or false
         else
             -- Put the exit position on the ground
             traceData.start = pos
@@ -506,7 +506,7 @@ do
             debugoverlay.Box( pos, traceData.mins, traceData.maxs, 8, Color( blocked and 255 or 0, 255, 0, 30 ) )
         end
 
-        return blocked, pos
+        return pos
     end
 end
 
