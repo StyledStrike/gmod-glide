@@ -506,7 +506,7 @@ do
             debugoverlay.Box( pos, traceData.mins, traceData.maxs, 8, Color( blocked and 255 or 0, 255, 0, 30 ) )
         end
 
-        return pos
+        return blocked, pos
     end
 end
 

@@ -58,6 +58,33 @@ hook.Add( "PlayerEnteredVehicle", "Glide.OnEnterSeat", function( ply, seat )
     hook.Run( "Glide_OnEnterVehicle", ply, parent, seatIndex )
 end )
 
+local always_exit_vehicle = CreateConVar( "glide_always_exit_vehicle", "1", { FCVAR_ARCHIVE, FCVAR_REPLICATED }, "If this option is enabled, players always exit GLide vehicles at the most appropriate exit point, even if it is considered 'blocked.'" )
+hook.Add( "CanExitVehicle", "Glide.CheckExitVehicle", function( seat, ply  )
+    if not ply.IsUsingGlideVehicle then return end
+    if always_exit_vehicle:GetBool() then return end
+
+    local seatIndex = seat.GlideSeatIndex
+    if not seatIndex then return end
+
+    local vehicle = seat:GetParent()
+    if not IsValid( vehicle ) then return end
+    if not vehicle.IsGlideVehicle then return end
+
+    local blocked, exitPos = vehicle:GetSeatExitPos( seatIndex )
+    if blocked then
+        Glide.SendNotification( ply, {
+            text = "#glide.notify.exit_blocked",
+            icon = "materials/glide/icons/locked.png",
+            sound = "glide/ui/radar_alert.wav",
+            immediate = true
+        } )
+
+        return false
+    end
+
+    ply.exitPosGlide = exitPos
+end )
+
 -- Once a player leaves a Glide vehicle, cleanup network variables
 -- and trigger the `Glide_OnExitVehicle` hook.
 hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
@@ -80,7 +107,12 @@ hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
     ply:SetAllowWeaponsInVehicle( false )
 
     if IsValid( vehicle ) then
-        ply:SetPos( vehicle:GetSeatExitPos( seatIndex ) )
+        local _, posExit = vehicle:GetSeatExitPos( seatIndex )
+        if not always_exit_vehicle:GetBool() and ply.exitPosGlide then
+            posExit = ply.exitPosGlide
+        end
+
+        ply:SetPos( posExit )
         ply:SetVelocity( vehicle:GetPhysicsObject():GetVelocity() )
         ply:SetEyeAngles( Angle( 0, vehicle:GetAngles().y, 0 ) )
     end

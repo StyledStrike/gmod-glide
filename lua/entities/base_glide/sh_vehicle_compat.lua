@@ -79,7 +79,8 @@ if SERVER then
     end
 
     function ENT:CheckExitPoint( _yaw, _distance )
-        return self:GetSeatExitPos( 0 )
+        local _, pos = self:GetSeatExitPos( 0 )
+        return pos
     end
 
     function ENT:GetHLSpeed()
