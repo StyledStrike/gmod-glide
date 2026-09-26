@@ -243,9 +243,7 @@ if SERVER then
 
         self:ChangeWheelRadius( 12 )
 
-        for _, w in ipairs( self.wheels ) do
-            Glide.HideEntity( w, true )
-        end
+        Glide.HideWheels( self, true )
     end
 
     function ENT:OnWeaponFire( _weapon, slotIndex )
