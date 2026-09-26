@@ -55,6 +55,10 @@ hook.Add( "PlayerEnteredVehicle", "Glide.OnEnterSeat", function( ply, seat )
     -- Enable vehicle input
     Glide.ActivateInput( ply, parent, seatIndex )
 
+    -- A parked vehicle only notices a driver on its next, slower Think
+    parent:GlideUnpark()
+    parent:NextThink( CurTime() )
+
     hook.Run( "Glide_OnEnterVehicle", ply, parent, seatIndex )
 end )
 
