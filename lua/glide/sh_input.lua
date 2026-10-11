@@ -78,6 +78,7 @@ Glide.AddInputAction( "general_controls", "switch_weapon", KEY_R )
 Glide.AddInputAction( "general_controls", "toggle_engine", KEY_I )
 Glide.AddInputAction( "general_controls", "headlights", KEY_H )
 Glide.AddInputAction( "general_controls", "free_look", KEY_LALT )
+Glide.AddInputAction( "general_controls", "attach_vehicle", KEY_M )
 
 --[[
     Inputs that only apply to land vehicle types
