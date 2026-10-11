@@ -18,6 +18,17 @@ do
     function PlayerMeta:GlideGetSeatIndex()
         return GetNWInt( self, "GlideSeatIndex", 0 )
     end
+
+    Glide._OriginalGetAimVector = Glide._OriginalGetAimVector or PlayerMeta.GetAimVector
+    function PlayerMeta:GetAimVector()
+        -- There is a significant risk or it may even be the case that the vector will always return the LocalPlayer's value instead of the intended player's if called on the client side.
+        if self:GlideGetSeatIndex() ~= 0 then
+            return ( ( CLIENT and Glide.GetCameraAimPos() or self:GlideGetAimPos() ) - self:EyePos() ):GetNormalized()
+        end
+
+        return Glide._OriginalGetAimVector( self )
+    end
+
 end
 
 if SERVER then
@@ -51,6 +62,17 @@ if SERVER then
 
             return EnterVehicle( self, vehicle )
         end
+
+        Glide._OriginalEyeAngles = Glide._OriginalEyeAngles or EntityMeta.EyeAngles
+        local IsPlayer = PlayerMeta.IsPlayer
+        function EntityMeta:EyeAngles()
+            if IsPlayer( self ) and self.IsUsingGlideVehicle then
+                return self:GlideGetAimAngles()
+            end
+
+            return Glide._OriginalEyeAngles( self )
+        end
+
     end
 
     --- Utility function to get the entity creator
@@ -93,13 +115,18 @@ if SERVER then
     local IsValid = IsValid
     local EntEyePos = EntityMeta.EyePos
 
+    local SCALE = 8
     hook.Add( "SetupMove", "Glide.CacheCameraLocation", function( ply, _, cmd )
         local vehicle = ply:GlideGetVehicle()
         if not IsValid( vehicle ) then return end
 
-        local angles = cmd:GetViewAngles()
+        local aimPos = Vector(
+            cmd:GetForwardMove() * SCALE,
+            cmd:GetSideMove() * SCALE,
+            cmd:GetUpMove() * SCALE
+        )
 
-        ply.GlideCameraAngles = angles
-        ply.GlideCameraAimPos = EntEyePos( ply ) + angles:Forward() * cmd:GetUpMove()
+        ply.GlideCameraAimPos = aimPos
+        ply.GlideCameraAngles = ( aimPos - EntEyePos( ply ) ):Angle()
     end, HOOK_HIGH )
 end
