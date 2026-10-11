@@ -135,7 +135,7 @@ function SWEP:DrawHUD()
 
     local x, y = ScrW() * 0.5, ScrH() * 0.5
 
-    Glide.DrawWeaponCrosshair( x, y, "glide/aim_dot.png", 0.05, Color( 255, 255, 255, 255 ) )
+    Glide.DrawWeaponCrosshair( x, y, "glide/aim_dot.png", 0.05, color_white )
 
     local w = math.floor( ScrH() * 0.4 )
     local h = math.floor( ScrH() * 0.03 )

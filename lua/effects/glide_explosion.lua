@@ -26,9 +26,10 @@ end
 
 local GLOW_MAT = Material( "sprites/light_glow02_add" )
 
+local color_render = Color( 255, 200, 150, 255 )
 function EFFECT:Render()
     render.SetMaterial( GLOW_MAT )
-    render.DrawSprite( self.origin, self.size, self.size, Color( 255, 200, 150, 255 ) )
+    render.DrawSprite( self.origin, self.size, self.size, color_render )
 end
 
 local FLAME_MATERIAL = "glide/effects/flamelet"
