@@ -34,6 +34,7 @@ function ENT:SetupDataTables()
     -- these slots when creating your own on child classes!
     self:NetworkVar( "Bool", "IsRedlining" )
     self:NetworkVar( "Bool", "IsHonking" )
+    self:NetworkVar( "Bool", "IsAlarmed" )
     self:NetworkVar( "Int", "SirenState" )
 
     self:NetworkVar( "Int", "Gear" )
