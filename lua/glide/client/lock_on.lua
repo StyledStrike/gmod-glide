@@ -153,22 +153,50 @@ function LockOnHandler:Think()
     end
 end
 
-local isInVehicle = false
+local glideVehicle = nil
+local GetParent = FindMetaTable( "Entity" ).GetParent
+local GetVehicle = FindMetaTable( "Player" ).GetVehicle
+local IsValid = IsValid
 
-timer.Create( "Glide.LockOnEnableCheck", 0.5, 0, function()
-    local user = LocalPlayer()
-    if not IsValid( user ) then return end
+local function EnterVehicle( vehicle )
+    if not IsValid( vehicle ) then return end
+    local vehicleSelect = IsValid( GetParent( vehicle ) ) and GetParent( vehicle ) or vehicle
+    if glideVehicle == vehicleSelect then return end
 
-    local veh = user:GetVehicle()
+    LockOnHandler:Setup( vehicleSelect )
+    glideVehicle = vehicleSelect
+end
 
-    if IsValid( veh ) then
-        if not isInVehicle then
-            isInVehicle = true
-            LockOnHandler:Setup( veh )
+hook.Add( "Glide_OnLocalEnterVehicle", "Glide.LockOnHandlerSetup", EnterVehicle )
+hook.Add( "Glide_OnLocalEnterNotGlideVehicle", "Glide.LockOnHandlerSetup", function( vehicle )
+    -- In vehicle systems, a passenger's GetParent is nil. Moving to the next frame isn't enough; you need to add 0.1 seconds.
+    timer.Create( "Glide.LockOnHandlerSetup", 0.1, 1, function()
+        EnterVehicle( vehicle )
+    end )
+end )
+
+local function ExitVehicle( bIsGlide )
+    timer.Simple( 0.5, function()
+        local ply = LocalPlayer()
+        if not IsValid( ply ) then return end
+
+        local vehicle = ply:GlideGetVehicle()
+        if not bIsGlide then
+            local vehicleTarget = GetVehicle( ply )
+            vehicle = IsValid( vehicleTarget ) and GetParent( vehicleTarget ) or vehicleTarget
         end
 
-    elseif isInVehicle then
-        isInVehicle = false
+        if IsValid( vehicle ) and glideVehicle == vehicle then return end
+
         LockOnHandler:Cleanup()
-    end
+        glideVehicle = nil
+    end )
+end
+
+hook.Add( "Glide_OnLocalExitVehicle", "Glide.LockOnHandlerCleanup", function()
+    ExitVehicle( true )
+end )
+
+hook.Add( "Glide_OnLocalExitNotGlideVehicle", "Glide.LockOnHandlerCleanup", function()
+    ExitVehicle( false )
 end )

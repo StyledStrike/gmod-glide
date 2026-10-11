@@ -32,7 +32,15 @@ hook.Add( "PlayerEnteredVehicle", "Glide.OnEnterSeat", function( ply, seat )
 
     -- Make sure this seat was created by Glide
     local seatIndex = seat.GlideSeatIndex
-    if not seatIndex then return end
+    if not seatIndex then
+
+        Glide.StartCommand( Glide.CMD_MANAGE_VEHICLE, false )
+            net.WriteUInt( 1, 2 ) -- 1 = Entered
+            net.WriteEntity( seat )
+        net.Send( ply )
+
+        return
+    end
 
     -- Is this seat's parent a Glide vehicle?
     local parent = seat:GetParent()
@@ -61,7 +69,15 @@ end )
 -- Once a player leaves a Glide vehicle, cleanup network variables
 -- and trigger the `Glide_OnExitVehicle` hook.
 hook.Add( "PlayerLeaveVehicle", "Glide.OnExitSeat", function( ply, seat )
-    if not ply.IsUsingGlideVehicle then return end
+    if not ply.IsUsingGlideVehicle then
+
+        Glide.StartCommand( Glide.CMD_MANAGE_VEHICLE, false )
+            net.WriteUInt( 2, 2 ) -- 2 = Exited
+            net.WriteEntity( seat )
+        net.Send( ply )
+
+        return
+    end
 
     local seatIndex = seat.GlideSeatIndex
     if not seatIndex then return end
