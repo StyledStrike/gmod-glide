@@ -7,9 +7,9 @@ end
 Glide.MAX_JSON_SIZE = 3072 -- 3 kibibytes
 
 -- Used on net.WriteUInt for the command ID
-Glide.CMD_SIZE = 4
+Glide.CMD_SIZE = 5
 
--- Command IDs (Max. ID when CMD_SIZE == 4 is 15)
+-- Command IDs (Max. ID when CMD_SIZE == 5 is 31)
 Glide.CMD_INPUT_SETTINGS = 0
 Glide.CMD_CREATE_EXPLOSION = 1
 Glide.CMD_SWITCH_SEATS = 2
@@ -25,6 +25,8 @@ Glide.CMD_UPLOAD_MISC_SOUNDS_PRESET = 11
 Glide.CMD_RELOAD_VSWEP = 13
 Glide.CMD_IS_USING_CAM_CONTROLLER = 14
 Glide.CMD_FORCE_THIRDPERSON = 15
+Glide.CMD_ENTER_VEHICLE = 16
+Glide.CMD_EXIT_VEHICLE = 17
 
 function Glide.StartCommand( id, unreliable )
     net.Start( "glide.command", unreliable or false )

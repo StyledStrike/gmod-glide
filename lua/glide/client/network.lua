@@ -66,6 +66,21 @@ commands[Glide.CMD_FORCE_THIRDPERSON] = function()
     Glide.Camera:SetFirstPerson( not useThirdPerson )
 end
 
+commands[Glide.CMD_ENTER_VEHICLE] = function()
+    local vehicle = net.ReadEntity()
+    if not IsValid( vehicle ) then return end
+    local iSeatIndex = net.ReadUInt( 5 )
+
+    Glide.OnEnter( vehicle, iSeatIndex )
+end
+
+commands[Glide.CMD_EXIT_VEHICLE] = function()
+    local ply = LocalPlayer()
+    if not IsValid( ply ) then return end
+
+    Glide.OnLeave( ply )
+end
+
 net.Receive( "glide.command", function()
     local cmd = net.ReadUInt( Glide.CMD_SIZE )
 
