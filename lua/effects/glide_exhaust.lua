@@ -12,6 +12,8 @@ function EFFECT:Init( data )
     local scale = Clamp( data:GetScale(), 0.1, 5 )
     local alpha = Clamp( data:GetColor(), 0, 255 )
     local power = Clamp( data:GetMagnitude() / 1000, 0, 1 )
+    local count = math.min( math.floor( Glide.GetScreenSize( origin, 6 * scale ) / 2 ), 3 )
+    if count < 1 then return end
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end
@@ -19,7 +21,7 @@ function EFFECT:Init( data )
     alpha = ( 1 - power ) * alpha
     power = 0.5 + power * 1.5
 
-    for _ = 1, 3 do
+    for _ = 1, count do
         local p = emitter:Add( EXHAUST_SMOKE_MAT .. RandomInt( 9 ), origin )
         if p then
             p:SetDieTime( 0.6 )

@@ -43,6 +43,8 @@ local CurTime = CurTime
 
 --- Update out model's bodygroups depending on which lights are on.
 function ENT:UpdateLightBodygroups( selfTbl )
+    if not selfTbl.LightBodygroups[1] then return end
+
     local headlightState = selfTbl.GetHeadlightState( self )
     local allowLights = selfTbl.IsEngineOn( self ) or headlightState > 0
 

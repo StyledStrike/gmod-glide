@@ -138,10 +138,21 @@ if CLIENT then
 
     local lastViewPos = Vector()
     local lastViewAng = Angle()
+    local lastViewPixelScale = 600
 
     --- Get the cached position/angle of the local player's render view.
     function Glide.GetLocalViewLocation()
         return lastViewPos, lastViewAng
+    end
+
+    local DistToSqr = FindMetaTable( "Vector" ).DistToSqr
+    local Sqrt = math.sqrt
+
+    function Glide.GetScreenSize( pos, size )
+        local distSqr = DistToSqr( pos, lastViewPos )
+        if distSqr < 1 then return math.huge end
+
+        return size * lastViewPixelScale / Sqrt( distSqr )
     end
 
     local EyePos = EyePos
@@ -156,6 +167,11 @@ if CLIENT then
 
         lastViewPos = EyePos()
         lastViewAng = EyeAngles()
+
+        local setup = render.GetViewSetup and render.GetViewSetup()
+        local fov = setup and setup.fov or 90
+
+        lastViewPixelScale = ScrH() * 0.5 / ( math.tan( math.rad( fov * 0.5 ) ) * 0.75 )
     end )
 end
 

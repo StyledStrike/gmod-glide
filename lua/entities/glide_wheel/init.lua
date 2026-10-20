@@ -237,17 +237,48 @@ do
     local Deg = math.deg
     local Approach = math.Approach
 
+    local Abs = math.abs
+    local Floor = math.floor
+    local steerAng = Angle()
+
+    local function NetSideSlip( v )
+        if Abs( v ) <= 0.1 then return 0 end
+        return Floor( v * 256 + 0.5 ) / 256
+    end
+
+    local function NetForwardSlip( v )
+        local a = Abs( v )
+        if a <= 1 then return 0 end
+        if a <= 2.5 then return v > 0 and 2 or -2 end
+
+        local q = Floor( v * 16 + 0.5 ) / 16
+
+        if ( v > 25 ) ~= ( q > 25 ) then
+            q = v > 25 and 25.0625 or 25
+        end
+
+        return q
+    end
+
     function ENT:Update( vehicle, steerAngle, isAsleep, dt, selfTbl )
         local state, params = selfTbl.state, selfTbl.params
 
         -- Get the wheel rotation relative to the vehicle, while applying the steering angle
-        local ang = vehicle:LocalToWorldAngles( steerAngle * params.steerMultiplier )
+        steerAng:Set( steerAngle )
+        steerAng:Mul( params.steerMultiplier )
 
         -- Rotate the wheel around the axle axis
         state.spin = ( state.spin - Deg( state.angularVelocity ) * dt ) % 360
 
-        ang:RotateAroundAxis( ang:Right(), state.spin )
-        self:SetAngles( ang )
+        local p, y, r = steerAng:Unpack()
+
+        if p ~= state.netSteerP or y ~= state.netSteerY or r ~= state.netSteerR or state.spin ~= state.netAngSpin then
+            state.netSteerP, state.netSteerY, state.netSteerR, state.netAngSpin = p, y, r, state.spin
+
+            local ang = Angle( p, y, r )
+            ang:RotateAroundAxis( ang:Right(), state.spin )
+            self:SetLocalAngles( ang )
+        end
 
         -- Do suspsension sounds
         local fraction = state.fraction
@@ -255,11 +286,16 @@ do
         state.lastFraction = fraction
 
         -- Set NW variables
-        if isAsleep then
-            selfTbl.SetContactSurface( self, 0 )
-        else
+        local surface = isAsleep and 0 or state.lastSurfaceId
+
+        if surface ~= state.netSurface then
+            state.netSurface = surface
+            selfTbl.SetContactSurface( self, surface )
+        end
+
+        if not isAsleep and state.spin ~= state.netSpin then
+            state.netSpin = state.spin
             selfTbl.SetLastSpin( self, state.spin )
-            selfTbl.SetContactSurface( self, state.lastSurfaceId )
         end
 
         if isAsleep or not state.isOnGround then
@@ -273,8 +309,19 @@ do
             state.lastSideSlip = 0
         end
 
-        selfTbl.SetForwardSlip( self, state.lastForwardSlip )
-        selfTbl.SetSideSlip( self, state.lastSideSlip )
+        local slip = NetForwardSlip( state.lastForwardSlip )
+
+        if slip ~= state.netForwardSlip then
+            state.netForwardSlip = slip
+            selfTbl.SetForwardSlip( self, slip )
+        end
+
+        slip = NetSideSlip( state.lastSideSlip )
+
+        if slip ~= state.netSideSlip then
+            state.netSideSlip = slip
+            selfTbl.SetSideSlip( self, slip )
+        end
 
         -- Run touch events on entities our trace hits
         local ent = state.ray.Entity
@@ -329,6 +376,7 @@ do
     local PlaySoundSet = Glide.PlaySoundSet
 
     function ENT:DoSuspensionSounds( change, vehicle, selfTbl )
+        if change <= 0.01 and change >= -0.01 then return end
         if not selfTbl.GetSoundsEnabled( self ) then return end
 
         local t = CurTime()
@@ -380,6 +428,15 @@ local EntSetLocalPos = FindMetaTable( "Entity" ).SetLocalPos
 local tractionCycle = Vector()
 local contactPos = Vector()
 
+local VectorMul = FindMetaTable( "Vector" ).Mul
+local VectorSetUnpacked = FindMetaTable( "Vector" ).SetUnpacked
+local AngleSet = FindMetaTable( "Angle" ).Set
+local AngleMul = FindMetaTable( "Angle" ).Mul
+
+local scratchAng = Angle()
+local scratchVec = Vector()
+local forceVec = Vector()
+
 function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfaceGrip, vehSurfaceResistance, vehPos, vehTbl )
     local selfTbl = GetTable( self )
     local state, params = selfTbl.state, selfTbl.params
@@ -388,7 +445,10 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     local pos = PhysLocalToWorld( phys, params.basePos )
 
     -- Get the wheel rotation relative to the chassis, applying the steering angle if necessary
-    local ang = EntLocalToWorldAngles( vehicle, vehTbl.steerAngle * params.steerMultiplier )
+    AngleSet( scratchAng, vehTbl.steerAngle )
+    AngleMul( scratchAng, params.steerMultiplier )
+
+    local ang = EntLocalToWorldAngles( vehicle, scratchAng )
 
     -- Do the raycast
     local up = AngUp( ang )
@@ -398,9 +458,12 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     local traceData = state.traceData
     traceData.filter = traceFilter
 
+    VectorSet( scratchVec, up )
+    VectorMul( scratchVec, maxLen )
+
     VectorSet( traceData.start, pos )
     VectorSet( traceData.endpos, pos )
-    VectorSub( traceData.endpos, up * maxLen )
+    VectorSub( traceData.endpos, scratchVec )
 
     -- TraceResult gets stored on the `state.ray` table
     TraceHull( traceData )
@@ -409,10 +472,16 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     local ray = state.ray
     state.fraction = Clamp( ray.Fraction, radius / maxLen, 1 )
 
+    VectorSet( scratchVec, up )
+    VectorMul( scratchVec, maxLen * state.fraction )
     VectorSet( contactPos, pos )
-    VectorSub( contactPos, maxLen * state.fraction * up )
+    VectorSub( contactPos, scratchVec )
 
-    EntSetLocalPos( self, PhysWorldToLocal( phys, contactPos + up * radius ) )
+    VectorSet( scratchVec, up )
+    VectorMul( scratchVec, radius )
+    VectorAdd( scratchVec, contactPos )
+
+    EntSetLocalPos( self, PhysWorldToLocal( phys, scratchVec ) )
 
     -- Update ground contact NW variables
     local surfaceId = ray.Hit and ( ray.MatType or 0 ) or 0
@@ -478,10 +547,10 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
         VectorAdd( vehPos, linearImp / dt )
     end
 
-    local force = ( springForce - damperForce ) * upAlign * up
+    local upAmount = ( springForce - damperForce ) * upAlign
 
     -- Rolling resistance
-    VectorAdd( force, ( vehSurfaceResistance[surfaceId] or 0.05 ) * -velF * fw )
+    local fwAmount = ( vehSurfaceResistance[surfaceId] or 0.05 ) * -velF
 
     -- Brake and torque forces
     local surfaceGrip = vehSurfaceGrip[surfaceId] or 1
@@ -503,7 +572,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     -- Reduce the forward force by the amount of grip we lost,
     -- but still allow some amount of brake force to apply regardless.
     forwardForce = forwardForce - ( gripLoss * signForwardForce ) + Clamp( brakeForce * 0.5, -maxTraction, maxTraction )
-    VectorAdd( force, fw * forwardForce )
+    fwAmount = fwAmount + forwardForce
 
     -- Get how fast the wheel would be spinning if it had never lost grip
     local groundAngularVelocity = TAU * ( velF / ( radius * TAU ) )
@@ -527,7 +596,7 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     maxTraction = state.isBlown and maxTraction * 0.2 or maxTraction
 
     -- The "* 0.75" is to compensate for existing vehicles after a change to how slipAngle is calculated was made
-    local sideForce = -VectorDot( rt, vel * params.sideTractionMultiplier * state.sideTractionMult * 0.75 )
+    local sideForce = -VectorDot( rt, vel ) * ( params.sideTractionMultiplier * state.sideTractionMult * 0.75 )
 
     -- Reduce sideways traction force as the wheel slips forward
     sideForce = sideForce * ( 1 - Clamp( Abs( gripLoss ) * 0.1, 0, 1 ) * 0.75 )
@@ -540,14 +609,20 @@ function ENT:DoPhysics( vehicle, phys, traceFilter, outLin, outAng, dt, vehSurfa
     surfaceGrip = surfaceGrip * Clamp( offset, 0, 1 )
 
     -- Apply sideways traction force
-    VectorAdd( force, Clamp( sideForce, -maxTraction, maxTraction ) * surfaceGrip * rt )
+    local rtAmount = Clamp( sideForce, -maxTraction, maxTraction ) * surfaceGrip
 
     -- Apply an extra, small sideways force that is not clamped by maxTraction.
     -- This helps at lot with cornering at high speed.
-    VectorAdd( force, velR * params.sideTractionMultiplier * -0.1 * rt )
+    rtAmount = rtAmount + velR * params.sideTractionMultiplier * -0.1
+
+    VectorSetUnpacked( forceVec,
+        up[1] * upAmount + fw[1] * fwAmount + rt[1] * rtAmount,
+        up[2] * upAmount + fw[2] * fwAmount + rt[2] * rtAmount,
+        up[3] * upAmount + fw[3] * fwAmount + rt[3] * rtAmount
+    )
 
     -- Apply the forces at the axle/ground contact position
-    local linearImp, angularImp = PhysCalculateForceOffset( phys, force, pos )
+    local linearImp, angularImp = PhysCalculateForceOffset( phys, forceVec, pos )
 
     outLin[1] = outLin[1] + linearImp[1] / dt
     outLin[2] = outLin[2] + linearImp[2] / dt

@@ -119,7 +119,9 @@ do
         rpm = Max( rpm, 0 )
 
         self.flywheelVelocity = rpm * TAU / 60
-        self:SetEngineRPM( rpm )
+        if self:GetEngineRPM() ~= rpm then
+            self:SetEngineRPM( rpm )
+        end
     end
 
     function ENT:TransmissionToEngineRPM( gear, selfTbl )
@@ -442,8 +444,15 @@ function ENT:EngineThink( dt, selfTbl )
         throttle = Approach( throttle, inputThrottle, dt * 4 )
 
         self:EngineAccelerate( selfTbl.flywheelFriction + selfTbl.flywheelTorque * throttle, dt )
-        self:SetEngineThrottle( throttle )
-        self:SetIsRedlining( isRedlining and inputThrottle > 0 )
+
+        if self:GetEngineThrottle() ~= throttle then
+            self:SetEngineThrottle( throttle )
+        end
+
+        isRedlining = isRedlining and inputThrottle > 0
+        if self:GetIsRedlining() ~= isRedlining then
+            self:SetIsRedlining( isRedlining )
+        end
     end
 end
 

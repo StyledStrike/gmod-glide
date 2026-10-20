@@ -34,10 +34,11 @@ end
 
 local IsString = isstring
 local Clamp = math.Clamp
+local Floor = math.floor
 local GetVolume = Glide.Config.GetVolume
 
 function ENT:ProcessSound( vehicle, id, surfaceId, soundSet, altSurface, volume, pitch, selfTbl, vehicleTbl )
-    if not selfTbl.GetSoundsEnabled( self ) then return end
+    if not selfTbl.soundsEnabled then return end
 
     local path = IsString( soundSet ) and soundSet or (
         vehicleTbl:OverrideWheelSound( vehicle, id, surfaceId ) or soundSet[surfaceId] )
@@ -65,15 +66,30 @@ function ENT:ProcessSound( vehicle, id, surfaceId, soundSet, altSurface, volume,
         end
     end
 
+    local lastVolume = selfTbl.soundVolume or {}
+    local lastPitch = selfTbl.soundPitch or {}
+    selfTbl.soundVolume, selfTbl.soundPitch = lastVolume, lastPitch
+
     if not snd then
         snd = CreateSound( self, path or soundSet[altSurface] )
         snd:SetSoundLevel( 80 )
         snd:PlayEx( 0, 100 )
         selfTbl.sounds[id] = snd
+        lastVolume[id], lastPitch[id] = nil, nil
     end
 
-    snd:ChangeVolume( volume )
-    snd:ChangePitch( pitch * selfTbl.soundPitchMult )
+    volume = Floor( volume * 128 + 0.5 ) / 128
+    pitch = Floor( pitch * selfTbl.soundPitchMult )
+
+    if volume ~= lastVolume[id] then
+        lastVolume[id] = volume
+        snd:ChangeVolume( volume )
+    end
+
+    if pitch ~= lastPitch[id] then
+        lastPitch[id] = pitch
+        snd:ChangePitch( pitch )
+    end
 end
 
 local WHEEL_SOUNDS = Glide.WHEEL_SOUNDS
@@ -133,13 +149,20 @@ function ENT:Think()
     local isActive = parentTbl.rfMisc.isActive
     if not isActive then return true end
 
+    if parentTbl.rfMisc.lastDistance > 2250000 then
+        self:SetNextClientThink( selfTbl.particleCD > t and selfTbl.particleCD or t + 0.05 )
+    end
+
     local velocity = parent:GetVelocity()
     local speed = Abs( parent:WorldToLocal( parent:GetPos() + velocity )[1] )
     local baseVolume = GetVolume( "carVolume" )
 
+    local radius = selfTbl.GetRadius( self )
+    selfTbl.soundsEnabled = selfTbl.GetSoundsEnabled( self )
+
     local up = parent:GetUp()
     local surfaceId = selfTbl.GetContactSurface( self )
-    local contactPos = self:GetPos() - up * selfTbl.GetRadius( self )
+    local contactPos = self:GetPos() - up * radius
 
     -- Force water surface when contactPos is under water
     if surfaceId > 0 and IsUnderWater( contactPos ) then
@@ -150,7 +173,7 @@ function ENT:Think()
     local muteRollSound = surfaceId == 67 and parentTbl.VehicleType == 5
 
     -- Disable some effects when a blown tire is touching a "hard" surface
-    local isBlownOnHardSurface = selfTbl.IsBlown( self ) and HARD_SURFACES[surfaceId]
+    local isBlownOnHardSurface = selfTbl.GetTireHealth( self ) < 1 and HARD_SURFACES[surfaceId]
 
     -- Fast roll sound
     local fastFactor = speed / 600
@@ -212,7 +235,7 @@ function ENT:Think()
     if isBlownOnHardSurface then return end
 
     -- Emit side slip/tire roll particles
-    local particleSize = Clamp( selfTbl.GetRadius( self ), 5, 10 )
+    local particleSize = Clamp( radius, 5, 10 )
     local rollFactor = sideSlipFactor - 0.5
 
     if ROLL_MARK_SURFACES[surfaceId] or surfaceId == MAT_SLOSH then
@@ -252,7 +275,7 @@ function ENT:Think()
     if not selfTbl.enableSkidmarks then return true end
 
     -- Create skidmarks
-    local skidmarkSize = selfTbl.GetRadius( self ) * parentTbl.WheelSkidmarkScale
+    local skidmarkSize = radius * parentTbl.WheelSkidmarkScale
 
     contactPos = contactPos + velocity * 0.04
 

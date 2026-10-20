@@ -3,7 +3,9 @@ local lightCount = 0
 
 function Glide.DrawLight( pos, color, size, brightness )
     lightCount = lightCount + 1
-    lights[lightCount] = { pos, color.r, color.g, color.b, size or 70, brightness or 5 }
+    local l = lights[lightCount] or {}
+    lights[lightCount] = l
+    l[1], l[2], l[3], l[4], l[5], l[6] = pos, color.r, color.g, color.b, size or 70, brightness or 5
 end
 
 local CurTime = CurTime
@@ -39,7 +41,9 @@ local spriteCount = 0
 
 function Glide.DrawLightSprite( pos, dir, size, color, material )
     spriteCount = spriteCount + 1
-    sprites[spriteCount] = { pos, size, dir, material, color.r, color.g, color.b, color.a }
+    local s = sprites[spriteCount] or {}
+    sprites[spriteCount] = s
+    s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8] = pos, size, dir, material, color.r, color.g, color.b, color.a
 end
 
 local Max = math.max
@@ -79,10 +83,10 @@ hook.Add( "PreDrawEffects", "Glide.DrawSprites", function()
         spriteColor.b = s[7]
         spriteColor.a = s[8]
 
-        SetMaterial( s[4] or DEFAULT_MAT )
-        DrawSprite( s[1], s[2], s[2], spriteColor )
-
-        sprites[i] = nil
+        if s[2] > 0 then
+            SetMaterial( s[4] or DEFAULT_MAT )
+            DrawSprite( s[1], s[2], s[2], spriteColor )
+        end
     end
 
     spriteCount = 0

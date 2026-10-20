@@ -7,12 +7,19 @@ function EFFECT:Init( data )
     local velocity = data:GetStart()
     local matId = data:GetSurfaceProp()
     local scale = Clamp( data:GetScale(), 0.1, 10 )
+    local fx = surfaceFX[matId]
+    local count = 5
+
+    if fx then
+        count = math.min( math.floor( Glide.GetScreenSize( origin, scale * math.max( fx.minSize * 1.1, fx.maxSize * 1.5 ) ) / 2 ), 5 )
+        if count < 1 then return end
+    end
 
     local emitter = ParticleEmitter( origin, false )
     if not IsValid( emitter ) then return end
 
     if surfaceFX[matId] then
-        self:DoSurface( emitter, origin, velocity, scale, surfaceFX[matId] )
+        self:DoSurface( emitter, origin, velocity, scale, fx, count )
     else
         self:DoSmoke( emitter, origin, velocity, scale, data:GetEntity() )
     end
@@ -34,11 +41,11 @@ local Config = Glide.Config
 local debrisGravity = Vector( 0, 0, 0 )
 local debrisVelocity = Vector( 0, 0, 0 )
 
-function EFFECT:DoSurface( emitter, origin, velocity, scale, fx )
+function EFFECT:DoSurface( emitter, origin, velocity, scale, fx, count )
     local p
     local lifetime = fx.lifetime * ( Config.reduceTireParticles and 0.4 or 1 )
 
-    for _ = 1, 5 do
+    for _ = 1, count do
         p = emitter:Add( fx.mat, origin )
 
         if p then

@@ -470,7 +470,11 @@ function ENT:OnPostThink( dt, selfTbl )
 
     -- Update driver inputs
     selfTbl.UpdateSteering( self, dt, selfTbl )
-    selfTbl.SetBrakeValue( self, Clamp( selfTbl.frontBrake + selfTbl.rearBrake + ( selfTbl.GetInputBool( self, 1, "handbrake" ) and 1 or 0 ), 0, 1 ) )
+    local brakeValue = Clamp( selfTbl.frontBrake + selfTbl.rearBrake + ( selfTbl.GetInputBool( self, 1, "handbrake" ) and 1 or 0 ), 0, 1 )
+
+    if selfTbl.GetBrakeValue( self ) ~= brakeValue then
+        selfTbl.SetBrakeValue( self, brakeValue )
+    end
 
     local phys = self:GetPhysicsObject()
 
@@ -505,6 +509,10 @@ function ENT:UpdateSteering( dt, selfTbl )
     steerCone = Clamp( steerCone, Abs( sideSlip ), 1 )
     inputSteer = ExpDecay( selfTbl.inputSteer, inputSteer * steerCone, selfTbl.GetSteerConeChangeRate( self ), dt )
 
+    if Abs( inputSteer - selfTbl.inputSteer ) < 0.0001 and Abs( inputSteer ) < 0.0001 then
+        inputSteer = 0
+    end
+
     selfTbl.inputSteer = inputSteer
 
     -- Counter-steer when slipping, going fast and not using steer input
@@ -513,7 +521,9 @@ function ENT:UpdateSteering( dt, selfTbl )
     counterSteer = Clamp( counterSteer, -1, 1 ) * selfTbl.GetCounterSteer( self )
     inputSteer = Clamp( inputSteer + counterSteer, -1, 1 )
 
-    selfTbl.SetSteering( self, inputSteer )
+    if selfTbl.GetSteering( self ) ~= inputSteer then
+        selfTbl.SetSteering( self, inputSteer )
+    end
     selfTbl.steerAngle[2] = -inputSteer * selfTbl.GetMaxSteerAngle( self )
 
     -- Reduce front wheel sideways friction when trying to do a J-turn

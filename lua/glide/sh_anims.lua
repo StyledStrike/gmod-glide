@@ -57,6 +57,18 @@ local holdTypeSequences = {
 }
 
 local GetTable = FindMetaTable( "Entity" ).GetTable
+local sequenceCache = {}
+
+local function GetSequenceID( ply, name )
+    local model = ply:GetModel()
+    local ids = sequenceCache[model] or {}
+    sequenceCache[model] = ids
+
+    local id = ids[name] or ply:LookupSequence( name )
+    ids[name] = id
+
+    return id
+end
 
 hook.Add( "CalcMainActivity", "Glide.OverridePlayerActivity", function( ply )
     local vehicle = ply:GlideGetVehicle()
@@ -78,7 +90,7 @@ hook.Add( "CalcMainActivity", "Glide.OverridePlayerActivity", function( ply )
     local anim = vehicle:GetPlayerSitSequence( ply:GlideGetSeatIndex() )
 
     plyTbl.CalcIdeal = 47 -- ACT_STAND
-    plyTbl.CalcSeqOverride = ply:LookupSequence( anim )
+    plyTbl.CalcSeqOverride = GetSequenceID( ply, anim )
 
     -- We only apply a sit sequence when the vehicle actually uses one.
     if anim == "sit" and ply:GetAllowWeaponsInVehicle() then
@@ -93,7 +105,7 @@ hook.Add( "CalcMainActivity", "Glide.OverridePlayerActivity", function( ply )
 
         -- Not every hold type has a corresponding sit sequence.
         if sitSequence then
-            local sequenceID = ply:LookupSequence( sitSequence )
+            local sequenceID = GetSequenceID( ply, sitSequence )
 
             if sequenceID ~= -1 then
                 plyTbl.CalcIdeal = 1970 -- ACT_HL2MP_SIT

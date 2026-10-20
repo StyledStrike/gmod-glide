@@ -46,6 +46,7 @@ function ENT:SetupDataTables()
 
     local order = 0
     local uneditable = self.UneditableNWVars
+    local tuningKeys = {}
 
     -- We add a bunch of floats here so, this utility function helps.
     local function AddFloatVar( key, min, max, category )
@@ -57,6 +58,7 @@ function ENT:SetupDataTables()
         } )
 
         self:NetworkVar( "Float", key, editData )
+        tuningKeys[#tuningKeys + 1] = key
     end
 
     local function AddBoolVar( key, category )
@@ -66,6 +68,8 @@ function ENT:SetupDataTables()
             KeyName = key,
             Edit = { type = "Bool", order = order, category = category }
         } )
+
+        tuningKeys[#tuningKeys + 1] = key
     end
 
     -- Steering parameters
@@ -104,6 +108,29 @@ function ENT:SetupDataTables()
     AddFloatVar( "SideTractionMin", 100, 5000, "#glide.editvar.traction" )
 
     if SERVER then
+        local cache = {}
+
+        local function Invalidate( _, name )
+            cache[name] = nil
+        end
+
+        for _, key in ipairs( tuningKeys ) do
+            local getter = self["Get" .. key]
+
+            self["Get" .. key] = function( ent )
+                local value = cache[key]
+
+                if value == nil then
+                    value = getter( ent )
+                    cache[key] = value
+                end
+
+                return value
+            end
+
+            self:NetworkVarNotify( key, Invalidate )
+        end
+
         -- Callback used to change the wheel radius
         self:NetworkVarNotify( "WheelRadius", self.OnWheelRadiusChange )
 

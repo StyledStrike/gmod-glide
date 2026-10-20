@@ -51,26 +51,36 @@ local GetDevMode = Glide.GetDevMode
 local EntityPairs = Glide.EntityPairs
 
 function ENT:WaterThink( selfTbl, dt )
-    -- Update buoyancy points
-    local underWaterPoints = 0
+    local waterState = selfTbl.GetWaterState( self )
 
-    for _, point in ipairs( selfTbl.buoyancyPoints ) do
-        point.isUnderWater = IsUnderWater( self:LocalToWorld( point.offset ) )
+    local phys = self:GetPhysicsObject()
+    local skipPoints = waterState == 0 and selfTbl.hasValidPhysics and IsValid( phys ) and phys:IsAsleep()
 
-        if point.isUnderWater then
-            underWaterPoints = underWaterPoints + 1
+    if not skipPoints then
+        -- Update buoyancy points
+        local underWaterPoints = 0
+
+        for _, point in ipairs( selfTbl.buoyancyPoints ) do
+            point.isUnderWater = IsUnderWater( self:LocalToWorld( point.offset ) )
+
+            if point.isUnderWater then
+                underWaterPoints = underWaterPoints + 1
+            end
+        end
+
+        local newState = underWaterPoints < 1 and 0 or (
+            underWaterPoints > selfTbl.buoyancyPointsCount * 0.5 and 2 or 1
+        )
+
+        if self:WaterLevel() > 2 then
+            newState = 3
+        end
+
+        if newState ~= waterState then
+            waterState = newState
+            selfTbl.SetWaterState( self, waterState )
         end
     end
-
-    local waterState = underWaterPoints < 1 and 0 or (
-        underWaterPoints > selfTbl.buoyancyPointsCount * 0.5 and 2 or 1
-    )
-
-    if self:WaterLevel() > 2 then
-        waterState = 3
-    end
-
-    selfTbl.SetWaterState( self, waterState )
 
     -- If necessary, kick passengers when underwater
     if selfTbl.FallWhileUnderWater and waterState > 2 then

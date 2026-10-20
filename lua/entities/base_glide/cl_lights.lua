@@ -26,6 +26,53 @@ function ENT:CreateHeadlight( index, offset, angles, color, texture, fovScale )
     light:Update()
 end
 
+local cvarMaxHeadlights = CreateClientConVar( "glide_max_projected_headlights", "8", true, false,
+    "How many of the nearest vehicles can cast projected headlights at once (0 = no limit)", 0, 128 )
+
+local headlightVehicles = setmetatable( {}, { __mode = "k" } )
+
+do
+    local candidates = {}
+    local nextBudgetUpdate = 0
+
+    local function SortByDistance( a, b )
+        return a.glideHeadlightRank < b.glideHeadlightRank
+    end
+
+    hook.Add( "Think", "Glide.HeadlightBudget", function()
+        local t = RealTime()
+        if t < nextBudgetUpdate then return end
+        nextBudgetUpdate = t + 0.25
+
+        local limit = cvarMaxHeadlights:GetInt()
+        local count = 0
+        local myVehicle = Glide.currentVehicle
+
+        for e in pairs( headlightVehicles ) do
+            if not IsValid( e ) or not e.rfMisc or not e.rfMisc.isActive or e:GetHeadlightState() < 1 then
+                headlightVehicles[e] = nil
+
+            elseif limit < 1 or e == myVehicle then
+                e.allowProjectedHeadlights = true
+
+            else
+                count = count + 1
+                candidates[count] = e
+                e.glideHeadlightRank = e.rfMisc.lastDistance * ( e.allowProjectedHeadlights == true and 0.8 or 1 )
+            end
+        end
+
+        if count > limit then
+            table.sort( candidates, SortByDistance )
+        end
+
+        for i = 1, count do
+            candidates[i].allowProjectedHeadlights = i <= limit
+            candidates[i] = nil
+        end
+    end )
+end
+
 function ENT:RemoveHeadlights()
     if not self.activeHeadlights then return end
 
@@ -68,15 +115,19 @@ function ENT:UpdateLights( selfTbl )
     local headlightState = selfTbl.GetHeadlightState( self )
 
     if headlightState > 0 then
+        headlightVehicles[self] = true
         local colorVec = selfTbl.GetHeadlightColor( self )
         colorHeadlight.r = colorVec[1] * 255
         colorHeadlight.g = colorVec[2] * 255
         colorHeadlight.b = colorVec[3] * 255
     end
 
+    local allowProjected = selfTbl.allowProjectedHeadlights ~= false
+
     -- Handle projected lights
-    if selfTbl.headlightState ~= headlightState then
+    if selfTbl.headlightState ~= headlightState or selfTbl.hasProjectedHeadlights ~= allowProjected then
         selfTbl.headlightState = headlightState
+        selfTbl.hasProjectedHeadlights = allowProjected
         selfTbl.RemoveHeadlights( self )
 
         if headlightState == 0 then return end
@@ -84,10 +135,10 @@ function ENT:UpdateLights( selfTbl )
         local enable
 
         for index, v in ipairs( selfTbl.Headlights ) do
-            enable = true
+            enable = allowProjected
 
             -- Check for optional bodygroup requirement
-            if v.ifBodygroupId then
+            if enable and v.ifBodygroupId then
                 enable = self:GetBodygroup( v.ifBodygroupId ) == ( v.ifSubModelId or 0 )
             end
 
@@ -98,7 +149,7 @@ function ENT:UpdateLights( selfTbl )
         end
     end
 
-    if headlightState > 0 and selfTbl.shouldThinkNow then
+    if headlightState > 0 and selfTbl.shouldThinkNow and allowProjected then
         local l, hasLight
 
         for index, data in ipairs( selfTbl.Headlights ) do
@@ -136,8 +187,6 @@ function ENT:UpdateLights( selfTbl )
     local pos, dir, ltype, enable
 
     for _, l in ipairs( selfTbl.LightSprites ) do
-        pos = self:LocalToWorld( l.offset )
-        dir = self:LocalToWorld( l.dir ) - myPos
         ltype = l.type
         enable = lightState[ltype]
 
@@ -168,6 +217,12 @@ function ENT:UpdateLights( selfTbl )
         -- Check for optional bodygroup requirement
         if l.ifBodygroupId then
             enable = enable and self:GetBodygroup( l.ifBodygroupId ) == ( l.ifSubModelId or 0 )
+        end
+
+        if enable then
+            pos = self:LocalToWorld( l.offset )
+            dir = self:LocalToWorld( l.dir )
+            dir:Sub( myPos )
         end
 
         if enable and ltype == "headlight" then
