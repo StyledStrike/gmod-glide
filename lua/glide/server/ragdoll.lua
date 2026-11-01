@@ -8,19 +8,6 @@ function Glide.StoreSpawnInfo( ply )
         armor = ply:Armor(),
         god = ply:HasGodMode()
     }
-
-    -- Store inventory
-    data.weapons = {}
-
-    for _, weapon in ipairs( ply:GetWeapons() ) do
-        data.weapons[weapon:GetClass()] = {
-            clip1 = weapon:Clip1(),
-            clip2 = weapon:Clip2(),
-            ammo1 = ply:GetAmmoCount( weapon:GetPrimaryAmmoType() ),
-            ammo2 = ply:GetAmmoCount( weapon:GetSecondaryAmmoType() )
-        }
-    end
-
     -- Store current held weapon class
     local weapon = ply:GetActiveWeapon()
 
@@ -32,37 +19,9 @@ function Glide.StoreSpawnInfo( ply )
 end
 
 do
-    local function RestoreWeapons( ply, spawnData )
-        ply:StripWeapons()
-        ply:RemoveAllAmmo()
-
-        for class, data in pairs( spawnData.weapons ) do
-            local weapon = ply:Give( class )
-
-            if IsValid( weapon ) then
-                if weapon.SetClip1 then
-                    weapon:SetClip1( data.clip1 )
-                end
-
-                if weapon.SetClip2 then
-                    weapon:SetClip2( data.clip2 )
-                end
-
-                ply:SetAmmo( data.ammo1, weapon:GetPrimaryAmmoType() )
-                ply:SetAmmo( data.ammo2, weapon:GetSecondaryAmmoType() )
-            end
-        end
-
-        if spawnData.weaponClass then
-            ply:SelectWeapon( spawnData.weaponClass )
-        end
-    end
-
     --- Restores health, armor and inventory previously stored on
     --- `Glide.StoreSpawnInfo`. Does nothing if there is no data from that function.
     function Glide.RestoreSpawnInfo( ply, restoreCallback )
-        ply:Spawn()
-
         local spawnData = ply.GlideSpawnData
         if not spawnData then return end
 
@@ -70,16 +29,12 @@ do
         ply:SetHealth( spawnData.health )
         ply:SetArmor( spawnData.armor )
 
-        if spawnData.god then
-            ply:GodEnable()
-        end
-
         timer.Simple( 0.1, function()
             if not IsValid( ply ) then return end
             if not ply:Alive() then return end
 
-            if spawnData.health > 0 then
-                RestoreWeapons( ply, spawnData )
+            if spawnData.health > 0 and spawnData.weaponClass then
+                ply:SelectWeapon( spawnData.weaponClass )
             end
 
             if restoreCallback then
@@ -218,7 +173,7 @@ function Glide.RagdollPlayer( ply, velocity, unragdollTime )
         ply:ExitVehicle()
     end
 
-    -- Store health, armor and inventory
+    -- Store health and armor
     Glide.StoreSpawnInfo( ply )
 
     -- Make the player spectate the ragdoll
@@ -344,14 +299,8 @@ function Glide.UnRagdollPlayer( ply, restoreCallback )
     local ragdoll = ply.GlideRagdoll
     if not ragdoll then return end
 
-    local pos = ply.GlideRagdollStartPos
-    local velocity = Vector()
-
     -- Get final position/velocity from the ragdoll
     if IsValid( ragdoll ) then
-        velocity = ragdoll:GetVelocity()
-        pos = ragdoll:GetPos()
-
         ragdoll:Remove()
     end
 
@@ -362,19 +311,13 @@ function Glide.UnRagdollPlayer( ply, restoreCallback )
     ply:UnSpectate()
 
     if not ply:Alive() then return end
-
-    local ang = Angle( 0, ply:GetAngles()[2], 0 )
     local bed = ply.SpawnBed
 
     ply.SpawnBed = nil -- Spawn Beds workaround
     ply.GlideBlockLoadout = true -- Custom Loadout workaround
 
-    -- Restore health, armor and inventory
+    -- Restore health and armor
     Glide.RestoreSpawnInfo( ply, function( restoredPly )
-        restoredPly:SetPos( Glide.GetFreeSpaceForPlayer( restoredPly, pos ) )
-        restoredPly:SetEyeAngles( ang )
-        restoredPly:SetVelocity( velocity )
-
         -- Reset Spawn Beds workaround
         if IsValid( bed ) then
             restoredPly.SpawnBed = bed
@@ -384,11 +327,6 @@ function Glide.UnRagdollPlayer( ply, restoreCallback )
             restoreCallback( restoredPly )
         end
     end )
-
-    -- Immediately put the player close to where they will be
-    -- after the callback on `RestoreSpawnInfo` runs.
-    ply:SetPos( pos )
-    ply:SetEyeAngles( ang )
 
     -- Reset Custom Loadout workaround
     ply.GlideBlockLoadout = nil
