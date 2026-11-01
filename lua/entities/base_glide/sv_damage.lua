@@ -184,12 +184,16 @@ function ENT:PhysicsCollide( data )
         Glide.SendViewPunch( self:GetAllPlayers(), Clamp( speed / 1000, 0, 1 ) * 3 )
     end
 
-    local eff = EffectData()
-    eff:SetOrigin( data.HitPos )
-    eff:SetScale( math.min( speed * 0.02, 6 ) * self.CollisionParticleSize )
-    eff:SetNormal( surfaceNormal )
-    eff:SetColor( 255 )
-    util.Effect( "glide_metal_impact", eff )
+    if t > ( self.collisionEffectCooldown or 0 ) then
+        self.collisionEffectCooldown = t + 0.1
+
+        local eff = EffectData()
+        eff:SetOrigin( data.HitPos )
+        eff:SetScale( math.min( speed * 0.02, 6 ) * self.CollisionParticleSize )
+        eff:SetNormal( surfaceNormal )
+        eff:SetColor( 255 )
+        util.Effect( "glide_metal_impact", eff )
+    end
 
     local isHardHit = speed > 300
 

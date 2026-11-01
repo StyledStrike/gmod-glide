@@ -1,5 +1,6 @@
 local Clamp = math.Clamp
 local RandomFloat = math.Rand
+local Floor = math.floor
 
 function EFFECT:Init( data )
     local pos = data:GetOrigin()
@@ -10,7 +11,7 @@ function EFFECT:Init( data )
     local emitter = ParticleEmitter( pos, false )
     if not IsValid( emitter ) then return end
 
-    local count = math.floor( scale * 20 )
+    local count = Floor( scale * 20 )
 
     for _ = 0, count do
         local p = emitter:Add( "effects/spark", pos )
