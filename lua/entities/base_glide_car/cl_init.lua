@@ -522,7 +522,7 @@ function ENT:DrawVehicleHUD( screenW, screenH )
     DrawIcon( x + size - iconSize, y + size - iconSize * 0.5, "glide/icons/engine.png", iconSize, self:IsEngineOn() and colors.icon or colors.iconDisabled )
 
     -- Cruise control state
-    DrawIcon( x + size - iconSize * 2.12, y + size - iconSize * 0.5, "glide/icons/cruise_control.png", iconSize, self:GetIsCruiseControlEnabled() and colors.icon or colors.iconDisabled )
+    DrawIcon( x + size - iconSize, y + iconSize * 0.5, "glide/icons/cruise_control.png", iconSize, self:GetIsCruiseControlEnabled() and colors.icon or colors.iconDisabled )
 
     -- Engine RPM
     local stream = self.stream
