@@ -221,7 +221,7 @@ local matTrackR = CreateMaterial( "glide_tank_track_r", "VertexLitGeneric", {
 
 local scrollMatrix = Matrix()
 
-function ENT:Draw()
+function ENT:Draw( flags )
     if self.leftTrackBumpMap then
         matTrackL:SetTexture( "$bumpmap", self.leftTrackBumpMap )
     end
@@ -242,5 +242,5 @@ function ENT:Draw()
         matTrackR:SetMatrix( "$basetexturetransform", scrollMatrix )
     end
 
-    self:DrawModel()
+    BaseClass.Draw( self, flags )
 end
