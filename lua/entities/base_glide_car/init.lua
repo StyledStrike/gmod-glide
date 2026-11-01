@@ -187,7 +187,7 @@ end
 function ENT:OnDriverExit()
     local keepOn = IsValid( self.lastDriver ) and self.lastDriver:KeyDown( IN_WALK )
 
-    if not self.hasTheDriverBeenRagdolled and not keepOn then
+    if not self.hasTheDriverBeenRagdolled and not keepOn and not self:GetIsCruiseControlEnabled() then
         self:TurnOff()
     end
 
@@ -247,6 +247,19 @@ function ENT:OnSeatInput( seatIndex, action, pressed )
 
     elseif action == "accelerate" and self:GetEngineState() == 0 and self:GetEngineRPM() < 1 then
         self:TurnOn()
+    elseif action == "toggle_cruise_control" then
+        self:SetIsCruiseControlEnabled( not self:GetIsCruiseControlEnabled() )
+
+        if not self:GetIsCruiseControlEnabled() then
+            self.cruiseTargetSpeed = 0
+        end
+
+        Glide.SendNotification( self:GetAllPlayers(), {
+            text = self:GetIsCruiseControlEnabled() and "#glide.notify.cruise_control_on" or "#glide.notify.cruise_control_off",
+            icon = "materials/glide/icons/car.png",
+            immediate = true,
+            formatArgs = { self:GetIsCruiseControlEnabled() and "on" or "off" }
+        } )
     end
 
     if not self.inputManualShift then return end
