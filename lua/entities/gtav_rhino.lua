@@ -11,6 +11,9 @@ ENT.ChassisModel = "models/gta5/vehicles/rhino/chassis.mdl"
 ENT.CanSwitchHeadlights = false
 ENT.CanSwitchTurnSignals = false
 
+ENT.MaxYawSpeed = 40
+ENT.YawAcceleration = 1000
+
 DEFINE_BASECLASS( "base_glide_tank" )
 
 if CLIENT then
