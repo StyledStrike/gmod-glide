@@ -482,7 +482,7 @@ do
 
         if blocked then
             -- We're cooked...
-            pos = seat:GetPos()
+            pos = cvars.Bool( "glide_always_exit_vehicle", true ) and seat:GetPos() or false
         else
             -- Put the exit position on the ground
             traceData.start = pos
