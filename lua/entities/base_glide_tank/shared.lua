@@ -145,6 +145,7 @@ if SERVER then
 end
 
 local Clamp = math.Clamp
+local Abs = math.abs
 local ExpDecayAngle = Glide.ExpDecayAngle
 local AngleDifference = Glide.AngleDifference
 
@@ -167,7 +168,13 @@ function ENT:UpdateTurret( driver, dt, currentAng )
     end
 
     currentAng[1] = ExpDecayAngle( currentAng[1], targetAng[1], 10, dt )
-    currentAng[2] = currentAng[2] + Clamp( AngleDifference( currentAng[2], targetAng[2] ) * self.YawAcceleration * dt, -self.MaxYawSpeed, self.MaxYawSpeed ) * dt
+
+    local diff = AngleDifference( currentAng[2], targetAng[2] )
+    local absDiff = Abs( diff )
+    local step = Clamp( diff * self.YawAcceleration * dt, -self.MaxYawSpeed, self.MaxYawSpeed ) * dt
+    step = Clamp( step, -absDiff, absDiff )
+
+    currentAng[2] = currentAng[2] + step
 
     isAimingAtTarget = isAimingAtTarget and targetDir:Dot( self:LocalToWorldAngles( currentAng ):Forward() ) > 0.99
 
