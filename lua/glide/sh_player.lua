@@ -1,14 +1,24 @@
 local PlayerMeta = FindMetaTable( "Player" )
 local EntityMeta = FindMetaTable( "Entity" )
 
-function PlayerMeta:GlideGetVehicle()
-    local seat = self:GetVehicle()
-    if not IsValid( seat ) then return end
+local GetTable = EntityMeta.GetTable
+local IsValid = EntityMeta.IsValid
 
-    local parent = seat:GetParent()
+do
+    local GetVehicle = PlayerMeta.GetVehicle
+    local GetParent = EntityMeta.GetParent
 
-    if IsValid( parent ) and parent.IsGlideVehicle then
-        return parent
+    function PlayerMeta:GlideGetVehicle()
+        local seat = GetVehicle( self )
+
+        if IsValid( seat ) then
+            local parent = GetParent( seat )
+            local tab = GetTable( parent )
+
+            if tab and tab.IsGlideVehicle then
+               return parent
+            end
+        end
     end
 end
 
@@ -16,33 +26,34 @@ do
     local GetNWInt = EntityMeta.GetNWInt
 
     function PlayerMeta:GlideGetSeatIndex()
-        return GetNWInt( self, "GlideSeatIndex", 0 )
+        return GetNWInt( self, "GlideSeatIndex" )
     end
 end
 
 if SERVER then
     function PlayerMeta:GlideGetAimAngles()
-        return self.GlideCameraAngles or Angle()
+        return GetTable( self ).GlideCameraAngles or Angle()
     end
 
     function PlayerMeta:GlideGetAimPos()
-        return self.GlideCameraAimPos or Vector()
+        return GetTable( self ).GlideCameraAimPos or Vector()
     end
 
     --- This function is deprecated, it has been
     --- replaced by Player:GlideGetAimAngles.
-    function PlayerMeta:GlideGetCameraAngles()
-        return self.GlideCameraAngles or Angle()
-    end
+    PlayerMeta.GlideGetCameraAngles = PlayerMeta.GlideGetAimAngles
 
     do
-        Glide._OriginalEnterVehicle = Glide._OriginalEnterVehicle or PlayerMeta.EnterVehicle
-        local EnterVehicle = Glide._OriginalEnterVehicle
+        local EnterVehicle = Glide._OriginalEnterVehicle or PlayerMeta.EnterVehicle
+        Glide._OriginalEnterVehicle = EnterVehicle
 
         function PlayerMeta:EnterVehicle( vehicle )
-            if vehicle.IsGlideVehicle and isfunction( vehicle.GetFreeSeat ) then
-                local seat = vehicle:GetFreeSeat()
-                if not IsValid( seat ) then
+            local tab = GetTable( vehicle )
+
+            if tab.IsGlideVehicle and isfunction( tab.GetFreeSeat ) then
+                local seat = tab.GetFreeSeat( vehicle )
+
+                if not seat or not IsValid( seat ) then
                     return
                 end
 
@@ -62,11 +73,7 @@ if SERVER then
             ply = source:CPPIGetOwner()
         end
 
-        if type( ply ) == "number" then
-            ply = nil
-        end
-
-        if not IsValid( ply ) then
+        if not ply or not IsValid( ply ) then
             ply = source:GetCreator()
         end
 
@@ -90,16 +97,18 @@ if SERVER then
         Glide.SetEntityCreator( target, ply )
     end
 
-    local IsValid = IsValid
     local EntEyePos = EntityMeta.EyePos
 
     hook.Add( "SetupMove", "Glide.CacheCameraLocation", function( ply, _, cmd )
         local vehicle = ply:GlideGetVehicle()
-        if not IsValid( vehicle ) then return end
+        if not vehicle then return end
 
         local angles = cmd:GetViewAngles()
+        local eyepos = angles:Forward()
+        eyepos:Mul( cmd:GetUpMove() )
+        eyepos:Add( EntEyePos( ply ) )
 
         ply.GlideCameraAngles = angles
-        ply.GlideCameraAimPos = EntEyePos( ply ) + angles:Forward() * cmd:GetUpMove()
+        ply.GlideCameraAimPos = eyepos
     end, HOOK_HIGH )
 end
