@@ -247,6 +247,7 @@ function ENT:OnSeatInput( seatIndex, action, pressed )
 
     elseif action == "accelerate" and self:GetEngineState() == 0 and self:GetEngineRPM() < 1 then
         self:TurnOn()
+
     elseif action == "toggle_cruise_control" then
         self:SetIsCruiseControlEnabled( not self:GetIsCruiseControlEnabled() )
 
@@ -257,8 +258,7 @@ function ENT:OnSeatInput( seatIndex, action, pressed )
         Glide.SendNotification( self:GetAllPlayers(), {
             text = self:GetIsCruiseControlEnabled() and "#glide.notify.cruise_control_on" or "#glide.notify.cruise_control_off",
             icon = "materials/glide/icons/car.png",
-            immediate = true,
-            formatArgs = { self:GetIsCruiseControlEnabled() and "on" or "off" }
+            immediate = true
         } )
     end
 
