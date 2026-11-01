@@ -188,7 +188,7 @@ do
 end
 
 do
-    local BlastDamage = util.BlastDamage
+    local BlastDamageInfo = util.BlastDamageInfo
     local GetNearbyPlayers = Glide.GetNearbyPlayers
 
     --- Utility function to deal damage and send a explosion event to nearby players.
@@ -200,7 +200,15 @@ do
         end
 
         -- Deal damage
-        BlastDamage( inflictor, attacker, origin, radius, damage )
+        local dmgInfo = DamageInfo()
+        dmgInfo:SetAttacker( attacker )
+        dmgInfo:SetInflictor( inflictor )
+        dmgInfo:SetDamage( damage )
+        dmgInfo:SetDamageType( bit.bor( DMG_BLAST, DMG_AIRBOAT ) )
+        dmgInfo:SetDamagePosition( origin )
+        dmgInfo:SetDamageForce( normal * 1000 )
+
+        BlastDamageInfo( dmgInfo, origin, radius )
 
         -- Let nearby players handle sounds and effects client side
         local targets, count = GetNearbyPlayers( origin, Glide.MAX_EXPLOSION_DISTANCE )
