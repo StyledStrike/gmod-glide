@@ -249,14 +249,22 @@ function ENT:OnSeatInput( seatIndex, action, pressed )
         self:TurnOn()
 
     elseif action == "toggle_cruise_control" then
-        self:SetIsCruiseControlEnabled( not self:GetIsCruiseControlEnabled() )
+        local shouldEnable = not self:GetIsCruiseControlEnabled()
 
-        if not self:GetIsCruiseControlEnabled() then
+        if shouldEnable then
+            if self.forwardSpeed > 100 then
+                self:SetIsCruiseControlEnabled( true )
+            end
+        else
             self.cruiseTargetSpeed = 0
+            self:SetIsCruiseControlEnabled( false )
         end
 
+        local isEnabled = self:GetIsCruiseControlEnabled()
+        if shouldEnable ~= isEnabled then return end
+
         Glide.SendNotification( self:GetAllPlayers(), {
-            text = self:GetIsCruiseControlEnabled() and "#glide.notify.cruise_control_on" or "#glide.notify.cruise_control_off",
+            text = isEnabled and "#glide.notify.cruise_control_on" or "#glide.notify.cruise_control_off",
             icon = "materials/glide/icons/car.png",
             immediate = true
         } )
