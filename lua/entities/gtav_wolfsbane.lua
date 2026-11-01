@@ -132,14 +132,14 @@ if CLIENT then
     local matScroll = Material( "models/gta5/vehicles/wolfsbane/vehicle_gen_bikedetail_diff_scroll" )
     local scrollMatrix = Matrix()
 
-    function ENT:Draw()
+    function ENT:Draw( flags )
         local scroll = self.beltTextureScroll
         if not scroll then return end
 
         scrollMatrix:SetTranslation( scroll )
         matScroll:SetMatrix( "$basetexturetransform", scrollMatrix )
 
-        self:DrawModel()
+        BaseClass.Draw( self, flags )
     end
 end
 
