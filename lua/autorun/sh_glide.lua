@@ -255,26 +255,15 @@ do
 end
 
 do
-    local isDeveloperActive = false
+    local isDeveloperActive = cvars.Bool( "developer" )
 
     function Glide.GetDevMode()
         return isDeveloperActive
     end
 
-    -- Using `cvars.AddChangeCallback` was unreliable serverside,
-    -- so we will check it periodically instead.
-    local cvarDeveloper = GetConVar( "developer" )
-    isDeveloperActive = cvarDeveloper:GetBool()
-
-    if CLIENT then
-        cvars.AddChangeCallback( "developer", function( _, _, newValue )
-            isDeveloperActive = tobool( newValue )
-        end )
-    else
-        timer.Create( "Glide.CheckDeveloperConvar", 1, 0, function()
-            isDeveloperActive = cvarDeveloper:GetBool()
-        end )
-    end
+    cvars.AddChangeCallback( "developer", function( _, _, newValue )
+        isDeveloperActive = tobool( newValue )
+    end )
 end
 
 function Glide.PrintDev( str, ... )
