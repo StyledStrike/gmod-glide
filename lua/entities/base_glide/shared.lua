@@ -44,6 +44,7 @@ function ENT:SetupDataTables()
     self:NetworkVar( "Int", "EngineState" )
     self:NetworkVar( "Bool", "IsEngineOnFire" )
     self:NetworkVar( "Bool", "IsLocked" )
+    self:NetworkVar( "Bool", "IsAttachedToTrailer" )
 
     self:NetworkVar( "Int", "LockOnState" )
     self:NetworkVar( "Entity", "LockOnTarget" )

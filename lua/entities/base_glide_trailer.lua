@@ -105,3 +105,44 @@ function ENT:OnPostThink( _dt, selfTbl )
     self:SetTurnSignalState( attachedVehicle:GetTurnSignalState() )
     self:SetIsVehicleReversing( attachedVehicle:IsReversing() )
 end
+
+function ENT:AttachToVehicle( vehicle )
+    if not IsValid( vehicle ) then return end
+
+    constraint.Weld( self, vehicle, 0, 0, 0, true )
+    constraint.NoCollide( self, vehicle, 0, 0 )
+    self.listAttachedVehicle = self.listAttachedVehicle or {}
+    self.listAttachedVehicle[vehicle] = true
+
+    vehicle:EnableEngine( false )
+    vehicle:SetIsAttachedToTrailer( true )
+    vehicle:CallOnRemove( ( "Glide_TrailerDetach_%s" ):format( self:EntIndex() ), function()
+        if not IsValid( self ) then return end
+        self:DetachFromVehicle( vehicle )
+    end )
+end
+
+function ENT:DetachFromVehicle( vehicle )
+    if not IsValid( vehicle ) then return end
+
+    constraint.RemoveConstraints( vehicle, "Weld" )
+    constraint.RemoveConstraints( vehicle, "NoCollide" )
+
+    if self.listAttachedVehicle then
+        self.listAttachedVehicle[vehicle] = nil
+    end
+
+    vehicle:EnableEngine( true )
+    vehicle:RemoveCallOnRemove( ( "Glide_TrailerDetach_%s" ):format( self:EntIndex() ) )
+    vehicle:SetIsAttachedToTrailer( false )
+end
+
+function ENT:GetAttachedVehicles()
+    return self.listAttachedVehicle or {}
+end
+
+function ENT:OnRemove()
+    for vehicle, _ in pairs( self:GetAttachedVehicles() ) do
+        self:DetachFromVehicle( vehicle )
+    end
+end
