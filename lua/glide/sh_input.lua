@@ -95,6 +95,7 @@ Glide.AddInputAction( "land_controls", "throttle_modifier", KEY_LSHIFT )
 Glide.AddInputAction( "land_controls", "horn", KEY_R )
 Glide.AddInputAction( "land_controls", "siren", KEY_L )
 Glide.AddInputAction( "land_controls", "detach_trailer", KEY_K )
+Glide.AddInputAction( "land_controls", "toggle_cruise_control", KEY_C )
 
 Glide.AddInputAction( "land_controls", "lean_forward", KEY_UP )
 Glide.AddInputAction( "land_controls", "lean_back", KEY_DOWN )

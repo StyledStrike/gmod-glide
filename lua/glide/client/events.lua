@@ -55,7 +55,8 @@ local DONT_BLOCK = {
     ["+attack"] = true,
     ["+attack2"] = true,
     ["+attack3"] = true,
-    ["+walk"] = true
+    ["+walk"] = true,
+    ["+score"] = true
 }
 
 local function BlockBinds( _, bind, _, code )

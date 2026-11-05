@@ -321,6 +321,9 @@ if SERVER then
     -- Spawn these gibs when the vehicle explodes
     ENT.ExplosionGibs = {}
 
+    -- Can the vehicle explode?
+    ENT.CanExplode = true
+
     -- Suspension sounds
     ENT.SuspensionHeavySound = "Glide.Suspension.CompressHeavy"
     ENT.SuspensionDownSound = "Glide.Suspension.Down"

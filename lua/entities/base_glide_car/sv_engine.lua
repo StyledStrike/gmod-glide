@@ -30,6 +30,8 @@ function ENT:EngineInit()
     self.avgSideSlip = 0
     self.avgPoweredRPM = 0
     self.avgForwardSlip = 0
+
+    self.cruiseTargetSpeed = 0
 end
 
 --- Returns a list of available transmission gears.
@@ -268,6 +270,22 @@ function ENT:EngineThink( dt, selfTbl )
     inputThrottle = self:GetInputFloat( 1, "accelerate", selfTbl )
     inputBrake = self:GetInputFloat( 1, "brake", selfTbl )
     inputHandbrake = self:GetInputBool( 1, "handbrake", selfTbl )
+
+    if self:GetIsCruiseControlEnabled() and not amphibiousMode then
+        if inputBrake > 0.1 or inputThrottle > 0.1 then
+            self:SetIsCruiseControlEnabled( false )
+            selfTbl.cruiseTargetSpeed = 0
+        else
+            if not selfTbl.cruiseTargetSpeed or selfTbl.cruiseTargetSpeed < 0.1 then
+                selfTbl.cruiseTargetSpeed = Max( selfTbl.forwardSpeed, 0 )
+            end
+
+            local cruiseThrottle = Clamp( ( selfTbl.cruiseTargetSpeed - selfTbl.forwardSpeed ) * 0.01, 0, 1 )
+
+            inputThrottle = Max( inputThrottle, cruiseThrottle )
+            inputBrake = 0
+        end
+    end
 
     if amphibiousMode then
         selfTbl.burnout = 0

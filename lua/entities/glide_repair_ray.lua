@@ -46,8 +46,8 @@ if CLIENT then
     local matBeam = Material( "tripmine_laser" )
     local strInfo = "%s\n%d / %d"
 
-    function ENT:Draw()
-        self:DrawModel()
+    function ENT:Draw( flags )
+        self:DrawModel( flags )
 
         local ply = LocalPlayer()
         local myPos = self:GetPos()

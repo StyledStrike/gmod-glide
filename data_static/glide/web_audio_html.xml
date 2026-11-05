@@ -269,8 +269,14 @@ class EngineStream {
         const layer = this.layers[id];
 
         // Abort an existing download request, if it is active
-        if (layer.loadRequest && layer.loadRequest.readyState < 4) {
-            layer.loadRequest.abort();
+        if (layer.loadRequest) {
+            layer.loadRequest.onload = null;
+            layer.loadRequest.onerror = null;
+            layer.loadRequest.onabort = null;
+
+            if (layer.loadRequest.readyState < 4) {
+                layer.loadRequest.abort();
+            }
         }
 
         // Remove audio nodes

@@ -76,6 +76,17 @@ function ENT:Initialize()
     end
 end
 
+function ENT:SetupCopy( otherEnt )
+
+    self:SetSkin( otherEnt:GetSkin() )
+
+    for i = 0, otherEnt:GetNumBodyGroups() - 1 do
+        self:SetBodygroup( i, otherEnt:GetBodygroup( i ) )
+    end
+
+    self:CopyVelocities( otherEnt )
+end
+
 function ENT:OnRemove()
     self:StopFire()
 end
