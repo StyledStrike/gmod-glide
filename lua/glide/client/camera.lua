@@ -450,11 +450,14 @@ function Camera:CalcView()
     }
 end
 
+local SCALE = 1 / 8
 function Camera:CreateMove( cmd )
-    if self.isActive then
-        cmd:SetViewAngles( self.lastAimPosAnglesFromEyes )
-        cmd:SetUpMove( Clamp( self.lastAimPosDistanceFromEyes, 0, 10000 ) )
-    end
+    if not self.isActive then return end
+
+    local pos = self.lastAimPos
+    cmd:SetForwardMove( pos[1] * SCALE )
+    cmd:SetSideMove( pos[2] * SCALE )
+    cmd:SetUpMove( pos[3] * SCALE )
 end
 
 function Camera:PlayerBindPress( ply, bind )
